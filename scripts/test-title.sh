@@ -18,6 +18,8 @@
 cd "$(dirname "$0")"
 
 url="${BASE_URL}"
-curl --silent --location --url "$url" 2>/dev/null | xsltproc response.xslt -
+curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt -
+
+count=0
 count=$(curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - | grep "<title>Foo")
 [ $count -eq 1 ] || { echo "title not found" && exit 1 ; }
