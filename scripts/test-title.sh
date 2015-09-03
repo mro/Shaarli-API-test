@@ -18,7 +18,7 @@
 cd "$(dirname "$0")"
 
 url="${BASE_URL}"
-curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt -
+# curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
 
 count=0
 count=$(curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep --count --fixed-strings '<shaarli title="Review Shaarli">')

@@ -28,7 +28,8 @@ TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | grep token 
 # the precise length isn't important, it just has to be significantly larger than ''
 [ $(echo -n $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(echo -n $TOKEN | wc -c)" && exit 1 ; }
 
-curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "returnurl=$url" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
+curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "returnurl=$url" --form "token=$TOKEN" --url "$url" 2>/dev/null
+# | xsltproc --html response.xslt - 2>/dev/null
 # egrep -hoe "<input.*"
 
 # echo ================
