@@ -17,16 +17,16 @@
 #
 cd "$(dirname "$0")"
 
-# check pre-condition - there's already 1 entry:
+# check pre-condition - there's already 1 public entry in the ATOM feed:
 entries=-1
 entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - | grep --count "<entry>")
 [ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 1 ; }
 
+# fetch token to login and add a new link:
 url="${BASE_URL}?post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
 TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | grep token | cut -c 46-85)
-echo "TOKEN=$TOKEN"
 # the precise length isn't important, it just has to be significantly larger than ''
-[ $(echo -n $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 18 characters, but found $TOKEN of $(echo -n $TOKEN | wc -c)" && exit 1 ; }
+[ $(echo -n $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(echo -n $TOKEN | wc -c)" && exit 1 ; }
 
 url="${BASE_URL}?do=login&post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
 curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc response.xslt -
