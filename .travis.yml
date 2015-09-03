@@ -16,9 +16,9 @@ env:
     - PASSWORD=tust
   matrix:
     - GITHUB_SRC_URL=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
-#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
-#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
-#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
 
 matrix:
   allow_failures:
@@ -27,16 +27,17 @@ matrix:
 before_install:
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi
-  - sudo /home/travis/.phpenv/versions/$(phpenv version-name)/bin/composer self-update
+  - echo "TRAVIS_PHP_VERSION $TRAVIS_PHP_VERSION"
+  - sudo /home/travis/.phpenv/versions/$TRAVIS_PHP_VERSION/bin/composer self-update
   - ./scripts/download.sh
 install:
   # https://github.com/shaarli/Shaarli/issues/16#issuecomment-136669639
   # http://docs.travis-ci.com/user/languages/php/#Apache-%2B-PHP
   # enable php-fpm
-  - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
+  - sudo cp ~/.phpenv/versions/$TRAVIS_PHP_VERSION/etc/php-fpm.conf.default ~/.phpenv/versions/$TRAVIS_PHP_VERSION/etc/php-fpm.conf
   - sudo a2enmod rewrite actions fastcgi alias
-  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
-  - ~/.phpenv/versions/$(phpenv version-name)/sbin/php-fpm
+  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$TRAVIS_PHP_VERSION/etc/php.ini
+  - ~/.phpenv/versions/$TRAVIS_PHP_VERSION/sbin/php-fpm
   # configure apache virtual hosts
   - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/default
   - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default

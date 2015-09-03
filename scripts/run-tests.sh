@@ -5,7 +5,7 @@ CWD=$(pwd)
 status_code=0
 for tst in ./scripts/test*.sh
 do
-  printf "Running %s... " "$(basename "$tst")"
+  printf "Running %s ... " "$(basename "$tst")"
   cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
