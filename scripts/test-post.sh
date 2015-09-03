@@ -17,24 +17,26 @@
 #
 cd "$(dirname "$0")"
 
+[ "$USERNAME" != "" ] || { echo "How strange, USERNAME is unset." && exit 1 ; }
+[ "$PASSWORD" != "" ] || { echo "How strange, PASSWORD is unset." && exit 1 ; }
+[ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
+
 # check pre-condition - there's already 1 public entry in the ATOM feed:
 entries=-1
 entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - | grep --count "<entry>")
 [ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 1 ; }
 
 # fetch token to login and add a new link:
-url="${BASE_URL}?post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
-echo ====================================
-curl --dump-header head --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
-echo ====================================
-cat head
+params="post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
+url="${BASE_URL}?$params"
 
-TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | grep token | cut -c 46-85)
+TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
 # the precise length isn't important, it just has to be significantly larger than ''
-[ $(echo -n $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(echo -n $TOKEN | wc -c)" && exit 1 ; }
+token_length=$(printf "%s" $TOKEN | wc -c)
+[ $token_length -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $token_length" && exit 1 ; }
 
-curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "returnurl=$url" --form "token=$TOKEN" --url "$url" 2>/dev/null
-# | xsltproc --html response.xslt - 2>/dev/null
+url="${BASE_URL}?do=login&$params"
+curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
 # egrep -hoe "<input.*"
 
 # echo ================
