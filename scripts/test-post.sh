@@ -29,7 +29,7 @@ TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | grep token 
 [ $(echo -n $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(echo -n $TOKEN | wc -c)" && exit 1 ; }
 
 url="${BASE_URL}?do=login&post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
-curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc response.xslt -
+curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt -
 # egrep -hoe "<input.*"
 
 # echo ================
