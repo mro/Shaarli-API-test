@@ -25,8 +25,9 @@ entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - 
 # fetch token to login and add a new link:
 url="${BASE_URL}?post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
 echo ====================================
-curl --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
+curl --dump-header head --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
 echo ====================================
+cat head
 
 TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | grep token | cut -c 46-85)
 # the precise length isn't important, it just has to be significantly larger than ''
