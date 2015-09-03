@@ -1,25 +1,22 @@
 # http://docs.travis-ci.com/user/languages/php/#Choosing-PHP-versions-to-test-against
 language: php
 php:
-#  - 5.4
-#  - 5.5
+  - 5.4
+  - 5.5
   - 5.6
 # http://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
 # http://docs.travis-ci.com/user/customizing-the-build/#Build-Matrix
 env:
   - SHAARLI_SRC=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
-#  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
-#  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
+  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
+  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
   - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/master.tar.gz
 before_install:
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi
   - sudo /home/travis/.phpenv/versions/5.6/bin/composer self-update
+  - ./scripts/download.sh
 install:
-  - ./scripts/install.sh
-# https://github.com/shaarli/Shaarli/issues/16#issuecomment-136669639
-# http://docs.travis-ci.com/user/languages/php/#Apache-%2B-PHP
-before_script:
   # - mkdir -p ~/.phpenv/versions/$(phpenv version-name)/etc
   # enable php-fpm
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
@@ -30,6 +27,9 @@ before_script:
   - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/default
   - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
   - sudo service apache2 restart
+# https://github.com/shaarli/Shaarli/issues/16#issuecomment-136669639
+# http://docs.travis-ci.com/user/languages/php/#Apache-%2B-PHP
+before_script:
 # http://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
 script:
   - ./scripts/run-tests.sh

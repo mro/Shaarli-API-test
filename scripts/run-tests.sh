@@ -3,7 +3,7 @@
 echo $(phpenv)
 
 
-curl --head http://localhost/index.php
+curl --location --head http://localhost/index.php
 exit $?
 
 echo "No tests implemented so far."
