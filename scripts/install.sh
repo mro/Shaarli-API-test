@@ -1,8 +1,8 @@
 #!/bin/sh
 cd "$(dirname "$0")/.."
 
-if [[ ""="$SHAARLI_SRC" ]] ; then
-	echo "How strange - where is the environment." 1>&2
+if [ "" = "$SHAARLI_SRC" ] ; then
+	echo "How strange - where is the env" 1>&2
 	SHAARLI_SRC=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
 fi
 
