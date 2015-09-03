@@ -21,5 +21,5 @@ url="${BASE_URL}"
 curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt -
 
 count=0
-count=$(curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - | grep --fixed-strings '<shaarli title="Review Shaarli">')
+count=$(curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep --count --fixed-strings '<shaarli title="Review Shaarli">')
 [ $count -eq 1 ] || { echo "title not found" && exit 1 ; }
