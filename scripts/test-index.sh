@@ -1,5 +1,5 @@
 #!/bin/sh
 cd "$(dirname "$0")/.."
 
-curl --location "$BASE_URL/" | xmllint --encode utf8 --format -
+curl --silent "$BASE_URL/" | xmllint --html --encode utf8 --format -
 exit $?
