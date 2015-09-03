@@ -1,9 +1,11 @@
 #!/bin/sh
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
+CWD=$(pwd)
 
 status_code=0
 for tst in ./scripts/test*.sh
 do
+	cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
   # ...and unpack into directory 'WebAppRoot'...
