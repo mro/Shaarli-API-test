@@ -5,13 +5,11 @@ status_code=0
 for tst in ./scripts/test*.sh
 do
   # prepare a clean test environment from scratch
-  sudo service apache2 stop
-
   rm -rf WebAppRoot
   # ...and unpack into directory 'WebAppRoot'...
   tar -xzf source.tar.gz || { echo "ouch" && exit 1 ; }
   mv $GITHUB_SRC_SUBDIR WebAppRoot
-  sudo service apache2 start
+  sudo service apache2 restart
 
   ls -l "WebAppRoot/index.php" >/dev/null || { echo "ouch" && exit 2 ; }
 
