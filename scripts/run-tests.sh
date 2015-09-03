@@ -5,13 +5,14 @@ CWD=$(pwd)
 status_code=0
 for tst in ./scripts/test*.sh
 do
+  echo "Running $(basename "$tst")..."
   cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
   # ...and unpack into directory 'WebAppRoot'...
   tar -xzf source.tar.gz || { echo "ouch" && exit 1 ; }
   mv $GITHUB_SRC_SUBDIR WebAppRoot
-  sudo service apache2 restart
+  sudo service apache2 restart >/dev/null 2>&1
 
   ls -l "WebAppRoot/index.php" >/dev/null || { echo "ouch" && exit 2 ; }
 
@@ -19,7 +20,12 @@ do
   curl --silent "$BASE_URL" -H 'Content-Type: application/x-www-form-urlencoded' --data "setlogin=$USERNAME&setpassword=$PASSWORD&continent=Europe&city=Brussels&title=Review+Shaarli&Save=Save+config" >/dev/null
 
   # execute all tests
-  sh "$tst" || { status_code=1 ; }
+  if [ sh "$tst" ] ; then
+    echo " successful"
+  else
+    echo " failed"
+    status_code=1
+  fi
 done
 
 exit $status_code
