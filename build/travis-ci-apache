@@ -3,9 +3,9 @@
 <VirtualHost *:80>
   # [...]
 
-  DocumentRoot %TRAVIS_BUILD_DIR%/Shaarli
+  DocumentRoot %TRAVIS_BUILD_DIR%/WebAppRoot
 
-  <Directory "%TRAVIS_BUILD_DIR%/Shaarli">
+  <Directory "%TRAVIS_BUILD_DIR%/WebAppRoot">
     Options FollowSymLinks MultiViews ExecCGI
     AllowOverride All
     Order deny,allow

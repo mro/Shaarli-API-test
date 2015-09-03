@@ -7,10 +7,14 @@ php:
 # http://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
 # http://docs.travis-ci.com/user/customizing-the-build/#Build-Matrix
 env:
-  - SHAARLI_SRC=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
-  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
-  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
-  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/master.tar.gz
+  global:
+    - GITHUB_SRC_SUBDIR=Shaarli-*
+    - BASE_URL=http://localhost
+  matrix:
+    - GITHUB_SRC_URL=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
 before_install:
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi
