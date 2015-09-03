@@ -22,11 +22,11 @@ entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - 
 [ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 1 ; }
 
 url="${BASE_URL}?post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
-TOKEN=$(curl --cookie-jar cook --location --url "$url" | grep token | cut -c 46-85)
+TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | grep token | cut -c 46-85)
 # echo ================
 
 url="${BASE_URL}?do=login&post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
-curl --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" | xsltproc response.xslt -
+curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc response.xslt -
 # egrep -hoe "<input.*"
 
 # echo ================
