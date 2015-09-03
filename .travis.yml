@@ -16,9 +16,9 @@ env:
     - PASSWORD=tust
   matrix:
     - GITHUB_SRC_URL=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
-#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
-#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
-#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
 
 matrix:
   allow_failures:
@@ -27,6 +27,7 @@ matrix:
 before_install:
   - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi
+  - echo "TRAVIS_PHP_VERSION $TRAVIS_PHP_VERSION"
   - sudo /home/travis/.phpenv/versions/$(phpenv version-name)/bin/composer self-update
   - ./scripts/download.sh
 install:
