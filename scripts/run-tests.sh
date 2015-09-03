@@ -15,7 +15,7 @@ do
   echo "TODO: register a user."
 
   # execute all tests
-  sh "$tst" || { status_code=1 }
+  sh "$tst" || { status_code=1 ; }
 done
 
 exit $status_code
