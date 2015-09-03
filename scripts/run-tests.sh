@@ -5,7 +5,7 @@ CWD=$(pwd)
 status_code=0
 for tst in ./scripts/test*.sh
 do
-  echo "Running $(basename "$tst")..."
+  printf "Running %s... " "$(basename "$tst")"
   cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
@@ -22,9 +22,9 @@ do
   # execute each test
   sh "$tst"
   if [ $? -eq 0 ] ; then
-    echo " successful"
+    echo "successful"
   else
-    echo " failed"
+    echo "failed"
     status_code=1
   fi
 done
