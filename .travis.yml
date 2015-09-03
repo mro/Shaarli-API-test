@@ -25,7 +25,7 @@ matrix:
     - php: 7.0
 
 before_install:
-  # - sudo apt-get update
+  - sudo apt-get update
   - sudo apt-get install apache2 libapache2-mod-fastcgi
   - sudo /home/travis/.phpenv/versions/$TRAVIS_PHP_VERSION/bin/composer self-update
   - sh ./scripts/download.sh
