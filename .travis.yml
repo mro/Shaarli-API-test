@@ -11,13 +11,15 @@ env:
 #  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
 #  - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
   - SHAARLI_SRC=https://github.com/shaarli/Shaarli/archive/master.tar.gz
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install apache2 libapache2-mod-fastcgi
+  - sudo /home/travis/.phpenv/versions/5.6/bin/composer self-update
 install:
   - ./scripts/install.sh
 # https://github.com/shaarli/Shaarli/issues/16#issuecomment-136669639
 # http://docs.travis-ci.com/user/languages/php/#Apache-%2B-PHP
 before_script:
-  - sudo apt-get update
-  - sudo apt-get install apache2 libapache2-mod-fastcgi
   # - mkdir -p ~/.phpenv/versions/$(phpenv version-name)/etc
   # enable php-fpm
   - sudo cp ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf.default ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.conf
