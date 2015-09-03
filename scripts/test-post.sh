@@ -25,7 +25,8 @@ entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - 
 url="${BASE_URL}?post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
 TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | grep token | cut -c 46-85)
 echo "TOKEN=$TOKEN"
-[ $(echo -n $TOKEN | wc -c) -eq 18 ] || { echo "expected TOKEN of 18 characters, but found $TOKEN of $(echo -n $TOKEN | wc -c)" && exit 1 ; }
+# the precise length isn't important, it just has to be significantly larger than ''
+[ $(echo -n $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 18 characters, but found $TOKEN of $(echo -n $TOKEN | wc -c)" && exit 1 ; }
 
 url="${BASE_URL}?do=login&post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
 curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc response.xslt -
