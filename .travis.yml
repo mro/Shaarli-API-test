@@ -2,10 +2,10 @@
 language: php
 php:
   - 5.3
-  - 5.4
-  - 5.5
-  - 5.6
-  - 7.0
+#  - 5.4
+#  - 5.5
+#  - 5.6
+#  - 7.0
 # http://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
 # http://docs.travis-ci.com/user/customizing-the-build/#Build-Matrix
 env:
@@ -16,9 +16,9 @@ env:
     - PASSWORD=tust
   matrix:
     - GITHUB_SRC_URL=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
-    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
-    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
-    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
+#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
+#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
+#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
 
 matrix:
   allow_failures:
