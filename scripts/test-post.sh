@@ -27,18 +27,18 @@ entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - 
 [ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 1 ; }
 
 # fetch token to login and add a new link:
-TOKEN=$(curl --get --data-urlencode "post=http://blog.mro.name/foo" --data-urlencode "title=Title Text" --data-urlencode "description=Desc Text" --data-urlencode "source=Source Text" --url "$url" --dump-header head --cookie cook --cookie-jar cook --location --silent | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
+TOKEN=$(curl --get --data-urlencode "post=http://blog.mro.name/foo" --data-urlencode "title=Title Text" --data-urlencode "description=Desc Text" --data-urlencode "source=Source Text" --url "$BASE_URL" --dump-header head --cookie cook --cookie-jar cook --location --silent | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
 # the precise length doesn't matter, it just has to be significantly larger than ''
 [ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 1 ; }
 
 # follow the redirect
-curl --silent --dump-header head --cookie cook --cookie-jar cook --location \
-  --url "${BASE_URL}$(grep -F 'Location: ' head | tr -d '\n' | head -c -1 | cut -c 11-)" \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
+curl --url "${BASE_URL}$(grep -F 'Location: ' head | tr -d '\n' | head -c -1 | cut -c 11-)" \
   --data-urlencode "login=$USERNAME" \
   --data-urlencode "password=$PASSWORD" \
   --data-urlencode "token=$TOKEN" \
+  --dump-header head --cookie cook --cookie-jar cook --location --silent \
 | xsltproc --html response.xslt - 2>/dev/null
+#   -H 'Content-Type: application/x-www-form-urlencoded' \
 
 # egrep -hoe "<input.*"
 
