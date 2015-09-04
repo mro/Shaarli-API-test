@@ -45,7 +45,7 @@ do
 		--data-urlencode "continent=Europe" \
 		--data-urlencode "city=Brussels" \
 		--data-urlencode "title=Review Shaarli" \
-		--data-urlencode "Save=Save+config" \
+		--data-urlencode "Save=Save config" \
 		--output /dev/null
 
   # execute each test
