@@ -17,6 +17,8 @@
 #
 cd "$(dirname "$0")"
 
+export BASE_URL=http://shaarli.review.mro.name/
+
 [ "$USERNAME" != "" ] || { echo "How strange, USERNAME is unset." && exit 1 ; }
 [ "$PASSWORD" != "" ] || { echo "How strange, PASSWORD is unset." && exit 1 ; }
 [ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
@@ -38,9 +40,7 @@ token_length=$(printf "%s" $TOKEN | wc -c)
 url="${BASE_URL}?do=login&$params"
 # curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
 
-cat $HOME/.curlrc
-
-curl -q --dump-header head --cookie cook --cookie-jar cook --location \
+curl --dump-header head --cookie cook --cookie-jar cook --location \
   --url "${BASE_URL}?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=curl" \
 	-H 'Content-Type: application/x-www-form-urlencoded' \
 	--data-urlencode "login=$USERNAME" \
