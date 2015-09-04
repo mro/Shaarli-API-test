@@ -53,8 +53,8 @@ token_length=$(printf "%s" $TOKEN | wc -c)
 
 # follow the redirect
 echo "TOKEN: $TOKEN"
-grep -F 'Location: ' head | tail -n 1 | cut -c 10-
-echo "New URL: '$(grep -F 'Location: ' head | tail -n 1 | cut -c 10-)'"
+grep -F 'Location: ' head | tr -d '\n' | head -c -1 | cut -c 11-
+echo "New URL: '$(grep -F 'Location: ' head | tr -d '\n' | head -c -1 | cut -c 11-)'"
 url="${BASE_URL}?do=login&$params"
 # curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
 
