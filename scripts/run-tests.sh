@@ -41,6 +41,7 @@ do
     echo "successful"
   else
     echo "failed"
+    cat "WebAppRoot/data/log.txt"
     status_code=1
   fi
 done
