@@ -17,6 +17,22 @@
 #
 cd "$(dirname "$0")"
 
+# http://stackoverflow.com/a/10797966
+urlencode() {
+  local data
+  if [[ $# != 1 ]]; then
+    echo "Usage: $0 string-to-urlencode"
+    return 1
+  fi
+  data="$(curl -s -o /dev/null -w %{url_effective} --get --data-urlencode "$1" "")"
+  if [[ $? != 3 ]]; then
+    echo "Unexpected error" 1>&2
+    return 2
+  fi
+  echo "${data##/?}"
+  return 0
+}
+
 [ "$USERNAME" != "" ] || { echo "How strange, USERNAME is unset." && exit 1 ; }
 [ "$PASSWORD" != "" ] || { echo "How strange, PASSWORD is unset." && exit 1 ; }
 [ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
@@ -27,10 +43,10 @@ entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - 
 [ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 1 ; }
 
 # fetch token to login and add a new link:
-params="post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
+params="post=$(urlencode "http://blog.mro.name/foo")&title=Title&description=desc&source=curl"
 url="${BASE_URL}?$params"
 
-TOKEN=$(curl --cookie cook --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
+TOKEN=$(curl --dump-header head --cookie cook --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
 # the precise length isn't important, it just has to be significantly larger than ''
 token_length=$(printf "%s" $TOKEN | wc -c)
 [ $token_length -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $token_length" && exit 1 ; }
@@ -40,24 +56,39 @@ url="${BASE_URL}?do=login&$params"
 
 # somehow travis+apache swallows the redirect from POST to GET:
 
+echo == cook =======================================
+cat cook
+echo == head =======================================
+cat head
+echo ===============================================
+
 curl --dump-header head --cookie cook --cookie-jar cook --location \
   --url "${BASE_URL}?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=curl" \
-	-H 'Content-Type: application/x-www-form-urlencoded' \
-	--data-urlencode "login=$USERNAME" \
-	--data-urlencode "password=$PASSWORD" \
-	--data-urlencode "token=$TOKEN" \
-	--data-urlencode "returnurl=http://heise.de" \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode "login=$USERNAME" \
+  --data-urlencode "password=$PASSWORD" \
+  --data-urlencode "token=$TOKEN" \
+  --data-urlencode "returnurl=http://heise.de" \
 2>/dev/null \
 | xsltproc --html response.xslt - 2>/dev/null
+
+echo == cook =======================================
+cat cook
+echo == head =======================================
 cat head
-# 	-H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
-# 	-H 'Accept-Encoding: gzip, deflate' \
-# 	-H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' \
-# 	-H 'Connection: keep-alive' \
-# 	-H 'Cookie: shaarli=821a57f40738b3ed34370ef0582a732d' \
-# 	-H 'Host: links.mro.name' \
-# 	-H 'Referer: http://links.mro.name/?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=bookmarklet' \
-# 	-H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:40.0) Gecko/20100101 Firefox/40.0' \
+echo == data/log.txt ===============================
+cat data/log.txt
+echo ===============================================
+
+
+#   -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+#   -H 'Accept-Encoding: gzip, deflate' \
+#   -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' \
+#   -H 'Connection: keep-alive' \
+#   -H 'Cookie: shaarli=821a57f40738b3ed34370ef0582a732d' \
+#   -H 'Host: links.mro.name' \
+#   -H 'Referer: http://links.mro.name/?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=bookmarklet' \
+#   -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:40.0) Gecko/20100101 Firefox/40.0' \
 
 # egrep -hoe "<input.*"
 
