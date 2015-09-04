@@ -20,12 +20,12 @@ cd "$(dirname "$0")"
 # http://stackoverflow.com/a/10797966
 urlencode() {
   local data
-  if [[ $# != 1 ]]; then
+  if [ $# != 1 ]; then
     echo "Usage: $0 string-to-urlencode"
     return 1
   fi
   data="$(curl -s -o /dev/null -w %{url_effective} --get --data-urlencode "$1" "")"
-  if [[ $? != 3 ]]; then
+  if [ $? != 3 ]; then
     echo "Unexpected error" 1>&2
     return 2
   fi
