@@ -79,6 +79,7 @@ xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 # TODO: watch out for error messages like e.g. ip bans or the like.
 
 # check post-condition - there must be more entries now:
-curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --encode utf8 --format -
-entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
+# there is an ugly caching issue - so I use a different atom URL down here:
+# curl --silent --show-error "$BASE_URL/?do=atom&nb=all" | xmllint --encode utf8 --format -
+entries=$(curl --silent --show-error "$BASE_URL/?do=atom&nb=all" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
 [ $entries -eq 2 ] || { echo "expected $entries = 2" && exit 18 ; }
