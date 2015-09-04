@@ -11,7 +11,7 @@ php:
 env:
   global:
     - GITHUB_SRC_SUBDIR=Shaarli-*
-    - BASE_URL=http://localhost
+    - BASE_URL=http://127.0.0.1
     - USERNAME=tast
     - PASSWORD=tust
   matrix:
