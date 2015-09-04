@@ -15,11 +15,11 @@ env:
     - USERNAME=tast
     - PASSWORD=tust
   matrix:
-    - GITHUB_SRC_URL=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
+#    - GITHUB_SRC_URL=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
 #    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
 #    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
-#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
-    - GITHUB_SRC_URL=https://github.com/mro/Shaarli/archive/feature/thumbnails.tar.gz
+    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
+#    - GITHUB_SRC_URL=https://github.com/mro/Shaarli/archive/feature/thumbnails.tar.gz
 ##    - GITHUB_SRC_URL=https://github.com/mro/Shaarli/archive/master.tar.gz
 
 matrix:
