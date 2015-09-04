@@ -22,20 +22,23 @@ cd "$(dirname "$0")"
 [ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 3 ; }
 
 # check pre-condition - there's already 1 public entry in the ATOM feed:
-entries=-1
-entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - | grep --count "<entry>")
+entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
 [ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 4 ; }
 
 #####################################################
 # Step 1: fetch token to login and add a new link:
-TOKEN=$(curl --get --url "$BASE_URL" \
+# http://unix.stackexchange.com/a/157219
+LOCATION=$(curl --get --url "$BASE_URL" \
   --data-urlencode "post=http://blog.mro.name/foo" \
   --data-urlencode "title=Title Text" \
   --data-urlencode "description=Desc Text" \
   --data-urlencode "source=Source Text" \
-  --dump-header curl.head --cookie curl.cook --cookie-jar curl.cook --location --silent \
-| xsltproc --html response.xslt - 2>/dev/null \
-| xmllint --xpath 'string(/shaarli/input[@name="token"]/@value)' -)
+  --cookie curl.cook --cookie-jar curl.cook \
+  --location --output curl.html \
+  --trace-ascii curl.trace --dump-header curl.head \
+  --write-out '%{url_effective}' 2>/dev/null)
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
+TOKEN=$(xmllint --xpath 'string(/shaarli/input[@name="token"]/@value)' curl.xml)
 # string(..) http://stackoverflow.com/a/18390404
 
 # the precise length doesn't matter, it just has to be significantly larger than ''
@@ -43,13 +46,15 @@ TOKEN=$(curl --get --url "$BASE_URL" \
 
 #####################################################
 # Step 2: follow the redirect and get the post form:
-curl --url "${BASE_URL}$(grep -F 'Location: ' curl.head | sed -e 's/Location://' | tr -d '[:space:]')" \
+LOCATION=$(curl --url "$LOCATION" \
   --data-urlencode "login=$USERNAME" \
   --data-urlencode "password=$PASSWORD" \
   --data-urlencode "token=$TOKEN" \
-  --dump-header curl.head --cookie curl.cook --cookie-jar curl.cook --location --trace-ascii curl.trace 2>/dev/null \
-| xsltproc --html --output curl.xml response.xslt - 2>/dev/null
-
+  --cookie curl.cook --cookie-jar curl.cook \
+  --location --output curl.html \
+  --trace-ascii curl.trace --dump-header curl.head \
+  --write-out '%{url_effective}' 2>/dev/null)
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 6 ; }
 
 # turn response.xml form input field data into curl commandline parameters or post file
@@ -57,16 +62,20 @@ ruby response2post.rb < curl.xml > curl.post
 
 #####################################################
 # Step 3: finally post the link:
-curl --url "${BASE_URL}$(grep -F 'Location: ' curl.head | sed -e 's/Location://' | tr -d '[:space:]')" \
+curl --url "$LOCATION" \
   --data "@curl.post" \
   --data-urlencode "lf_source=$0" \
   --data-urlencode "lf_tags=t1 t2" \
   --data-urlencode "save_edit=Save" \
-  --dump-header curl.head --cookie curl.cook --cookie-jar curl.cook --location --trace-ascii curl.trace 2>/dev/null \
-| xsltproc --html --output curl.xml response.xslt - 2>/dev/null
+  --cookie curl.cook --cookie-jar curl.cook \
+  --location --output curl.html \
+  --trace-ascii curl.trace --dump-header curl.head \
+  2>/dev/null
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 
 #####################################################
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be still logged in" && exit 7 ; }
 # TODO: watch out for error messages like e.g. ip bans or the like.
 # check post-condition - there must be 2 entries now:
-[ $(curl --silent "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -) -eq 2 ] || { echo "expected exactly two <entry>, found $entries" && exit 18 ; }
+entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
+[ $entries -eq 2 ] || { echo "expected exactly two <entry>, found $entries" && exit 18 ; }
