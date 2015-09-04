@@ -17,22 +17,6 @@
 #
 cd "$(dirname "$0")"
 
-# http://stackoverflow.com/a/10797966
-urlencode() {
-  local data
-  if [ $# != 1 ]; then
-    echo "Usage: $0 string-to-urlencode"
-    return 1
-  fi
-  data="$(curl -s -o /dev/null -w %{url_effective} --get --data-urlencode "$1" "")"
-  if [ $? != 3 ]; then
-    echo "Unexpected error" 1>&2
-    return 2
-  fi
-  echo "${data##/?}"
-  return 0
-}
-
 [ "$USERNAME" != "" ] || { echo "How strange, USERNAME is unset." && exit 1 ; }
 [ "$PASSWORD" != "" ] || { echo "How strange, PASSWORD is unset." && exit 1 ; }
 [ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
@@ -43,23 +27,17 @@ entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - 
 [ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 1 ; }
 
 # fetch token to login and add a new link:
-url="${BASE_URL}?post=$(urlencode "http://blog.mro.name/foo")&title=$(urlencode "Title")&description=$(urlencode "desc")&source=$(urlencode "curl")"
-
-TOKEN=$(curl --dump-header head --cookie cook --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
+TOKEN=$(curl --get --data-urlencode "post=http://blog.mro.name/foo" --data-urlencode "title=Title Text" --data-urlencode "description=Desc Text" --data-urlencode "source=Source Text" --url "$url" --dump-header head --cookie cook --cookie-jar cook --location --silent | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
 # the precise length doesn't matter, it just has to be significantly larger than ''
-token_length=$(printf "%s" $TOKEN | wc -c)
-[ $token_length -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $token_length" && exit 1 ; }
+[ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 1 ; }
 
 # follow the redirect
-url1="${BASE_URL}$(grep -F 'Location: ' head | tr -d '\n' | head -c -1 | cut -c 11-)"
-[ "$url1" != "" ] || { echo "Redirect URL unset." && exit 1 ; }
 curl --silent --dump-header head --cookie cook --cookie-jar cook --location \
-  --url "$url1" \
+  --url "${BASE_URL}$(grep -F 'Location: ' head | tr -d '\n' | head -c -1 | cut -c 11-)" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode "login=$USERNAME" \
   --data-urlencode "password=$PASSWORD" \
   --data-urlencode "token=$TOKEN" \
-  --data-urlencode "returnurl=$url" \
 | xsltproc --html response.xslt - 2>/dev/null
 
 # egrep -hoe "<input.*"
