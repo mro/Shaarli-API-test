@@ -39,14 +39,14 @@ do
   ls -l "WebAppRoot/index.php" >/dev/null || { echo "ouch" && exit 2 ; }
 
   curl --silent --show-error \
-  	--url "$BASE_URL" \
-		--data-urlencode "setlogin=$USERNAME" \
-		--data-urlencode "setpassword=$PASSWORD" \
-		--data-urlencode "continent=Europe" \
-		--data-urlencode "city=Brussels" \
-		--data-urlencode "title=Review Shaarli" \
-		--data-urlencode "Save=Save config" \
-		--output /dev/null
+    --url "$BASE_URL" \
+    --data-urlencode "setlogin=$USERNAME" \
+    --data-urlencode "setpassword=$PASSWORD" \
+    --data-urlencode "continent=Europe" \
+    --data-urlencode "city=Brussels" \
+    --data-urlencode "title=Review Shaarli" \
+    --data-urlencode "Save=Save config" \
+    --output /dev/null
 
   # execute each test
   sh "$tst"
