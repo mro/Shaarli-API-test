@@ -41,7 +41,10 @@ do
     echo "successful"
   else
     echo "failed"
-    cat "WebAppRoot/data/log.txt"
+    for f in scripts/curl.* WebAppRoot/data/log.txt ; do
+      echo "== $f =============================="
+      cat "$f"
+    done
     status_code=1
   fi
 done
