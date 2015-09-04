@@ -41,7 +41,10 @@ url="${BASE_URL}?do=login&$params"
 curl --dump-header head --cookie cook --cookie-jar cook --location \
   --url "${BASE_URL}?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=curl" \
 	-H 'Content-Type: application/x-www-form-urlencoded' \
-	--data "login=$USERNAME&password=$PASSWORD&token=$TOKEN" \
+	--data-urlencode "login=$USERNAME" \
+	--data-urlencode "password=$PASSWORD" \
+	--data-urlencode "token=$TOKEN" \
+	--data-urlencode "returnurl=http://heise.de" \
 2>/dev/null \
 | xsltproc --html response.xslt - 2>/dev/null
 cat head
