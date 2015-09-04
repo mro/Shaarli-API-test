@@ -51,6 +51,8 @@ TOKEN=$(curl --dump-header head --cookie cook --cookie-jar cook --location --url
 token_length=$(printf "%s" $TOKEN | wc -c)
 [ $token_length -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $token_length" && exit 1 ; }
 
+# follow the redirect
+echo "New URL: '$(grep -F "Location: " head | tail -n 1 | cut -c 10-)'"
 url="${BASE_URL}?do=login&$params"
 # curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
 
@@ -77,9 +79,10 @@ cat cook
 echo == head =======================================
 cat head
 echo == data/log.txt ===============================
+pwd
+ls -l ../WebAppRoot/data/
 cat ../WebAppRoot/data/log.txt
 echo ===============================================
-
 
 #   -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
 #   -H 'Accept-Encoding: gzip, deflate' \
