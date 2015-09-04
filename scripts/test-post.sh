@@ -30,7 +30,7 @@ entries=$(curl --silent "$BASE_URL/?do=atom" | xmllint --encode utf8 --format - 
 params="post=http://blog.mro.name/foo&title=Title&description=desc&source=curl"
 url="${BASE_URL}?$params"
 
-TOKEN=$(curl --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
+TOKEN=$(curl --cookie cook --cookie-jar cook --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep -F ' name="token" ' | cut -c 44-83)
 # the precise length isn't important, it just has to be significantly larger than ''
 token_length=$(printf "%s" $TOKEN | wc -c)
 [ $token_length -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $token_length" && exit 1 ; }
@@ -38,12 +38,13 @@ token_length=$(printf "%s" $TOKEN | wc -c)
 url="${BASE_URL}?do=login&$params"
 # curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
 
-curl --cookie cook --cookie-jar cook --location \
+curl --dump-header head --cookie cook --cookie-jar cook --location \
   --url "${BASE_URL}?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=curl" \
 	-H 'Content-Type: application/x-www-form-urlencoded' \
 	--data "login=$USERNAME&password=$PASSWORD&token=$TOKEN" \
 2>/dev/null \
 | xsltproc --html response.xslt - 2>/dev/null
+cat head
 # 	-H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
 # 	-H 'Accept-Encoding: gzip, deflate' \
 # 	-H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' \
