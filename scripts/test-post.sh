@@ -52,6 +52,8 @@ token_length=$(printf "%s" $TOKEN | wc -c)
 [ $token_length -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $token_length" && exit 1 ; }
 
 # follow the redirect
+echo "TOKEN: $TOKEN"
+grep -F 'Location: ' head | tail -n 1 | cut -c 10-
 echo "New URL: '$(grep -F 'Location: ' head | tail -n 1 | cut -c 10-)'"
 url="${BASE_URL}?do=login&$params"
 # curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
