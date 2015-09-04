@@ -38,6 +38,8 @@ TOKEN=$(curl --get --url "$BASE_URL" \
 | xmllint --xpath 'string(/shaarli/input[@name="token"]/@value)' -)
 # string(..) http://stackoverflow.com/a/18390404
 
+echo "TOKEN: '$TOKEN'"
+
 # the precise length doesn't matter, it just has to be significantly larger than ''
 [ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 5 ; }
 

@@ -40,7 +40,7 @@ do
   if [ $? -eq 0 ] ; then
     echo "successful"
   else
-    echo "failed"
+    echo "failed with code:$?"
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
       echo "== $f =============================="
       cat "$f"
