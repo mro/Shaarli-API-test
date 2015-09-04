@@ -18,7 +18,7 @@ env:
     - GITHUB_SRC_URL=https://github.com/sebsauvage/Shaarli/archive/master.tar.gz
 #    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.0.40beta.tar.gz
 #    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/v0.5.3.tar.gz
-    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
+#    - GITHUB_SRC_URL=https://github.com/shaarli/Shaarli/archive/master.tar.gz
 #    - GITHUB_SRC_URL=https://github.com/mro/Shaarli/archive/feature/thumbnails.tar.gz
 ##    - GITHUB_SRC_URL=https://github.com/mro/Shaarli/archive/master.tar.gz
 
@@ -27,7 +27,6 @@ matrix:
     - php: 7.0
 
 before_install:
-  - curl --version
   - sudo apt-get update
   - sudo apt-get install xsltproc apache2 libapache2-mod-fastcgi
   - sudo /home/travis/.phpenv/versions/$TRAVIS_PHP_VERSION/bin/composer self-update
