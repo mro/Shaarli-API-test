@@ -21,9 +21,10 @@ cd "$(dirname "$0")"
 [ "$PASSWORD" != "" ] || { echo "How strange, PASSWORD is unset." && exit 2 ; }
 [ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 3 ; }
 
-# check pre-condition - there's already 1 public entry in the ATOM feed:
+# curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --encode utf8 --format -
+
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
-[ $entries -eq 1 ] || { echo "expected exactly one <entry>, found $entries" && exit 4 ; }
+[ $entries -eq 1 ] || { echo "expected $entries = 1" && exit 18 ; }
 
 #####################################################
 # Step 1: fetch token to login and add a new link:
@@ -37,7 +38,7 @@ LOCATION=$(curl --get --url "$BASE_URL" \
   --location --output curl.html \
   --trace-ascii curl.trace --dump-header curl.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failed to fetch TOKEN" && exit 20 ; }
 TOKEN=$(xmllint --xpath 'string(/shaarli/input[@name="token"]/@value)' curl.xml)
 # string(..) http://stackoverflow.com/a/18390404
 
@@ -54,7 +55,7 @@ LOCATION=$(curl --url "$LOCATION" \
   --location --output curl.html \
   --trace-ascii curl.trace --dump-header curl.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failure" && exit 21 ; }
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 6 ; }
 
 # turn response.xml form input field data into curl commandline parameters or post file
@@ -76,6 +77,8 @@ xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 #####################################################
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be still logged in" && exit 7 ; }
 # TODO: watch out for error messages like e.g. ip bans or the like.
-# check post-condition - there must be 2 entries now:
+
+# check post-condition - there must be more entries now:
+curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --encode utf8 --format -
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
-[ $entries -eq 2 ] || { echo "expected exactly two <entry>, found $entries" && exit 18 ; }
+[ $entries -eq 2 ] || { echo "expected $entries = 2" && exit 18 ; }

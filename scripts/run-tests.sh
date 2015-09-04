@@ -16,8 +16,10 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-# todo: check preliminaries
-#   curl, xmllint, xsltproc, ruby
+# Check preliminaries
+curl --version >/dev/null || { echo "I need curl." && exit 101 ; }
+xmllint --version 2> /dev/null || { echo "I need xmllint." && exit 102 ; }
+ruby --version > /dev/null || { echo "I need xmllint." && exit 103 ; }
 
 cd "$(dirname "$0")/.."
 CWD=$(pwd)
@@ -42,7 +44,7 @@ do
 		--data-urlencode "setpassword=$PASSWORD" \
 		--data-urlencode "continent=Europe" \
 		--data-urlencode "city=Brussels" \
-		--data-urlencode "title=Review+Shaarli" \
+		--data-urlencode "title=Review Shaarli" \
 		--data-urlencode "Save=Save+config" \
 		--output /dev/null
 
