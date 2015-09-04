@@ -36,8 +36,15 @@ do
 
   ls -l "WebAppRoot/index.php" >/dev/null || { echo "ouch" && exit 2 ; }
 
-  # curl "$BASE_URL" -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' -H 'Accept-Encoding: gzip, deflate' -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' -H 'Connection: keep-alive' -H 'Cookie: shaarli=a5929a34b29600fe02d657a976a22664' -H 'Host: shaarli.review.mro.name' -H 'Referer: http://shaarli.review.mro.name/' -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:40.0) Gecko/20100101 Firefox/40.0' -H 'Content-Type: application/x-www-form-urlencoded' --data 'setlogin=tast&setpassword=tust&continent=Europe&city=Brussels&title=Review+Shaarli&Save=Save+config'
-  curl --silent "$BASE_URL" -H 'Content-Type: application/x-www-form-urlencoded' --data "setlogin=$USERNAME&setpassword=$PASSWORD&continent=Europe&city=Brussels&title=Review+Shaarli&Save=Save+config" >/dev/null
+  curl --silent --show-error \
+  	--url "$BASE_URL" \
+		--data-urlencode "setlogin=$USERNAME" \
+		--data-urlencode "setpassword=$PASSWORD" \
+		--data-urlencode "continent=Europe" \
+		--data-urlencode "city=Brussels" \
+		--data-urlencode "title=Review+Shaarli" \
+		--data-urlencode "Save=Save+config" \
+		--output /dev/null
 
   # execute each test
   sh "$tst"
