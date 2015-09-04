@@ -37,10 +37,11 @@ do
 
   # execute each test
   sh "$tst"
-  if [ $? -eq 0 ] ; then
+  code=$?
+  if [ $code -eq 0 ] ; then
     echo "successful"
   else
-    echo "failed with code:$?"
+    echo "failed with code: $code"
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
       echo "== $f =============================="
       cat "$f"
