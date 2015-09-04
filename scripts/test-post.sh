@@ -36,7 +36,23 @@ token_length=$(printf "%s" $TOKEN | wc -c)
 [ $token_length -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $token_length" && exit 1 ; }
 
 url="${BASE_URL}?do=login&$params"
-curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
+# curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
+
+curl --cookie cook --cookie-jar cook --location \
+  --url "${BASE_URL}?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=curl" \
+	-H 'Content-Type: application/x-www-form-urlencoded' \
+	--data "login=$USERNAME&password=$PASSWORD&token=$TOKEN" \
+2>/dev/null \
+| xsltproc --html response.xslt - 2>/dev/null
+# 	-H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
+# 	-H 'Accept-Encoding: gzip, deflate' \
+# 	-H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' \
+# 	-H 'Connection: keep-alive' \
+# 	-H 'Cookie: shaarli=821a57f40738b3ed34370ef0582a732d' \
+# 	-H 'Host: links.mro.name' \
+# 	-H 'Referer: http://links.mro.name/?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=bookmarklet' \
+# 	-H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:40.0) Gecko/20100101 Firefox/40.0' \
+
 # egrep -hoe "<input.*"
 
 # echo ================
