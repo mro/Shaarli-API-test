@@ -41,6 +41,8 @@ xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 TOKEN=$(xmllint --xpath 'string(/shaarli/input[@name="token"]/@value)' curl.xml)
 # string(..) http://stackoverflow.com/a/18390404
 
+echo "Location: '$LOCATION'"
+
 # the precise length doesn't matter, it just has to be significantly larger than ''
 [ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 5 ; }
 
@@ -56,6 +58,8 @@ LOCATION=$(curl --url "$LOCATION" \
   --write-out '%{url_effective}' 2>/dev/null)
 xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 6 ; }
+
+echo "Location: '$LOCATION'"
 
 # turn response.xml form input field data into curl commandline parameters or post file
 ruby response2post.rb < curl.xml > curl.post
