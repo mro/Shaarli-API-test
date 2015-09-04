@@ -53,43 +53,14 @@ token_length=$(printf "%s" $TOKEN | wc -c)
 # follow the redirect
 url1="${BASE_URL}$(grep -F 'Location: ' head | tr -d '\n' | head -c -1 | cut -c 11-)"
 [ "$url1" != "" ] || { echo "Redirect URL unset." && exit 1 ; }
-# curl --silent --cookie cook --cookie-jar cook --location --form "login=$USERNAME" --form "password=$PASSWORD" --form "token=$TOKEN" --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
-
-# somehow travis+apache swallows the redirect from POST to GET:
-
-echo == cook =======================================
-cat cook
-echo == head =======================================
-cat head
-echo ===============================================
-
 curl --silent --dump-header head --cookie cook --cookie-jar cook --location \
   --url "$url1" \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   --data-urlencode "login=$USERNAME" \
   --data-urlencode "password=$PASSWORD" \
   --data-urlencode "token=$TOKEN" \
-  --data-urlencode "returnurl=$url" # \
-# | xsltproc --html response.xslt - 2>/dev/null
-
-echo == cook =======================================
-cat cook
-echo == head =======================================
-cat head
-echo == data/log.txt ===============================
-pwd
-ls -l ../WebAppRoot/data/
-cat ../WebAppRoot/data/log.txt
-echo ===============================================
-
-#   -H 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' \
-#   -H 'Accept-Encoding: gzip, deflate' \
-#   -H 'Accept-Language: de,en-US;q=0.7,en;q=0.3' \
-#   -H 'Connection: keep-alive' \
-#   -H 'Cookie: shaarli=821a57f40738b3ed34370ef0582a732d' \
-#   -H 'Host: links.mro.name' \
-#   -H 'Referer: http://links.mro.name/?do=login&post=http%3A%2F%2Fshaarli.review.mro.name%2F&title=Shaarli+-+sebsauvage.net+-+Review+Shaarli&source=bookmarklet' \
-#   -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:40.0) Gecko/20100101 Firefox/40.0' \
+  --data-urlencode "returnurl=$url"
+| xsltproc --html response.xslt - 2>/dev/null
 
 # egrep -hoe "<input.*"
 
