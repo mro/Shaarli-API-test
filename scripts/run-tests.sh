@@ -36,11 +36,11 @@ do
   curl --silent "$BASE_URL" -H 'Content-Type: application/x-www-form-urlencoded' --data "setlogin=$USERNAME&setpassword=$PASSWORD&continent=Europe&city=Brussels&title=Review+Shaarli&Save=Save+config" >/dev/null
 
   # execute each test
-  t=$(time sh "$tst")
+  sh "$tst"
   if [ $? -eq 0 ] ; then
-    echo "successful $t"
+    echo "successful"
   else
-    echo "failed $t"
+    echo "failed"
     cat "WebAppRoot/data/log.txt"
     status_code=1
   fi
