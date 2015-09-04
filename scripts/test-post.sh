@@ -43,9 +43,11 @@ TOKEN=$(curl --get --url "$BASE_URL" \
 
 #####################################################
 # Step 2: follow the redirect and get the post form:
-echo "URL: '${BASE_URL}$(grep -F 'Location: ' curl.head | tr -d '\n' | cut -c 11-)'"
+echo "#########.#########.#########."
+echo "URL: '${BASE_URL}$(grep -F 'Location: ' curl.head | sed -e 's/Location://' | tr -d '[:space:]')'"
+echo "#########.#########.#########."
 
-curl --url "${BASE_URL}$(grep -F 'Location: ' curl.head | tr -d '\n' | cut -c 11-)" \
+curl --url "${BASE_URL}$(grep -F 'Location: ' curl.head | sed -e 's/Location://' | tr -d '[:space:]')" \
   --data-urlencode "login=$USERNAME" \
   --data-urlencode "password=$PASSWORD" \
   --data-urlencode "token=$TOKEN" \
@@ -59,7 +61,7 @@ ruby response2post.rb < curl.xml > curl.post
 
 #####################################################
 # Step 3: finally post the link:
-curl --url "${BASE_URL}$(grep -F 'Location: ' curl.head | tr -d '\n' | cut -c 11-)" \
+curl --url "${BASE_URL}$(grep -F 'Location: ' curl.head | sed -e 's/Location://' | tr -d '[:space:]')" \
   --data "@${tmp}.post" \
   --data-urlencode "lf_source=$0" \
   --data-urlencode "lf_tags=t1 t2" \
