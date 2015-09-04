@@ -59,7 +59,7 @@ curl --silent --dump-header head --cookie cook --cookie-jar cook --location \
   --data-urlencode "login=$USERNAME" \
   --data-urlencode "password=$PASSWORD" \
   --data-urlencode "token=$TOKEN" \
-  --data-urlencode "returnurl=$url"
+  --data-urlencode "returnurl=$url" \
 | xsltproc --html response.xslt - 2>/dev/null
 
 # egrep -hoe "<input.*"
