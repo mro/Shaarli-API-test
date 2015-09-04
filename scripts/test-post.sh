@@ -77,7 +77,7 @@ cat cook
 echo == head =======================================
 cat head
 echo == data/log.txt ===============================
-cat data/log.txt
+cat ../WebAppRoot/data/log.txt
 echo ===============================================
 
 
