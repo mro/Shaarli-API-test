@@ -55,12 +55,13 @@ do
     echo "success"
   else
     echo "failed with code: $code"
-    echo ">> BEGIN $tst debug output >>>>>>>>>>>>>>>>>"
+    printf " %-60s \n" "_BEGIN_$tst_debug_output_" | tr ' _' '> '
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
-      echo "== $f =============================="
+    	printf " %-60s \n" "_$f_" | tr ' _' '# '
       cat "$f"
     done
-    echo "<< END $tst debug output <<<<<<<<<<<<<<<<<<<"
+    printf " %-60s \n" "_END_$tst_debug_output_" | tr ' _' '< '
+    echo ". "
     status_code=1
   fi
 done
