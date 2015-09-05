@@ -18,6 +18,6 @@
 require 'rexml/document'
 require 'cgi'
 
-REXML::Document.new($stdin).elements.each('/shaarli/input[@type = "text" or @type = "hidden"]') do |element|
+REXML::Document.new($stdin).elements.each('/shaarli/form/input[@type = "text" or @type = "hidden"]') do |element|
   puts "#{CGI.escape(element.attributes['name'] || '')}=#{CGI.escape(element.attributes['value'] || '')}&"
 end

@@ -38,7 +38,10 @@ LOCATION=$(curl --get --url "$BASE_URL" \
   --trace-ascii curl.trace --dump-header curl.head \
   --write-out '%{url_effective}' 2>/dev/null)
 xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failed to fetch TOKEN" && exit 5 ; }
-TOKEN=$(xmllint --xpath 'string(/shaarli/input[@name="token"]/@value)' curl.xml)
+
+errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.xml)
+[ "$errmsg" = "" ] || { echo "error: '$errmsg'" && exit 107 ; }
+TOKEN=$(xmllint --xpath 'string(/shaarli/form[@name="loginform"]/input[@name="token"]/@value)' curl.xml)
 # string(..) http://stackoverflow.com/a/18390404
 
 # the precise length doesn't matter, it just has to be significantly larger than ''
@@ -55,6 +58,8 @@ LOCATION=$(curl --url "$LOCATION" \
   --trace-ascii curl.trace --dump-header curl.head \
   --write-out '%{url_effective}' 2>/dev/null)
 xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failure" && exit 7 ; }
+errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.xml)
+[ "$errmsg" = "" ] || { echo "error: '$errmsg'" && exit 108 ; }
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 8 ; }
 
 # turn response.xml form input field data into curl commandline parameters or post file

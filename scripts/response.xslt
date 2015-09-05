@@ -32,25 +32,44 @@
 
   <xsl:template match="/">
     <shaarli>
+      <!-- naked error message -->
+      <xsl:for-each select="/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,'alert(')]">
+        <error message="{normalize-space(substring-before(substring-after(.,'alert(&quot;'), '&quot;'))}"/>
+      </xsl:for-each>
+
       <xsl:for-each select="/html/body">
+        <!-- embedded error message -->
+        <xsl:for-each select="div[@id = 'pageheader']/div[@id='headerform' and 0 = count(*)]">
+          <error message="{normalize-space(.)}"/>
+        </xsl:for-each>
+
+        <!-- shaarli title -->
         <xsl:for-each select="//span[@id = 'shaarli_title']">
           <xsl:attribute name="title">
             <xsl:value-of select="normalize-space(.)"/>
           </xsl:attribute>
         </xsl:for-each>
-        <xsl:for-each select="div[@id = 'pageheader']//a[@href = '?do=logout']">
-          <is_logged_in value="true"/>
+
+        <!-- logged in? -->
+        <is_logged_in value="{1 = count(div[@id = 'pageheader']//a[@href = '?do=logout'])}"/>
+        <!-- xsl:choose>
+          <xsl:when test="1 = count(div[@id = 'pageheader']//a[@href = '?do=logout'])">
+          </xsl:when>
+          <xsl:otherwise>
+            <is_logged_in value="false"/>
+          </xsl:otherwise>
+        </xsl:choose -->
+
+        <!-- login and link form field presets and TOKEN -->
+        <xsl:for-each select="//form[@name='loginform' or @name='linkform']">
+          <xsl:copy>
+            <xsl:for-each select="@* | .//input">
+              <xsl:copy-of select="."/>
+            </xsl:for-each>
+          </xsl:copy>
         </xsl:for-each>
-        <xsl:for-each select="div[@id = 'pageheader']/div[@id='headerform' and 0 = count(*)]">
-          <error>
-            <xsl:attribute name="title">
-              <xsl:value-of select="normalize-space(.)"/>
-            </xsl:attribute>
-          </error>
-        </xsl:for-each>
-        <xsl:for-each select="//form[@name='loginform' or @name='linkform']//input">
-          <xsl:copy-of select="."/>
-        </xsl:for-each>
+
+        <!-- tags from tagcloud (unused) -->
         <xsl:for-each select="//div[@id = 'cloudtag']/span[@class = 'count']">
           <tag count="{.}">
             <xsl:for-each select="following-sibling::a[1]">
