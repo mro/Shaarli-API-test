@@ -24,7 +24,7 @@ cd "$(dirname "$0")"
 # curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --encode utf8 --format -
 
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
-[ $entries -eq 1 ] || { echo "expected $entries = 1" && exit 18 ; }
+[ $entries -eq 1 ] || { echo "expected $entries = 1" && exit 4 ; }
 
 #####################################################
 # Step 1: fetch token to login and add a new link:
@@ -32,18 +32,17 @@ entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'cou
 LOCATION=$(curl --get --url "$BASE_URL" \
   --data-urlencode "post=http://blog.mro.name/foo" \
   --data-urlencode "title=Title Text" \
-  --data-urlencode "description=Desc Text" \
   --data-urlencode "source=Source Text" \
   --cookie curl.cook --cookie-jar curl.cook \
   --location --output curl.html \
   --trace-ascii curl.trace --dump-header curl.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failed to fetch TOKEN" && exit 20 ; }
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failed to fetch TOKEN" && exit 5 ; }
 TOKEN=$(xmllint --xpath 'string(/shaarli/input[@name="token"]/@value)' curl.xml)
 # string(..) http://stackoverflow.com/a/18390404
 
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 5 ; }
+[ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 6 ; }
 
 #####################################################
 # Step 2: follow the redirect and get the post form:
@@ -55,8 +54,8 @@ LOCATION=$(curl --url "$LOCATION" \
   --location --output curl.html \
   --trace-ascii curl.trace --dump-header curl.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failure" && exit 21 ; }
-[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 6 ; }
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null || { echo "Failure" && exit 7 ; }
+[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 8 ; }
 
 # turn response.xml form input field data into curl commandline parameters or post file
 ruby response2post.rb < curl.xml > curl.post
@@ -66,6 +65,7 @@ ruby response2post.rb < curl.xml > curl.post
 curl --url "$LOCATION" \
   --data "@curl.post" \
   --data-urlencode "lf_source=$0" \
+  --data-urlencode "lf_description=Description Text" \
   --data-urlencode "lf_tags=t1 t2" \
   --data-urlencode "save_edit=Save" \
   --cookie curl.cook --cookie-jar curl.cook \
@@ -75,11 +75,11 @@ curl --url "$LOCATION" \
 xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 
 #####################################################
-[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be still logged in" && exit 7 ; }
+[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.xml) -eq 1 ] || { echo "expected to be still logged in" && exit 9 ; }
 # TODO: watch out for error messages like e.g. ip bans or the like.
 
 # check post-condition - there must be more entries now:
 # there is an ugly caching issue - so I use a different atom URL down here:
 # curl --silent --show-error "$BASE_URL/?do=atom&nb=all" | xmllint --encode utf8 --format -
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom&nb=all" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
-[ $entries -eq 2 ] || { echo "expected $entries = 2" && exit 18 ; }
+[ $entries -eq 2 ] || { echo "expected $entries = 2" && exit 10 ; }

@@ -17,9 +17,11 @@
 #
 cd "$(dirname "$0")"
 
-url="${BASE_URL}"
-# curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null
+curl --url "$BASE_URL" \
+  --cookie curl.cook --cookie-jar curl.cook \
+  --location --output curl.html \
+  --trace-ascii curl.trace --dump-header curl.head \
+  2>/dev/null
+xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 
-count=0
-count=$(curl --silent --location --url "$url" 2>/dev/null | xsltproc --html response.xslt - 2>/dev/null | grep --count --fixed-strings '<shaarli title="Review Shaarli">')
-[ $count -eq 1 ] || { echo "title not found" && exit 1 ; }
+[ "Review Shaarli" = "$(xmllint --xpath 'string(/shaarli/@title)' curl.xml)" ] || { echo "title not found" && exit 1 ; }
