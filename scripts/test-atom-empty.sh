@@ -17,5 +17,7 @@
 #
 cd "$(dirname "$0")"
 
+[ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
+
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
-[ $entries -eq 1 ] || { echo "expected exactly one <entry>" && exit 1 ; }
+[ $entries -eq 1 ] || { echo "expected exactly one <entry>" && exit 2 ; }

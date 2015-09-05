@@ -17,6 +17,8 @@
 #
 cd "$(dirname "$0")"
 
+[ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
+
 curl --url "$BASE_URL" \
   --cookie curl.cook --cookie-jar curl.cook \
   --location --output curl.html \
@@ -24,4 +26,4 @@ curl --url "$BASE_URL" \
   2>/dev/null
 xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 
-[ "Review Shaarli" = "$(xmllint --xpath 'string(/shaarli/@title)' curl.xml)" ] || { echo "title not found" && exit 1 ; }
+[ "Review Shaarli" = "$(xmllint --xpath 'string(/shaarli/@title)' curl.xml)" ] || { echo "title not found" && exit 2 ; }

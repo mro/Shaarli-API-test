@@ -17,6 +17,8 @@
 #
 cd "$(dirname "$0")"
 
+[ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
+
 curl --silent "$BASE_URL/" | xmllint --html --encode utf8 --format - 2>/dev/null >/dev/null
 
 exit $?
