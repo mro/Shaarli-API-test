@@ -54,16 +54,17 @@ do
   if [ $code -eq 0 ] ; then
     echo "success"
   else
+    travis_name="$(basename "$tst")"
     echo "failed with code: $code"
-    echo -n "travis_fold:start:$tst\r"
-    printf " %-60s \n" "_BEGIN_$tst_debug_output_" | tr ' _' '> '
+    echo -n "travis_fold:start:${travis_name}\r"
+    printf " %-60s \n" "_BEGIN_${tst}_debug_output_" | tr ' _' '> '
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
-    	printf " %-60s \n" "_$f_" | tr ' _' '# '
+      printf " %-60s \n" "_$f_" | tr ' _' '# '
       cat "$f"
     done
-    printf " %-60s \n" "_END_$tst_debug_output_" | tr ' _' '< '
+    printf " %-60s \n" "_END_${tst}_debug_output_" | tr ' _' '< '
     echo ". "
-    echo -n "travis_fold:end:$tst\r"
+    echo -n "travis_fold:end:${travis_name}\r"
     status_code=1
   fi
 done
