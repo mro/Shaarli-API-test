@@ -28,14 +28,14 @@ env:
 
 matrix:
   allow_failures:
+    # that's due to apache config issues:
+    - php: 7.0
     # that's bad: the most recent official release can fail
     - env: GITHUB=shaarli/Shaarli/archive/v0.5.3
     # that's even worse: current master can fail
     - env: GITHUB=shaarli/Shaarli/archive/master
     # first community release is known to fail, too:
     - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
-    # why does this one fail?
-    - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
 
 before_install:
   - sudo apt-get update
