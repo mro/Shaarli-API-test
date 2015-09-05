@@ -55,7 +55,7 @@ do
     echo "success"
   else
     echo "failed with code: $code"
-    echo -en 'travis_fold:start:#{tst}\r'
+    echo -n 'travis_fold:start:#{$tst}\r'
     printf " %-60s \n" "_BEGIN_$tst_debug_output_" | tr ' _' '> '
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
     	printf " %-60s \n" "_$f_" | tr ' _' '# '
@@ -63,7 +63,7 @@ do
     done
     printf " %-60s \n" "_END_$tst_debug_output_" | tr ' _' '< '
     echo ". "
-    echo -en 'travis_fold:end:#{tst}\r'
+    echo -n 'travis_fold:end:#{$tst}\r'
     status_code=1
   fi
 done
