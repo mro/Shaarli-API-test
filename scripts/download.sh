@@ -18,4 +18,5 @@
 cd "$(dirname "$0")/.."
 
 # Download the tarball...
+GITHUB_SRC_URL="https://github.com/${GITHUB}.tar.gz"
 curl --location --output source.tar.gz --url "$GITHUB_SRC_URL" || { echo "ouch" && exit 1 ; }
