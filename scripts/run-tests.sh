@@ -88,7 +88,7 @@ do
   if [ $code -eq 0 ] ; then
     echo "${FGC_GREEN}✓${FGC_NONE} ${test_name}"
   else
-    echo "${FGC_RED}×${FGC_NONE} ${test_name} with code: $code"
+    echo "${FGC_RED}❗${FGC_NONE} ${test_name} with code: $code"
     status_code=1
   fi
 done
