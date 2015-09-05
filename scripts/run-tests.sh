@@ -52,13 +52,15 @@ do
   sh "$tst"
   code=$?
   if [ $code -eq 0 ] ; then
-    echo "successful"
+    echo "success"
   else
     echo "failed with code: $code"
+    echo ">> BEGIN $tst debug output >>>>>>>>>>>>>>>>>"
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
       echo "== $f =============================="
       cat "$f"
     done
+    echo "<< END $tst debug output <<<<<<<<<<<<<<<<<<<"
     status_code=1
   fi
 done
