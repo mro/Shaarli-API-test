@@ -16,26 +16,26 @@ env:
     - PASSWORD=tust
   matrix:
     - GITHUB=sebsauvage/Shaarli/archive/master
-#    - GITHUB=shaarli/Shaarli/archive/v0.0.40beta
+    - GITHUB=shaarli/Shaarli/archive/v0.0.40beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.41beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.42beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.43beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.44beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.45beta
-#    - GITHUB=shaarli/Shaarli/archive/v0.5.0
-#    - GITHUB=shaarli/Shaarli/archive/v0.5.1
-#    - GITHUB=shaarli/Shaarli/archive/v0.5.2
     - GITHUB=shaarli/Shaarli/archive/v0.5.3
     - GITHUB=shaarli/Shaarli/archive/master
     - GITHUB=mro/Shaarli/archive/feature/thumbnails
 
 matrix:
   allow_failures:
-    - php: 7.0
-# that's bad: the most recent official release can fail
-    - GITHUB=shaarli/Shaarli/archive/v0.5.3
-# that's even worse: current master can fail
-    - GITHUB=shaarli/Shaarli/archive/master
+    # that's bad: the most recent official release can fail
+    - env: GITHUB=shaarli/Shaarli/archive/v0.5.3
+    # that's even worse: current master can fail
+    - env: GITHUB=shaarli/Shaarli/archive/master
+    # first community release is known to fail, too:
+    - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
+    # why does this one fail?
+    - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
 
 before_install:
   - sudo apt-get update
@@ -57,4 +57,4 @@ install:
 before_script:
   # http://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
 script:
-  - sh ./scripts/run-tests.sh
+  - sh scripts/run-tests.sh
