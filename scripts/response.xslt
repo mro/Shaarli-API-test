@@ -48,7 +48,7 @@
             </xsl:attribute>
           </error>
         </xsl:for-each>
-        <xsl:for-each select="//form//input">
+        <xsl:for-each select="//form[@name='loginform' or @name='linkform']//input">
           <xsl:copy-of select="."/>
         </xsl:for-each>
         <xsl:for-each select="//div[@id = 'cloudtag']/span[@class = 'count']">
