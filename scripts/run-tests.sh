@@ -50,8 +50,8 @@ for tst in ./scripts/test*.sh
 do
   test_name="$(basename "$tst")"
   echo -n "travis_fold:start:${test_name}\r"
+  echo -n "Running $test_name "
 
-  echo -n "Running $test_name"
   cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
