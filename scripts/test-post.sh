@@ -24,7 +24,7 @@ cd "$(dirname "$0")"
 # curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --encode utf8 --format -
 
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
-[ $entries -eq 1 ] || { echo "expected $entries = 1" && exit 4 ; }
+[ $entries -eq 1 ] || { echo "Atom feed expected $entries = 1" && exit 4 ; }
 
 #####################################################
 # Step 1: fetch token to login and add a new link:
@@ -82,4 +82,4 @@ xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 # there is an ugly caching issue - so I use a different atom URL down here:
 # curl --silent --show-error "$BASE_URL/?do=atom&nb=all" | xmllint --encode utf8 --format -
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom&nb=all" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
-[ $entries -eq 2 ] || { echo "expected $entries = 2" && exit 10 ; }
+[ $entries -eq 2 ] || { echo "Atom feed expected $entries = 2" && exit 10 ; }
