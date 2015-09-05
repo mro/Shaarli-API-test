@@ -27,9 +27,10 @@ CWD=$(pwd)
 status_code=0
 for tst in ./scripts/test*.sh
 do
-  printf "Running %s ... " "$(basename "$tst")"
   travis_name="$(basename "$tst")"
   echo -n "travis_fold:start:${travis_name}\r"
+
+  printf "Running %s ... " "$travis_name"
   cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
@@ -64,6 +65,7 @@ do
   fi
   echo -n "travis_fold:end:${travis_name}\r"
 
+  printf "Running %s ... " "$travis_name"
   if [ $code -eq 0 ] ; then
     echo "success"
   else
