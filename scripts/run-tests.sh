@@ -27,10 +27,10 @@ CWD=$(pwd)
 status_code=0
 for tst in ./scripts/test*.sh
 do
-  travis_name="$(basename "$tst")"
-  echo -n "travis_fold:start:${travis_name}\r"
+  test_name="$(basename "$tst")"
+  echo -n "travis_fold:start:${test_name}\r"
 
-  printf "Running %s ... " "$travis_name"
+  printf "Running %s ... " "$test_name"
   cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
@@ -55,15 +55,13 @@ do
   sh "$tst"
   code=$?
   if [ $code -ne 0 ] ; then
-    printf " %-60s \n" "_BEGIN_${tst}_debug_output_" | tr ' _' '> '
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
-      printf " %-60s \n" "_$f_" | tr ' _' '# '
+      printf " %-60s \n" "_${f}_" | tr ' _' '# '
       cat "$f"
     done
-    printf " %-60s \n" "_END_${tst}_debug_output_" | tr ' _' '< '
     echo ". "
   fi
-  echo -n "travis_fold:end:${travis_name}\r"
+  echo -n "travis_fold:end:${test_name}\r"
 
   if [ $code -eq 0 ] ; then
     echo "success"
