@@ -51,7 +51,7 @@ do
   test_name="$(basename "$tst")"
   echo -n "travis_fold:start:${test_name}\r"
 
-  echo "Running $test_name"
+  echo -n "Running $test_name"
   cd "$CWD"
   # prepare a clean test environment from scratch
   rm -rf WebAppRoot
@@ -86,9 +86,9 @@ do
   echo -n "travis_fold:end:${test_name}\r"
 
   if [ $code -eq 0 ] ; then
-    echo -e "${FGC_GREEN}✓${FGC_NONE} ${test_name}"
+    echo "${FGC_GREEN}✓${FGC_NONE} ${test_name}"
   else
-    echo -e "${FGC_RED}×${FGC_NONE} ${test_name} with code: $code"
+    echo "${FGC_RED}×${FGC_NONE} ${test_name} with code: $code"
     status_code=1
   fi
 done
