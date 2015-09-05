@@ -32,9 +32,9 @@ env:
 matrix:
   allow_failures:
     - php: 7.0
-    # that's bad: the most recent official release can fail
+# that's bad: the most recent official release can fail
     - GITHUB=shaarli/Shaarli/archive/v0.5.3
-    # that's even worse: current master can fail
+# that's even worse: current master can fail
     - GITHUB=shaarli/Shaarli/archive/master
 
 before_install:
