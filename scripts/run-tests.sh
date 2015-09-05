@@ -65,7 +65,6 @@ do
   fi
   echo -n "travis_fold:end:${travis_name}\r"
 
-  printf "Running %s ... " "$travis_name"
   if [ $code -eq 0 ] ; then
     echo "success"
   else
