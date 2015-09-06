@@ -69,13 +69,13 @@ errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 8 ; }
 
 # turn response.xml form input field data into curl commandline parameters or post file
-ruby response2post.rb < curl.tmp.xml > curl.tmp.post
+ruby response2post.rb < curl.tmp.xml > curl.post
 
 echo "######################################################"
 echo "## Step 3: finally post the link: "
 rm curl.tmp.*
 curl --url "$LOCATION" \
-  --data "@curl.tmp.post" \
+  --data "@curl.post" \
   --data-urlencode "lf_source=$0" \
   --data-urlencode "lf_description=Description Text" \
   --data-urlencode "lf_tags=t1 t2" \
