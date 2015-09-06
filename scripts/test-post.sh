@@ -22,7 +22,7 @@ cd "$(dirname "$0")"
 [ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 3 ; }
 
 echo "###################################################"
-echo "## Atom feed before adding a link (should have only the initial default entry):"
+echo "## Non-logged-in Atom feed before adding a link (should have only the initial public default entry):"
 curl --silent --show-error --output curl.tmp.atom "$BASE_URL/?do=atom"
 xmllint --encode utf8 --format curl.tmp.atom
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
@@ -94,8 +94,8 @@ cat curl.tmp.xml
 # check post-condition - there must be more entries now:
 # there is an ugly caching issue - so I use a different atom URL down here:
 echo "###################################################"
-echo "## Atom feed after adding a link (should have both, the added and the initial default entry):"
-curl --silent --show-error --output curl.tmp.atom "$BASE_URL/?do=atom&nb=all"
+echo "## Logged-in Atom feed after adding a link (should have all three, the added and the initial default public and private entries):"
+curl --silent --show-error --cookie curl.cook --cookie-jar curl.cook --output curl.tmp.atom "$BASE_URL/?do=atom&nb=all"
 xmllint --encode utf8 --format curl.tmp.atom
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
-[ $entries -eq 2 ] || { echo "Atom feed expected 2 = $entries" && exit 10 ; }
+[ $entries -eq 3 ] || { echo "Atom feed expected 3 = $entries" && exit 10 ; }
