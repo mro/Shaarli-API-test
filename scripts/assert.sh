@@ -39,6 +39,6 @@ BGC_CYAN="\033[7;36m"
 BGC_WHITE="\033[7;37m"
 
 assert_fail() {
-  echo "${FGC_RED}Assert fail: $2${FGC_NONE}"
+  echo "${BGC_RED}Assert fail ($1): $2${FGC_NONE}"
   exit $1
 }
