@@ -16,17 +16,18 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 cd "$(dirname "$0")"
+source assert.sh
 
-[ "$USERNAME" != "" ] || { echo "How strange, USERNAME is unset." && exit 1 ; }
-[ "$PASSWORD" != "" ] || { echo "How strange, PASSWORD is unset." && exit 2 ; }
-[ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 3 ; }
+[ "$USERNAME" != "" ] || assert_fail 1 "How strange, USERNAME is unset."
+[ "$PASSWORD" != "" ] || assert_fail 2 "How strange, PASSWORD is unset."
+[ "$BASE_URL" != "" ] || assert_fail 3 "How strange, BASE_URL is unset."
 
 echo "###################################################"
 echo "## Non-logged-in Atom feed before adding a link (should have only the initial public default entry):"
 curl --silent --show-error --output curl.tmp.atom "$BASE_URL/?do=atom"
 xmllint --encode utf8 --format curl.tmp.atom
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
-[ $entries -eq 1 ] || { echo "Atom feed expected 1 = $entries" && exit 4 ; }
+[ $entries -eq 1 ] || assert_fail 4 "Atom feed expected 1 = $entries"
 
 echo "####################################################"
 echo "## Step 1: fetch token to login and add a new link: "
@@ -40,16 +41,16 @@ LOCATION=$(curl --get --url "$BASE_URL" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || { echo "Failed to fetch TOKEN" && exit 5 ; }
+xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || assert_fail 5 "Failed to fetch TOKEN"
 cat curl.tmp.xml
 
 errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
-[ "$errmsg" = "" ] || { echo "error: '$errmsg'" && exit 107 ; }
+[ "$errmsg" = "" ] || assert_fail 107 "error: '$errmsg'"
 TOKEN=$(xmllint --xpath 'string(/shaarli/form[@name="loginform"]/input[@name="token"]/@value)' curl.tmp.xml)
 # string(..) http://stackoverflow.com/a/18390404
 
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 6 ; }
+[ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || assert_fail 6 "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)"
 
 echo "######################################################"
 echo "## Step 2: follow the redirect and get the post form: "
@@ -62,11 +63,11 @@ LOCATION=$(curl --url "$LOCATION" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || { echo "Failure" && exit 7 ; }
+xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || assert_fail 7 "Failure"
 cat curl.tmp.xml
 errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
-[ "$errmsg" = "" ] || { echo "error: '$errmsg'" && exit 108 ; }
-[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || { echo "expected to be logged in now" && exit 8 ; }
+[ "$errmsg" = "" ] || assert_fail 108 "error: '$errmsg'"
+[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || assert_fail 8 "expected to be logged in now"
 
 # turn response.xml form input field data into curl commandline parameters or post file
 ruby response2post.rb < curl.tmp.xml > curl.post
@@ -89,7 +90,7 @@ xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null
 cat curl.tmp.xml
 
 #####################################################
-[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || { echo "expected to be still logged in" && exit 9 ; }
+[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || assert_fail 9 "expected to be still logged in"
 # TODO: watch out for error messages like e.g. ip bans or the like.
 
 # check post-condition - there must be more entries now:
@@ -99,4 +100,4 @@ echo "## Logged-in Atom feed after adding a link (should have all three, the add
 curl --silent --show-error --cookie curl.cook --cookie-jar curl.cook --output curl.tmp.atom "$BASE_URL/?do=atom&nb=all"
 xmllint --encode utf8 --format curl.tmp.atom
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
-[ $entries -eq 3 ] || { echo "Atom feed expected 3 = $entries" && exit 10 ; }
+[ $entries -eq 3 ] || assert_fail 10 "Atom feed expected 3 = $entries"

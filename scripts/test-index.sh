@@ -16,8 +16,9 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 cd "$(dirname "$0")"
+source assert.sh
 
-[ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
+[ "$BASE_URL" != "" ] || assert_fail 1 "How strange, BASE_URL is unset."
 
 curl --silent "$BASE_URL/" | xmllint --html --encode utf8 --format - 2>/dev/null >/dev/null
 

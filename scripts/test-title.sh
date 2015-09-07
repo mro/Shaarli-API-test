@@ -16,8 +16,9 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 cd "$(dirname "$0")"
+source assert.sh
 
-[ "$BASE_URL" != "" ] || { echo "How strange, BASE_URL is unset." && exit 1 ; }
+[ "$BASE_URL" != "" ] || assert_fail 1 "How strange, BASE_URL is unset."
 
 curl --url "$BASE_URL" \
   --cookie curl.cook --cookie-jar curl.cook \
@@ -26,4 +27,4 @@ curl --url "$BASE_URL" \
   2>/dev/null
 xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
 
-[ "Review Shaarli" = "$(xmllint --xpath 'string(/shaarli/@title)' curl.xml)" ] || { echo "title not found" && exit 2 ; }
+[ "Review Shaarli" = "$(xmllint --xpath 'string(/shaarli/@title)' curl.xml)" ] || assert_fail 2 "title not found"
