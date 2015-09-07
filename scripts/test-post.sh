@@ -33,8 +33,8 @@ echo "## Step 1: fetch token to login and add a new link: "
 rm curl.tmp.*
 # http://unix.stackexchange.com/a/157219
 LOCATION=$(curl --get --url "$BASE_URL" \
-  --data-urlencode "post=http://blog.mro.name/foo" \
-  --data-urlencode "title=Title Text" \
+  --data-urlencode "post=https://en.wikipedia.org/wiki/Gutenberg_Bible" \
+  --data-urlencode "title=Movable type invented." \
   --data-urlencode "source=Source Text" \
   --cookie curl.cook --cookie-jar curl.cook \
   --location --output curl.tmp.html \
@@ -76,8 +76,9 @@ echo "## Step 3: finally post the link: "
 rm curl.tmp.*
 curl --url "$LOCATION" \
   --data "@curl.post" \
+  --data-urlencode "lf_linkdate=15460801_120001" \
   --data-urlencode "lf_source=$0" \
-  --data-urlencode "lf_description=Description Text" \
+  --data-urlencode "lf_description=First movable-type bible printed." \
   --data-urlencode "lf_tags=t1 t2" \
   --data-urlencode "save_edit=Save" \
   --cookie curl.cook --cookie-jar curl.cook \
