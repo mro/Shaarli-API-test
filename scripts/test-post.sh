@@ -51,6 +51,8 @@ TOKEN=$(xmllint --xpath 'string(/shaarli/form[@name="loginform"]/input[@name="to
 # the precise length doesn't matter, it just has to be significantly larger than ''
 [ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || { echo "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)" && exit 6 ; }
 
+sleep 2
+
 echo "######################################################"
 echo "## Step 2: follow the redirect and get the post form: "
 rm curl.tmp.*
@@ -71,6 +73,8 @@ errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
 # turn response.xml form input field data into curl commandline parameters or post file
 ruby response2post.rb < curl.tmp.xml > curl.post
 
+sleep 2
+
 echo "######################################################"
 echo "## Step 3: finally post the link: "
 rm curl.tmp.*
@@ -90,6 +94,8 @@ cat curl.tmp.xml
 #####################################################
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || { echo "expected to be still logged in" && exit 9 ; }
 # TODO: watch out for error messages like e.g. ip bans or the like.
+
+sleep 2
 
 # check post-condition - there must be more entries now:
 # there is an ugly caching issue - so I use a different atom URL down here:
