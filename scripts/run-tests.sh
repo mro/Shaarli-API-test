@@ -74,8 +74,8 @@ do
 
   # execute each test
   sh "$tst"
-
   code=$?
+
   if [ $code -ne 0 ] ; then
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
       printf " %-60s \n" "_${f}_" | tr ' _' '# '
