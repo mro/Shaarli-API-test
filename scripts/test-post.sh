@@ -53,7 +53,7 @@ TOKEN=$(xmllint --xpath 'string(/shaarli/form[@name="loginform"]/input[@name="to
 [ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || assert_fail 6 "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)"
 
 echo "######################################################"
-echo "## Step 2: follow the redirect and get the post form: "
+echo "## Step 2: follow the redirect, login and get the post form: "
 rm curl.tmp.*
 LOCATION=$(curl --url "$LOCATION" \
   --data-urlencode "login=$USERNAME" \
