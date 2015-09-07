@@ -16,7 +16,7 @@
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 cd "$(dirname "$0")"
-source assert.sh
+. ./assert.sh
 
 [ "$USERNAME" != "" ] || assert_fail 1 "How strange, USERNAME is unset."
 [ "$PASSWORD" != "" ] || assert_fail 2 "How strange, PASSWORD is unset."
