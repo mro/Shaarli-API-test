@@ -34,8 +34,8 @@ echo "## Step 1: fetch token to login and add a new link: "
 rm curl.tmp.*
 # http://unix.stackexchange.com/a/157219
 LOCATION=$(curl --get --url "$BASE_URL" \
-  --data-urlencode "post=https://en.wikipedia.org/wiki/Gutenberg_Bible" \
-  --data-urlencode "title=Movable type invented." \
+  --data-urlencode "post=https://github.com/sebsauvage/Shaarli/commit/450342737ced8ef2864b4f83a4107a7fafcc4add" \
+  --data-urlencode "title=Initial Commit to Shaarli on Github." \
   --data-urlencode "source=Source Text" \
   --cookie curl.cook --cookie-jar curl.cook \
   --location --output curl.tmp.html \
@@ -53,7 +53,7 @@ TOKEN=$(xmllint --xpath 'string(/shaarli/form[@name="loginform"]/input[@name="to
 [ $(printf "%s" $TOKEN | wc -c) -eq 40 ] || assert_fail 6 "expected TOKEN of 40 characters, but found $TOKEN of $(printf "%s" $TOKEN | wc -c)"
 
 echo "######################################################"
-echo "## Step 2: follow the redirect, login and get the post form: "
+echo "## Step 2: follow the redirect, do the login and get the post form: "
 rm curl.tmp.*
 LOCATION=$(curl --url "$LOCATION" \
   --data-urlencode "login=$USERNAME" \
@@ -77,9 +77,9 @@ echo "## Step 3: finally post the link: "
 rm curl.tmp.*
 curl --url "$LOCATION" \
   --data "@curl.post" \
-  --data-urlencode "lf_linkdate=15460801_120001" \
+  --data-urlencode "lf_linkdate=20130226_100941" \
   --data-urlencode "lf_source=$0" \
-  --data-urlencode "lf_description=First movable-type bible printed." \
+  --data-urlencode "lf_description=Must be older because http://sebsauvage.github.io/Shaarli/ mentions 'Copyright (c) 2011 Sébastien SAUVAGE (sebsauvage.net)'." \
   --data-urlencode "lf_tags=t1 t2" \
   --data-urlencode "save_edit=Save" \
   --cookie curl.cook --cookie-jar curl.cook \
@@ -94,10 +94,9 @@ cat curl.tmp.xml
 # TODO: watch out for error messages like e.g. ip bans or the like.
 
 # check post-condition - there must be more entries now:
-# there is an ugly caching issue - so I use a different atom URL down here:
 echo "###################################################"
-echo "## Logged-in Atom feed after adding a link (should have all three, the added and the initial default public and private entries):"
-curl --silent --show-error --cookie curl.cook --cookie-jar curl.cook --output curl.tmp.atom "$BASE_URL/?do=atom&nb=all"
+echo "## Non-logged-in Atom feed after adding a link (should have the added + the initial public default entry):"
+curl --silent --show-error --output curl.tmp.atom "$BASE_URL/?do=atom"
 xmllint --encode utf8 --format curl.tmp.atom
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
-[ $entries -eq 3 ] || assert_fail 10 "Atom feed expected 3 = $entries"
+[ $entries -eq 2 ] || assert_fail 10 "Atom feed expected 2 = $entries"

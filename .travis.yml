@@ -16,15 +16,15 @@ env:
     - PASSWORD=tust
   matrix:
     - GITHUB=sebsauvage/Shaarli/archive/master
-    - GITHUB=shaarli/Shaarli/archive/v0.0.40beta
+#    - GITHUB=shaarli/Shaarli/archive/v0.0.40beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.41beta
-    - GITHUB=shaarli/Shaarli/archive/v0.0.42beta
-    - GITHUB=shaarli/Shaarli/archive/v0.0.43beta
-    - GITHUB=shaarli/Shaarli/archive/v0.0.44beta
+#    - GITHUB=shaarli/Shaarli/archive/v0.0.42beta
+#    - GITHUB=shaarli/Shaarli/archive/v0.0.43beta
+#    - GITHUB=shaarli/Shaarli/archive/v0.0.44beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.45beta
     - GITHUB=shaarli/Shaarli/archive/v0.5.3
     - GITHUB=shaarli/Shaarli/archive/master
-    - GITHUB=mro/Shaarli/archive/feature/thumbnails
+#    - GITHUB=mro/Shaarli/archive/feature/thumbnails
 
 matrix:
   allow_failures:
