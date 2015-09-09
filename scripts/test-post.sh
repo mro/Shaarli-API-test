@@ -18,9 +18,14 @@
 cd "$(dirname "$0")"
 . ./assert.sh
 
-[ "$USERNAME" != "" ] || assert_fail 1 "How strange, USERNAME is unset."
-[ "$PASSWORD" != "" ] || assert_fail 2 "How strange, PASSWORD is unset."
-[ "$BASE_URL" != "" ] || assert_fail 3 "How strange, BASE_URL is unset."
+# Check preliminaries
+curl --version >/dev/null       || assert_fail 101 "I need curl."
+xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
+xsltproc --version > /dev/null  || assert_fail 102 "I need xsltproc."
+ruby --version > /dev/null      || assert_fail 103 "I need ruby."
+[ "$USERNAME" != "" ]           || assert_fail 1 "How strange, USERNAME is unset."
+[ "$PASSWORD" != "" ]           || assert_fail 2 "How strange, PASSWORD is unset."
+[ "$BASE_URL" != "" ]           || assert_fail 3 "How strange, BASE_URL is unset."
 
 echo "###################################################"
 echo "## Non-logged-in Atom feed before adding a link (should have only the initial public default entry):"
@@ -42,7 +47,7 @@ LOCATION=$(curl --get --url "$BASE_URL" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || assert_fail 5 "Failed to fetch TOKEN"
-cat curl.tmp.xml
+xmllint --relaxng response.rng curl.tmp.xml || assert_fail 5 "Response invalid."
 
 errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
 [ "$errmsg" = "" ] || assert_fail 107 "error: '$errmsg'"
@@ -64,7 +69,7 @@ LOCATION=$(curl --url "$LOCATION" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || assert_fail 7 "Failure"
-cat curl.tmp.xml
+xmllint --relaxng response.rng curl.tmp.xml || assert_fail 5 "Response invalid."
 errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
 [ "$errmsg" = "" ] || assert_fail 108 "error: '$errmsg'"
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || assert_fail 8 "expected to be logged in now"
@@ -87,7 +92,7 @@ curl --url "$LOCATION" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   2>/dev/null
 xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null
-cat curl.tmp.xml
+xmllint --relaxng response.rng curl.tmp.xml || assert_fail 5 "Response invalid."
 
 #####################################################
 [ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || assert_fail 9 "expected to be still logged in"

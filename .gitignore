@@ -1,2 +1,2 @@
-scripts/cook
-scripts/head
+scripts/curl.*
+scripts/response.rnc

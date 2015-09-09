@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  
+   Copyright (c) 2015 Marcus Rohrmoser http://mro.name/me. All rights reserved.
+  
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+  
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+  
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
+  
+  About RelaxNG schemas: http://blog.mro.name/2010/05/xml-toolbox-relax-ng-trang/
+-->
+<!--
+  default namespace is empty, because 
+    $ xmllint - -xpath 
+  is used for quick assert checks and doesn't like namespaces at all :-(.
+-->
+<grammar ns="" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <a:documentation>
+Schema for
+https://github.com/mro/Shaarli-API-test/blob/master/scripts/response.xslt
+output.
+</a:documentation>
+    <element name="shaarli">
+      <optional>
+        <attribute name="title">
+          <a:documentation>Optional and maybe empty.</a:documentation>
+        </attribute>
+      </optional>
+      <choice>
+        <a:documentation>Then comes...</a:documentation>
+        <element name="error">
+          <a:documentation>Either an error and nothing else</a:documentation>
+          <attribute name="message"/>
+        </element>
+        <group>
+          <a:documentation>Or the logged-in state</a:documentation>
+          <element name="is_logged_in">
+            <attribute name="value">
+              <data type="boolean"/>
+            </attribute>
+          </element>
+          <optional>
+            <group>
+              <a:documentation>plus optional form with fields &amp; presets</a:documentation>
+              <element name="form">
+                <attribute name="method">
+                  <value>post</value>
+                </attribute>
+                <choice>
+                  <ref name="loginform"/>
+                  <ref name="linkform"/>
+                </choice>
+              </element>
+            </group>
+          </optional>
+        </group>
+      </choice>
+    </element>
+  </start>
+  <define name="loginform">
+    <a:documentation>curl.2:    &lt;input type="text" name="login" tabindex="1"/&gt;
+curl.2:    &lt;input type="password" name="password" tabindex="2"/&gt;
+curl.2:    &lt;input type="submit" value="Login" class="bigbutton" tabindex="4"/&gt;
+curl.2:    &lt;input style="margin:10 0 0 40;" type="checkbox" name="longlastingsession" id="longlastingsession" tabindex="3"/&gt;
+curl.2:    &lt;input type="hidden" name="token" value="5b03458ac7c2caf1dba003b87f066fea63cc4ea5"/&gt;</a:documentation>
+    <attribute name="name">
+      <value>loginform</value>
+    </attribute>
+    <oneOrMore>
+      <choice>
+        <ref name="token_"/>
+        <element name="input">
+          <attribute name="name">
+            <choice>
+              <value>login</value>
+              <value>password</value>
+              <value>longlastingsession</value>
+            </choice>
+          </attribute>
+          <attribute name="type">
+            <choice>
+              <value>password</value>
+              <value>text</value>
+              <value>checkbox</value>
+            </choice>
+          </attribute>
+          <optional>
+            <attribute name="value"/>
+          </optional>
+          <zeroOrMore>
+            <attribute>
+              <a:documentation>ignore all other attributes</a:documentation>
+              <anyName>
+                <except>
+                  <name>name</name>
+                  <name>type</name>
+                  <name>value</name>
+                </except>
+              </anyName>
+            </attribute>
+          </zeroOrMore>
+        </element>
+        <element name="input">
+          <attribute name="type">
+            <value>submit</value>
+          </attribute>
+          <attribute name="value"/>
+          <zeroOrMore>
+            <attribute>
+              <a:documentation>ignore all other attributes</a:documentation>
+              <anyName>
+                <except>
+                  <name>name</name>
+                  <name>type</name>
+                  <name>value</name>
+                </except>
+              </anyName>
+            </attribute>
+          </zeroOrMore>
+        </element>
+      </choice>
+    </oneOrMore>
+  </define>
+  <define name="linkform">
+    <a:documentation>curl.3:    &lt;input type="hidden" name="lf_linkdate" value="20150909_094202"/&gt;
+curl.3:    &lt;input type="text" name="lf_url" value="https://github.com/sebsauvage/Shaarli/commit/450342737ced8ef2864b4f83a4107a7fafcc4add" style="width:100%"/&gt;
+curl.3:    &lt;input type="text" name="lf_title" value="Initial Commit to Shaarli on Github." style="width:100%"/&gt;
+curl.3:    &lt;input type="text" id="lf_tags" name="lf_tags" value="" style="width:100%"/&gt;
+curl.3:    &lt;input type="checkbox" name="lf_private" id="lf_private"/&gt;
+curl.3:    &lt;input type="submit" value="Save" name="save_edit" class="bigbutton" style="margin-left:40px;"/&gt;
+curl.3:    &lt;input type="submit" value="Cancel" name="cancel_edit" class="bigbutton" style="margin-left:40px;"/&gt;
+curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028192ea5b97aee2b2"/&gt;</a:documentation>
+    <attribute name="name">
+      <value>linkform</value>
+    </attribute>
+    <oneOrMore>
+      <choice>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_linkdate</value>
+          </attribute>
+          <attribute name="type">
+            <value>hidden</value>
+          </attribute>
+          <attribute name="value">
+            <data type="string">
+              <param name="pattern">\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}</param>
+              <a:documentation>kinda ISO date</a:documentation>
+            </data>
+          </attribute>
+          <zeroOrMore>
+            <attribute>
+              <a:documentation>ignore all other attributes</a:documentation>
+              <anyName>
+                <except>
+                  <name>name</name>
+                  <name>type</name>
+                  <name>value</name>
+                </except>
+              </anyName>
+            </attribute>
+          </zeroOrMore>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_private</value>
+          </attribute>
+          <attribute name="type">
+            <value>checkbox</value>
+          </attribute>
+          <optional>
+            <attribute name="value">
+              <value>on</value>
+            </attribute>
+          </optional>
+          <zeroOrMore>
+            <attribute>
+              <a:documentation>ignore all other attributes</a:documentation>
+              <anyName>
+                <except>
+                  <name>name</name>
+                  <name>type</name>
+                  <name>value</name>
+                </except>
+              </anyName>
+            </attribute>
+          </zeroOrMore>
+        </element>
+        <element name="input">
+          <attribute name="type">
+            <value>submit</value>
+          </attribute>
+          <attribute name="name">
+            <value>save_edit</value>
+          </attribute>
+          <attribute name="value">
+            <value>Save</value>
+          </attribute>
+          <zeroOrMore>
+            <attribute>
+              <a:documentation>ignore all other attributes</a:documentation>
+              <anyName>
+                <except>
+                  <name>name</name>
+                  <name>type</name>
+                  <name>value</name>
+                </except>
+              </anyName>
+            </attribute>
+          </zeroOrMore>
+        </element>
+        <element name="input">
+          <attribute name="type">
+            <value>submit</value>
+          </attribute>
+          <attribute name="name">
+            <value>cancel_edit</value>
+          </attribute>
+          <attribute name="value">
+            <value>Cancel</value>
+          </attribute>
+          <zeroOrMore>
+            <attribute>
+              <a:documentation>ignore all other attributes</a:documentation>
+              <anyName>
+                <except>
+                  <name>name</name>
+                  <name>type</name>
+                  <name>value</name>
+                </except>
+              </anyName>
+            </attribute>
+          </zeroOrMore>
+        </element>
+        <ref name="token_"/>
+        <element name="input">
+          <attribute name="name">
+            <choice>
+              <value>lf_url</value>
+              <value>lf_title</value>
+              <value>lf_tags</value>
+            </choice>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+          <attribute name="value"/>
+          <zeroOrMore>
+            <attribute>
+              <a:documentation>ignore all other attributes</a:documentation>
+              <anyName>
+                <except>
+                  <name>name</name>
+                  <name>type</name>
+                  <name>value</name>
+                </except>
+              </anyName>
+            </attribute>
+          </zeroOrMore>
+        </element>
+      </choice>
+    </oneOrMore>
+  </define>
+  <define name="token_">
+    <a:documentation>Server token</a:documentation>
+    <element name="input">
+      <attribute name="name">
+        <value>token</value>
+      </attribute>
+      <attribute name="type">
+        <value>hidden</value>
+      </attribute>
+      <attribute name="value">
+        <data type="string">
+          <a:documentation>de-facto hex, but essentially just anything non-empty and passed back again.</a:documentation>
+          <param name="pattern">[0-9a-f]{40}</param>
+        </data>
+      </attribute>
+      <zeroOrMore>
+        <attribute>
+          <a:documentation>ignore all other attributes</a:documentation>
+          <anyName>
+            <except>
+              <name>name</name>
+              <name>type</name>
+              <name>value</name>
+            </except>
+          </anyName>
+        </attribute>
+      </zeroOrMore>
+    </element>
+  </define>
+</grammar>

@@ -18,7 +18,10 @@
 cd "$(dirname "$0")"
 . ./assert.sh
 
-[ "$BASE_URL" != "" ] || assert_fail 1 "How strange, BASE_URL is unset."
+# Check preliminaries
+curl --version >/dev/null       || assert_fail 101 "I need curl."
+xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
+[ "$BASE_URL" != "" ]           || assert_fail 1 "How strange, BASE_URL is unset."
 
 entries=$(curl --silent --show-error "$BASE_URL/?do=atom" | xmllint --xpath 'count(/*/*[local-name()="entry"])' -)
 [ $entries -eq 1 ] || assert_fail 2 "expected exactly one <entry>"

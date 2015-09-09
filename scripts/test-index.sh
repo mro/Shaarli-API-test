@@ -18,7 +18,10 @@
 cd "$(dirname "$0")"
 . ./assert.sh
 
-[ "$BASE_URL" != "" ] || assert_fail 1 "How strange, BASE_URL is unset."
+# Check preliminaries
+curl --version >/dev/null       || assert_fail 101 "I need curl."
+xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
+[ "$BASE_URL" != "" ]           || assert_fail 1 "How strange, BASE_URL is unset."
 
 curl --silent "$BASE_URL/" | xmllint --html --encode utf8 --format - 2>/dev/null >/dev/null
 

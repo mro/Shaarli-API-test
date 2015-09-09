@@ -18,7 +18,11 @@
 cd "$(dirname "$0")"
 . ./assert.sh
 
-[ "$BASE_URL" != "" ] || assert_fail 1 "How strange, BASE_URL is unset."
+# Check preliminaries
+curl --version >/dev/null       || assert_fail 101 "I need curl."
+xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
+xsltproc --version > /dev/null  || assert_fail 102 "I need xsltproc."
+[ "$BASE_URL" != "" ]           || assert_fail 1 "How strange, BASE_URL is unset."
 
 curl --url "$BASE_URL" \
   --cookie curl.cook --cookie-jar curl.cook \
@@ -26,5 +30,6 @@ curl --url "$BASE_URL" \
   --trace-ascii curl.trace --dump-header curl.head \
   2>/dev/null
 xsltproc --html --output curl.xml response.xslt curl.html 2>/dev/null
+xmllint --relaxng response.rng curl.xml || assert_fail 5 "Response invalid."
 
 [ "Review Shaarli" = "$(xmllint --xpath 'string(/shaarli/@title)' curl.xml)" ] || assert_fail 2 "title not found"

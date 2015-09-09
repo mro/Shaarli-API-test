@@ -18,8 +18,6 @@
 
 # Check preliminaries
 curl --version >/dev/null || { echo "I need curl." && exit 101 ; }
-xmllint --version 2> /dev/null || { echo "I need xmllint." && exit 102 ; }
-ruby --version > /dev/null || { echo "I need xmllint." && exit 103 ; }
 
 cd "$(dirname "$0")/.."
 CWD=$(pwd)
