@@ -40,7 +40,7 @@ output.
       <choice>
         <a:documentation>Then comes...</a:documentation>
         <element name="error">
-          <a:documentation>Either an error and nothing else</a:documentation>
+          <a:documentation>Either an error message and nothing else</a:documentation>
           <attribute name="message"/>
         </element>
         <group>
@@ -52,7 +52,7 @@ output.
           </element>
           <optional>
             <group>
-              <a:documentation>plus optional form with fields &amp; presets</a:documentation>
+              <a:documentation>plus an optional form with fields &amp; presets</a:documentation>
               <element name="form">
                 <attribute name="method">
                   <value>post</value>
@@ -69,83 +69,75 @@ output.
     </element>
   </start>
   <define name="loginform">
-    <a:documentation>curl.2:    &lt;input type="text" name="login" tabindex="1"/&gt;
-curl.2:    &lt;input type="password" name="password" tabindex="2"/&gt;
-curl.2:    &lt;input type="submit" value="Login" class="bigbutton" tabindex="4"/&gt;
-curl.2:    &lt;input style="margin:10 0 0 40;" type="checkbox" name="longlastingsession" id="longlastingsession" tabindex="3"/&gt;
+    <a:documentation>curl.2:    &lt;input type="text" name="login"/&gt;
+curl.2:    &lt;input type="password" name="password"/&gt;
+curl.2:    &lt;input type="submit" value="Login"/&gt;
+curl.2:    &lt;input type="checkbox" name="longlastingsession"/&gt;
 curl.2:    &lt;input type="hidden" name="token" value="5b03458ac7c2caf1dba003b87f066fea63cc4ea5"/&gt;</a:documentation>
     <attribute name="name">
       <value>loginform</value>
     </attribute>
     <oneOrMore>
       <choice>
-        <ref name="token_"/>
+        <a:documentation>The elements are all mandatory but in arbitrary order. I can't get the 
+http://www.relaxng.org/compact-tutorial-20030326.html#id2815185 to work</a:documentation>
         <element name="input">
           <attribute name="name">
-            <choice>
-              <value>login</value>
-              <value>password</value>
-              <value>longlastingsession</value>
-            </choice>
+            <value>login</value>
           </attribute>
           <attribute name="type">
-            <choice>
-              <value>password</value>
-              <value>text</value>
-              <value>checkbox</value>
-            </choice>
+            <value>text</value>
           </attribute>
-          <optional>
-            <attribute name="value"/>
-          </optional>
-          <zeroOrMore>
-            <attribute>
-              <a:documentation>ignore all other attributes</a:documentation>
-              <anyName>
-                <except>
-                  <name>name</name>
-                  <name>type</name>
-                  <name>value</name>
-                </except>
-              </anyName>
-            </attribute>
-          </zeroOrMore>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>password</value>
+          </attribute>
+          <attribute name="type">
+            <value>password</value>
+          </attribute>
         </element>
         <element name="input">
           <attribute name="type">
             <value>submit</value>
           </attribute>
-          <attribute name="value"/>
-          <zeroOrMore>
-            <attribute>
-              <a:documentation>ignore all other attributes</a:documentation>
-              <anyName>
-                <except>
-                  <name>name</name>
-                  <name>type</name>
-                  <name>value</name>
-                </except>
-              </anyName>
-            </attribute>
-          </zeroOrMore>
+          <attribute name="value">
+            <value>Login</value>
+          </attribute>
         </element>
+        <element name="input">
+          <attribute name="name">
+            <value>longlastingsession</value>
+          </attribute>
+          <attribute name="type">
+            <value>checkbox</value>
+          </attribute>
+          <optional>
+            <attribute name="value">
+              <value>on</value>
+            </attribute>
+          </optional>
+        </element>
+        <ref name="token_"/>
       </choice>
     </oneOrMore>
   </define>
   <define name="linkform">
     <a:documentation>curl.3:    &lt;input type="hidden" name="lf_linkdate" value="20150909_094202"/&gt;
-curl.3:    &lt;input type="text" name="lf_url" value="https://github.com/sebsauvage/Shaarli/commit/450342737ced8ef2864b4f83a4107a7fafcc4add" style="width:100%"/&gt;
-curl.3:    &lt;input type="text" name="lf_title" value="Initial Commit to Shaarli on Github." style="width:100%"/&gt;
-curl.3:    &lt;input type="text" id="lf_tags" name="lf_tags" value="" style="width:100%"/&gt;
-curl.3:    &lt;input type="checkbox" name="lf_private" id="lf_private"/&gt;
-curl.3:    &lt;input type="submit" value="Save" name="save_edit" class="bigbutton" style="margin-left:40px;"/&gt;
-curl.3:    &lt;input type="submit" value="Cancel" name="cancel_edit" class="bigbutton" style="margin-left:40px;"/&gt;
+curl.3:    &lt;input type="text" name="lf_url" value="https://github.com/sebsauvage/Shaarli/commit/450342737ced8ef2864b4f83a4107a7fafcc4add"/&gt;
+curl.3:    &lt;input type="text" name="lf_title" value="Initial Commit to Shaarli on Github."/&gt;
+curl.3:    &lt;input type="text" id="lf_tags" name="lf_tags" value=""/&gt;
+curl.3:    &lt;input type="checkbox" name="lf_private"/&gt;
+curl.3:    &lt;input type="submit" value="Save" name="save_edit"/&gt;
+curl.3:    &lt;input type="submit" value="Cancel" name="cancel_edit"/&gt;
 curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028192ea5b97aee2b2"/&gt;</a:documentation>
     <attribute name="name">
       <value>linkform</value>
     </attribute>
     <oneOrMore>
       <choice>
+        <a:documentation>The elements are all mandatory but in arbitrary order. I can't get the 
+http://www.relaxng.org/compact-tutorial-20030326.html#id2815185 to work</a:documentation>
         <element name="input">
           <attribute name="name">
             <value>lf_linkdate</value>
@@ -159,18 +151,35 @@ curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028
               <a:documentation>kinda ISO date</a:documentation>
             </data>
           </attribute>
-          <zeroOrMore>
-            <attribute>
-              <a:documentation>ignore all other attributes</a:documentation>
-              <anyName>
-                <except>
-                  <name>name</name>
-                  <name>type</name>
-                  <name>value</name>
-                </except>
-              </anyName>
-            </attribute>
-          </zeroOrMore>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_url</value>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+          <attribute name="value">
+            <data type="anyURI"/>
+          </attribute>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_title</value>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+          <attribute name="value"/>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_tags</value>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+          <attribute name="value"/>
         </element>
         <element name="input">
           <attribute name="name">
@@ -184,18 +193,6 @@ curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028
               <value>on</value>
             </attribute>
           </optional>
-          <zeroOrMore>
-            <attribute>
-              <a:documentation>ignore all other attributes</a:documentation>
-              <anyName>
-                <except>
-                  <name>name</name>
-                  <name>type</name>
-                  <name>value</name>
-                </except>
-              </anyName>
-            </attribute>
-          </zeroOrMore>
         </element>
         <element name="input">
           <attribute name="type">
@@ -207,18 +204,6 @@ curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028
           <attribute name="value">
             <value>Save</value>
           </attribute>
-          <zeroOrMore>
-            <attribute>
-              <a:documentation>ignore all other attributes</a:documentation>
-              <anyName>
-                <except>
-                  <name>name</name>
-                  <name>type</name>
-                  <name>value</name>
-                </except>
-              </anyName>
-            </attribute>
-          </zeroOrMore>
         </element>
         <element name="input">
           <attribute name="type">
@@ -230,45 +215,8 @@ curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028
           <attribute name="value">
             <value>Cancel</value>
           </attribute>
-          <zeroOrMore>
-            <attribute>
-              <a:documentation>ignore all other attributes</a:documentation>
-              <anyName>
-                <except>
-                  <name>name</name>
-                  <name>type</name>
-                  <name>value</name>
-                </except>
-              </anyName>
-            </attribute>
-          </zeroOrMore>
         </element>
         <ref name="token_"/>
-        <element name="input">
-          <attribute name="name">
-            <choice>
-              <value>lf_url</value>
-              <value>lf_title</value>
-              <value>lf_tags</value>
-            </choice>
-          </attribute>
-          <attribute name="type">
-            <value>text</value>
-          </attribute>
-          <attribute name="value"/>
-          <zeroOrMore>
-            <attribute>
-              <a:documentation>ignore all other attributes</a:documentation>
-              <anyName>
-                <except>
-                  <name>name</name>
-                  <name>type</name>
-                  <name>value</name>
-                </except>
-              </anyName>
-            </attribute>
-          </zeroOrMore>
-        </element>
       </choice>
     </oneOrMore>
   </define>
@@ -287,18 +235,6 @@ curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028
           <param name="pattern">[0-9a-f]{40}</param>
         </data>
       </attribute>
-      <zeroOrMore>
-        <attribute>
-          <a:documentation>ignore all other attributes</a:documentation>
-          <anyName>
-            <except>
-              <name>name</name>
-              <name>type</name>
-              <name>value</name>
-            </except>
-          </anyName>
-        </attribute>
-      </zeroOrMore>
     </element>
   </define>
 </grammar>

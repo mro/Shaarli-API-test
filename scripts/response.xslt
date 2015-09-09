@@ -52,19 +52,19 @@
 
         <!-- logged in? -->
         <is_logged_in value="{1 = count(div[@id = 'pageheader']//a[@href = '?do=logout'])}"/>
-        <!-- xsl:choose>
-          <xsl:when test="1 = count(div[@id = 'pageheader']//a[@href = '?do=logout'])">
-          </xsl:when>
-          <xsl:otherwise>
-            <is_logged_in value="false"/>
-          </xsl:otherwise>
-        </xsl:choose -->
 
         <!-- login and link form field presets and TOKEN -->
         <xsl:for-each select="//form[@name='loginform' or @name='linkform']">
           <xsl:copy>
-            <xsl:for-each select="@* | .//input">
+            <xsl:for-each select="@name | @method">
               <xsl:copy-of select="."/>
+            </xsl:for-each>
+            <xsl:for-each select=".//input">
+              <xsl:copy>
+                <xsl:for-each select="@name | @type | @value">
+                  <xsl:copy-of select="."/>
+                </xsl:for-each>
+              </xsl:copy>
             </xsl:for-each>
           </xsl:copy>
         </xsl:for-each>
