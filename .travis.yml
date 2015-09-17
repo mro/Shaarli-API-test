@@ -22,7 +22,7 @@ env:
 #    - GITHUB=shaarli/Shaarli/archive/v0.0.43beta
 #    - GITHUB=shaarli/Shaarli/archive/v0.0.44beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.45beta
-    - GITHUB=shaarli/Shaarli/archive/v0.5.3
+    - GITHUB=shaarli/Shaarli/archive/v0.5.4
     - GITHUB=shaarli/Shaarli/archive/master
 #    - GITHUB=mro/Shaarli/archive/feature/thumbnails
 
