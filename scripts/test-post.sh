@@ -72,11 +72,11 @@ errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 =
 [ "$errmsg" = "" ] || assert_fail 108 "error: '$errmsg'"
 for field in lf_url lf_title lf_linkdate lf_tags token
 do
-	[ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//input[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
+  [ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//input[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
 done
 for field in lf_description
 do
-	[ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//textarea[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
+  [ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//textarea[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
 done
 
 # turn response.html form input field data into curl post data file
