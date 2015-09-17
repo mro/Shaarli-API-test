@@ -36,6 +36,7 @@ entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
 
 echo "####################################################"
 echo "## Step 1: fetch token to login and add a new link: "
+echo "GET ${BASE_URL}?post=..."
 rm curl.tmp.*
 # http://unix.stackexchange.com/a/157219
 LOCATION=$(curl --get --url "$BASE_URL" \
@@ -46,12 +47,10 @@ LOCATION=$(curl --get --url "$BASE_URL" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || assert_fail 5 "Failed to fetch TOKEN"
-xmllint --relaxng response.rng curl.tmp.xml || assert_fail 5 "Response invalid."
-
-errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
+# todo:
+errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
 [ "$errmsg" = "" ] || assert_fail 107 "error: '$errmsg'"
-TOKEN=$(xmllint --xpath 'string(/shaarli/form[@name="loginform"]/input[@name="token"]/@value)' curl.tmp.xml)
+TOKEN=$(xmllint --html --nowarning --xpath 'string(/html/body//form[@name="loginform"]//input[@name="token"]/@value)' curl.tmp.html)
 # string(..) http://stackoverflow.com/a/18390404
 
 # the precise length doesn't matter, it just has to be significantly larger than ''
@@ -59,6 +58,7 @@ TOKEN=$(xmllint --xpath 'string(/shaarli/form[@name="loginform"]/input[@name="to
 
 echo "######################################################"
 echo "## Step 2: follow the redirect, do the login and get the post form: "
+echo "POST $LOCATION"
 rm curl.tmp.*
 LOCATION=$(curl --url "$LOCATION" \
   --data-urlencode "login=$USERNAME" \
@@ -68,19 +68,26 @@ LOCATION=$(curl --url "$LOCATION" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
-xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null || assert_fail 7 "Failure"
-xmllint --relaxng response.rng curl.tmp.xml || assert_fail 5 "Response invalid."
-errmsg=$(xmllint --xpath 'string(/shaarli/error/@message)' curl.tmp.xml)
+# todo:
+errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
 [ "$errmsg" = "" ] || assert_fail 108 "error: '$errmsg'"
-[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || assert_fail 8 "expected to be logged in now"
+for field in lf_url lf_title lf_linkdate lf_tags token
+do
+	[ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//input[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
+done
+for field in lf_description
+do
+	[ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//textarea[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
+done
 
-# turn response.xml form input field data into curl commandline parameters or post file
-ruby response2post.rb < curl.tmp.xml > curl.post
+# turn response.html form input field data into curl post data file
+xmllint --html --nowarning --xmlout curl.tmp.html | ruby linkform2post.rb > curl.post
 
 echo "######################################################"
 echo "## Step 3: finally post the link: "
+echo "POST $LOCATION"
 rm curl.tmp.*
-curl --url "$LOCATION" \
+LOCATION=$(curl --url "$LOCATION" \
   --data "@curl.post" \
   --data-urlencode "lf_linkdate=20130226_100941" \
   --data-urlencode "lf_source=$0" \
@@ -90,12 +97,13 @@ curl --url "$LOCATION" \
   --cookie curl.cook --cookie-jar curl.cook \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
-  2>/dev/null
-xsltproc --html --output curl.tmp.xml response.xslt curl.tmp.html 2>/dev/null
-xmllint --relaxng response.rng curl.tmp.xml || assert_fail 5 "Response invalid."
+  --write-out '%{url_effective}' 2>/dev/null)
+# todo:
+errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html 2>/dev/null)
+[ "$errmsg" = "" ] || assert_fail 107 "error: '$errmsg'"
+echo "$LOCATION" | egrep -e "^${BASE_URL}/\?#[a-zA-Z0-9_-]{6}\$" || assert_fail 108 "expected link hash url, but got '$LOCATION'"
 
 #####################################################
-[ $(xmllint --xpath 'count(/shaarli/is_logged_in[@value="true"])' curl.tmp.xml) -eq 1 ] || assert_fail 9 "expected to be still logged in"
 # TODO: watch out for error messages like e.g. ip bans or the like.
 
 # check post-condition - there must be more entries now:
