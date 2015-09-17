@@ -100,7 +100,9 @@ LOCATION=$(curl --url "$LOCATION" \
 # todo:
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html 2>/dev/null)
 [ "$errmsg" = "" ] || assert_fail 107 "error: '$errmsg'"
-echo "$LOCATION" | egrep -e "^${BASE_URL}/\?#[a-zA-Z0-9_-]{6}\$" || assert_fail 108 "expected link hash url, but got '$LOCATION'"
+# community shaarli doesn't redirect to the added url, so how can we detect success?
+# echo "$LOCATION" | egrep -e "^${BASE_URL}/\?#[a-zA-Z0-9_-]{6}\$" || assert_fail 108 "expected link hash url, but got '$LOCATION'"
+[ 1 -eq $(xmllint --html --nowarning --xpath "count(/html/body//a[@href = '?do=logout'])" curl.tmp.html 2>/dev/null) ] || assert_fail 13 "I expected a logout link."
 
 #####################################################
 # TODO: watch out for error messages like e.g. ip bans or the like.
