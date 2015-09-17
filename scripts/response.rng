@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  
+   Copyright (c) 2015 Marcus Rohrmoser http://mro.name/me. All rights reserved.
+  
+   This program is free software: you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
+  
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+  
+   You should have received a copy of the GNU General Public License
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  
+  
+  About RelaxNG schemas: http://blog.mro.name/2010/05/xml-toolbox-relax-ng-trang/
+-->
+<!--
+  default namespace is empty, because 
+    $ xmllint - -xpath 
+  is used for quick assert checks and doesn't like namespaces at all :-(.
+-->
+<grammar ns="" xmlns:a="http://relaxng.org/ns/compatibility/annotations/1.0" xmlns="http://relaxng.org/ns/structure/1.0" datatypeLibrary="http://www.w3.org/2001/XMLSchema-datatypes">
+  <start>
+    <a:documentation>
+Schema for
+https://github.com/mro/Shaarli-API-test/blob/master/scripts/response.xslt
+output.
+</a:documentation>
+    <element name="shaarli">
+      <optional>
+        <attribute name="title">
+          <a:documentation>Optional and maybe empty.</a:documentation>
+        </attribute>
+      </optional>
+      <choice>
+        <a:documentation>Then comes...</a:documentation>
+        <element name="error">
+          <a:documentation>Either an error message and nothing else</a:documentation>
+          <attribute name="message"/>
+        </element>
+        <group>
+          <a:documentation>Or the logged-in state</a:documentation>
+          <element name="is_logged_in">
+            <attribute name="value">
+              <data type="boolean"/>
+            </attribute>
+          </element>
+          <optional>
+            <group>
+              <a:documentation>plus an optional form with fields &amp; presets</a:documentation>
+              <element name="form">
+                <attribute name="method">
+                  <value>post</value>
+                </attribute>
+                <choice>
+                  <ref name="loginform"/>
+                  <ref name="linkform"/>
+                </choice>
+              </element>
+            </group>
+          </optional>
+        </group>
+      </choice>
+    </element>
+  </start>
+  <define name="loginform">
+    <a:documentation>curl.2:    &lt;input type="text" name="login"/&gt;
+curl.2:    &lt;input type="password" name="password"/&gt;
+curl.2:    &lt;input type="submit" value="Login"/&gt;
+curl.2:    &lt;input type="checkbox" name="longlastingsession"/&gt;
+curl.2:    &lt;input type="hidden" name="token" value="5b03458ac7c2caf1dba003b87f066fea63cc4ea5"/&gt;</a:documentation>
+    <attribute name="name">
+      <value>loginform</value>
+    </attribute>
+    <oneOrMore>
+      <choice>
+        <a:documentation>The elements are all mandatory but in arbitrary order. I can't get the 
+http://www.relaxng.org/compact-tutorial-20030326.html#id2815185 to work</a:documentation>
+        <element name="input">
+          <attribute name="name">
+            <value>login</value>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>password</value>
+          </attribute>
+          <attribute name="type">
+            <value>password</value>
+          </attribute>
+        </element>
+        <element name="input">
+          <attribute name="type">
+            <value>submit</value>
+          </attribute>
+          <attribute name="value">
+            <value>Login</value>
+          </attribute>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>longlastingsession</value>
+          </attribute>
+          <attribute name="type">
+            <value>checkbox</value>
+          </attribute>
+          <optional>
+            <attribute name="value">
+              <value>on</value>
+            </attribute>
+          </optional>
+        </element>
+        <ref name="token_"/>
+      </choice>
+    </oneOrMore>
+  </define>
+  <define name="linkform">
+    <a:documentation>curl.3:    &lt;input type="hidden" name="lf_linkdate" value="20150909_094202"/&gt;
+curl.3:    &lt;input type="text" name="lf_url" value="https://github.com/sebsauvage/Shaarli/commit/450342737ced8ef2864b4f83a4107a7fafcc4add"/&gt;
+curl.3:    &lt;input type="text" name="lf_title" value="Initial Commit to Shaarli on Github."/&gt;
+curl.3:    &lt;input type="text" id="lf_tags" name="lf_tags" value=""/&gt;
+curl.3:    &lt;input type="checkbox" name="lf_private"/&gt;
+curl.3:    &lt;input type="submit" value="Save" name="save_edit"/&gt;
+curl.3:    &lt;input type="submit" value="Cancel" name="cancel_edit"/&gt;
+curl.3:    &lt;input type="hidden" name="token" value="fc8402cc9d68d3e97069b5028192ea5b97aee2b2"/&gt;</a:documentation>
+    <attribute name="name">
+      <value>linkform</value>
+    </attribute>
+    <oneOrMore>
+      <choice>
+        <a:documentation>The elements are all mandatory but in arbitrary order. I can't get the 
+http://www.relaxng.org/compact-tutorial-20030326.html#id2815185 to work</a:documentation>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_linkdate</value>
+          </attribute>
+          <attribute name="type">
+            <value>hidden</value>
+          </attribute>
+          <attribute name="value">
+            <data type="string">
+              <param name="pattern">\d{4}\d{2}\d{2}_\d{2}\d{2}\d{2}</param>
+              <a:documentation>kinda ISO date</a:documentation>
+            </data>
+          </attribute>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_url</value>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+          <attribute name="value">
+            <data type="anyURI"/>
+          </attribute>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_title</value>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+          <attribute name="value"/>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_tags</value>
+          </attribute>
+          <attribute name="type">
+            <value>text</value>
+          </attribute>
+          <attribute name="value"/>
+        </element>
+        <element name="input">
+          <attribute name="name">
+            <value>lf_private</value>
+          </attribute>
+          <attribute name="type">
+            <value>checkbox</value>
+          </attribute>
+          <optional>
+            <attribute name="value">
+              <value>on</value>
+            </attribute>
+          </optional>
+        </element>
+        <element name="input">
+          <attribute name="type">
+            <value>submit</value>
+          </attribute>
+          <attribute name="name">
+            <value>save_edit</value>
+          </attribute>
+          <attribute name="value">
+            <value>Save</value>
+          </attribute>
+        </element>
+        <element name="input">
+          <attribute name="type">
+            <value>submit</value>
+          </attribute>
+          <attribute name="name">
+            <value>cancel_edit</value>
+          </attribute>
+          <attribute name="value">
+            <value>Cancel</value>
+          </attribute>
+        </element>
+        <ref name="token_"/>
+      </choice>
+    </oneOrMore>
+  </define>
+  <define name="token_">
+    <a:documentation>Server token</a:documentation>
+    <element name="input">
+      <attribute name="name">
+        <value>token</value>
+      </attribute>
+      <attribute name="type">
+        <value>hidden</value>
+      </attribute>
+      <attribute name="value">
+        <data type="string">
+          <a:documentation>de-facto hex, but essentially just anything non-empty and passed back again.</a:documentation>
+          <param name="pattern">[0-9a-f]{40}</param>
+        </data>
+      </attribute>
+    </element>
+  </define>
+</grammar>

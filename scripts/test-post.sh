@@ -21,7 +21,6 @@ cd "$(dirname "$0")"
 # Check preliminaries
 curl --version >/dev/null       || assert_fail 101 "I need curl."
 xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
-xsltproc --version > /dev/null  || assert_fail 102 "I need xsltproc."
 ruby --version > /dev/null      || assert_fail 103 "I need ruby."
 [ "$USERNAME" != "" ]           || assert_fail 1 "How strange, USERNAME is unset."
 [ "$PASSWORD" != "" ]           || assert_fail 2 "How strange, PASSWORD is unset."
