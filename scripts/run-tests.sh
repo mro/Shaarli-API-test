@@ -52,6 +52,7 @@ do
 
   cd "$CWD"
   # prepare a clean test environment from scratch
+  rm scripts/curl.* 1>/dev/null 2>&1
   rm -rf WebAppRoot
   # ...and unpack into directory 'WebAppRoot'...
   tar -xzf source.tar.gz || { echo "ouch" && exit 1 ; }
@@ -71,7 +72,6 @@ do
     --output /dev/null
 
   # execute each test
-  rm scripts/curl.* 1>/dev/null 2>&1
   sh "$tst"
   code=$?
 
