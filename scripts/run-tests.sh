@@ -71,6 +71,7 @@ do
     --output /dev/null
 
   # execute each test
+  rm scripts/curl.* 1>/dev/null 2>&1
   sh "$tst"
   code=$?
 
