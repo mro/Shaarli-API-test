@@ -18,8 +18,6 @@
 require 'rexml/document'
 require 'cgi'
 
-REXML::Document.new($stdin).elements.each('/html/body//form[@name="linkform"]') do |form|
-  form.elements.each('.//textarea | .//input[@type = "text" or @type = "hidden"]') do |element|
-    puts "#{CGI.escape(element.attributes['name'] || '')}=#{CGI.escape(element.attributes['value'] || '')}&"
-  end
+REXML::Document.new($stdin).elements.each('//textarea | //input[@type = "text" or @type = "hidden"]') do |element|
+  puts "#{CGI.escape(element.attributes['name'] || '')}=#{CGI.escape(element.attributes['value'] || '')}&"
 end

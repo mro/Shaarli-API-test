@@ -70,6 +70,7 @@ LOCATION=$(curl --url "$LOCATION" \
 # todo:
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
 [ "$errmsg" = "" ] || assert_fail 108 "error: '$errmsg'"
+# check presence of various mandatory form fields:
 for field in lf_url lf_title lf_linkdate lf_tags token
 do
   [ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//input[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
@@ -79,8 +80,8 @@ do
   [ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'linkform']//textarea[@name='$field'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '$field'"
 done
 
-# turn response.html form input field data into curl post data file
-xmllint --html --nowarning --xmlout curl.tmp.html | ruby linkform2post.rb > curl.post
+# turn form field data into curl post data file
+xmllint --html --nowarning --xmlout curl.tmp.html | xmllint --xpath '/html/body//form[@name="linkform"]' - | ruby form2post.rb > curl.post
 
 echo "######################################################"
 echo "## Step 3: finally post the link: "
@@ -92,15 +93,17 @@ LOCATION=$(curl --url "$LOCATION" \
   --data-urlencode "lf_source=$0" \
   --data-urlencode "lf_description=Must be older because http://sebsauvage.github.io/Shaarli/ mentions 'Copyright (c) 2011 Sébastien SAUVAGE (sebsauvage.net)'." \
   --data-urlencode "lf_tags=t1 t2" \
+  --data-urlencode "returnurl=?foo" \
   --data-urlencode "save_edit=Save" \
   --cookie curl.cook --cookie-jar curl.cook \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
+# sadly setting the returnurl doesn't make a difference
 # todo:
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html 2>/dev/null)
 [ "$errmsg" = "" ] || assert_fail 107 "error: '$errmsg'"
-# community shaarli doesn't redirect to the added url, so how can we detect success?
+# community shaarli doesn't redirect to the added url no more, so how can we detect success? https://github.com/shaarli/Shaarli/commit/35c2c4db5b5179e571023ab7fa7d3ecc03c85391
 # echo "$LOCATION" | egrep -e "^${BASE_URL}/\?#[a-zA-Z0-9_-]{6}\$" || assert_fail 108 "expected link hash url, but got '$LOCATION'"
 [ 1 -eq $(xmllint --html --nowarning --xpath "count(/html/body//a[@href = '?do=logout'])" curl.tmp.html 2>/dev/null) ] || assert_fail 13 "I expected a logout link."
 
