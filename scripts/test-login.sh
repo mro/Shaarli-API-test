@@ -70,7 +70,7 @@ LOCATION=$(curl --url "$LOCATION" \
   --data-urlencode "login=$USERNAME" \
   --data-urlencode "password=$PASSWORD" \
   --data-urlencode "token=$TOKEN" \
-  --data-urlencode "returnurl=/?do=changepasswd" \
+  --data-urlencode "returnurl=${BASE_URL}/?do=changepasswd" \
   --cookie curl.cook --cookie-jar curl.cook \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
