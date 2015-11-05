@@ -1,5 +1,9 @@
 # http://docs.travis-ci.com/user/migrating-from-legacy/
 sudo: false
+addons:
+  apt:
+    packages:
+    - libxml2-utils
 # http://docs.travis-ci.com/user/languages/php/#Choosing-PHP-versions-to-test-against
 language: php
 php:
