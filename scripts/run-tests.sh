@@ -18,6 +18,8 @@
 
 # Check preliminaries
 curl --version >/dev/null || { echo "I need curl." && exit 101 ; }
+xmllint --version 2> /dev/null || { echo "I need xmllint." && exit 102 ; }
+ruby --version > /dev/null || { echo "I need xmllint." && exit 103 ; }
 
 cd "$(dirname "$0")/.."
 CWD=$(pwd)
@@ -54,12 +56,15 @@ do
 
   cd "$CWD"
   # prepare a clean test environment from scratch
-  rm scripts/curl.* 1>/dev/null 2>&1
   rm -rf WebAppRoot
   # ...and unpack into directory 'WebAppRoot'...
   tar -xzf source.tar.gz || { echo "ouch" && exit 1 ; }
   mv $GITHUB_SRC_SUBDIR WebAppRoot
-  sudo service apache2 restart >/dev/null 2>&1
+
+  # http://robbiemackay.com/2013/05/03/automating-behat-and-mink-tests-with-travis-ci/
+  # webserver setup
+  php -S 127.0.0.1:8000 -t WebAppRoot 1> php.stdout 2> php.stderr &
+  sleep 3
 
   ls -l "WebAppRoot/index.php" >/dev/null || { echo "ouch" && exit 2 ; }
 
@@ -77,6 +82,7 @@ do
   sh "$tst"
   code=$?
 
+  killall php 1>/dev/null 2>&1
   if [ $code -ne 0 ] ; then
     for f in scripts/curl.* WebAppRoot/data/log.txt ; do
       printf " %-60s \n" "_${f}_" | tr ' _' '# '
@@ -92,6 +98,7 @@ do
     echo "${FGC_RED}✗${FGC_NONE} ${test_name} (code: $code)"
     status_code=1
   fi
+  wait
 done
 
 exit $status_code

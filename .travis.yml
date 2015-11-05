@@ -1,7 +1,8 @@
+# http://docs.travis-ci.com/user/migrating-from-legacy/
+sudo: false
 # http://docs.travis-ci.com/user/languages/php/#Choosing-PHP-versions-to-test-against
 language: php
 php:
-  - 5.3
   - 5.4
   - 5.5
   - 5.6
@@ -11,52 +12,33 @@ php:
 env:
   global:
     - GITHUB_SRC_SUBDIR=Shaarli-*
-    - BASE_URL=http://127.0.0.1
+    - BASE_URL=http://127.0.0.1:8000
     - USERNAME=tast
     - PASSWORD=tust
   matrix:
     - GITHUB=sebsauvage/Shaarli/archive/master
 #    - GITHUB=shaarli/Shaarli/archive/v0.0.40beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.41beta
-#    - GITHUB=shaarli/Shaarli/archive/v0.0.42beta
+    - GITHUB=shaarli/Shaarli/archive/v0.0.42beta
 #    - GITHUB=shaarli/Shaarli/archive/v0.0.43beta
 #    - GITHUB=shaarli/Shaarli/archive/v0.0.44beta
     - GITHUB=shaarli/Shaarli/archive/v0.0.45beta
-    - GITHUB=shaarli/Shaarli/archive/v0.5.0
     - GITHUB=shaarli/Shaarli/archive/v0.5.4
     - GITHUB=shaarli/Shaarli/archive/master
     - GITHUB=mro/Shaarli/archive/b292450
     - GITHUB=ArthurHoaro/Shaarli/archive/d01c234
 #    - GITHUB=mro/Shaarli/archive/feature/thumbnails
-
 matrix:
   allow_failures:
-    # that's due to apache config issues:
-    - php: 7.0
+    # vanilla may fail due to port 80/sudo issue
+    - env: GITHUB=sebsauvage/Shaarli/archive/master
     # first community release is known to fail, too:
     - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
-    - env: GITHUB=shaarli/Shaarli/archive/v0.5.0
-    # https://github.com/shaarli/Shaarli/pull/354
-    - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
-
+    # why does this one fail?
+    - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install apache2 libapache2-mod-fastcgi
-  - sudo /home/travis/.phpenv/versions/$TRAVIS_PHP_VERSION/bin/composer self-update
-  - sh ./scripts/download.sh
-install:
-  # https://github.com/shaarli/Shaarli/issues/16#issuecomment-136669639
-  # http://docs.travis-ci.com/user/languages/php/#Apache-%2B-PHP
-  # enable php-fpm
-  - sudo cp ~/.phpenv/versions/$TRAVIS_PHP_VERSION/etc/php-fpm.conf.default ~/.phpenv/versions/$TRAVIS_PHP_VERSION/etc/php-fpm.conf
-  - sudo a2enmod rewrite actions fastcgi alias
-  - echo "cgi.fix_pathinfo = 1" >> ~/.phpenv/versions/$TRAVIS_PHP_VERSION/etc/php.ini
-  - ~/.phpenv/versions/$TRAVIS_PHP_VERSION/sbin/php-fpm
-  # configure apache virtual hosts
-  - sudo cp -f build/travis-ci-apache /etc/apache2/sites-available/default
-  - sudo sed -e "s?%TRAVIS_BUILD_DIR%?$(pwd)?g" --in-place /etc/apache2/sites-available/default
-  - sudo service apache2 restart
-before_script:
-  # http://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
+  - sh scripts/download.sh
+#before_script:
+#  # http://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
 script:
   - sh scripts/run-tests.sh
