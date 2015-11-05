@@ -25,6 +25,7 @@ ruby --version > /dev/null      || assert_fail 103 "I need ruby."
 [ "$USERNAME" != "" ]           || assert_fail 1 "How strange, USERNAME is unset."
 [ "$PASSWORD" != "" ]           || assert_fail 2 "How strange, PASSWORD is unset."
 [ "$BASE_URL" != "" ]           || assert_fail 3 "How strange, BASE_URL is unset."
+[ "" = "$(echo "$BASE_URL" | egrep -e "/$")" ] || assert_fail 4 "BASE_URL must be without trailing /"
 
 echo "###################################################"
 echo "## Non-logged-in Atom feed before adding a link (should have only the initial public default entry):"
@@ -95,15 +96,16 @@ LOCATION=$(curl --url "$LOCATION" \
   --data-urlencode "lf_tags=t1 t2" \
   --data-urlencode "save_edit=Save" \
   --cookie curl.cook --cookie-jar curl.cook \
-  --location --output curl.tmp.html \
+  --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
-  --write-out '%{url_effective}' 2>/dev/null)
+  --write-out '%{redirect_url}' 2>/dev/null)
+# don't use --location and url_effective because this strips /?#... on curl 7.30.0 (x86_64-apple-darwin13.0)
 echo "final $LOCATION"
 # todo:
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html 2>/dev/null)
 [ "$errmsg" = "" ] || assert_fail 107 "error: '$errmsg'"
 echo "$LOCATION" | egrep -e "^${BASE_URL}/\?#[a-zA-Z0-9@_-]{6}\$" || assert_fail 108 "expected link hash url, but got '$LOCATION'"
-[ 1 -eq $(xmllint --html --nowarning --xpath "count(/html/body//a[@href = '?do=logout'])" curl.tmp.html 2>/dev/null) ] || assert_fail 13 "I expected a logout link."
+# don't follow the redirect => no html => no logout link [ 1 -eq "$(xmllint --html --nowarning --xpath "count(/html/body//a[@href = '?do=logout'])" curl.tmp.html 2>/dev/null)" ] || assert_fail 13 "I expected a logout link."
 
 #####################################################
 # TODO: watch out for error messages like e.g. ip bans or the like.

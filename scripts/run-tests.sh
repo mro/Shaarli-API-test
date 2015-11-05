@@ -43,6 +43,8 @@ BGC_PURPLE="\033[7;35m"
 BGC_CYAN="\033[7;36m"
 BGC_WHITE="\033[7;37m"
 
+echo "\$ curl --version" ; curl --version
+
 status_code=0
 for tst in ./scripts/test*.sh
 do
