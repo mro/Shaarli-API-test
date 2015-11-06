@@ -1,9 +1,5 @@
 # http://docs.travis-ci.com/user/migrating-from-legacy/
 sudo: false
-addons:
-  apt:
-    packages:
-    - xsltproc
 # http://docs.travis-ci.com/user/languages/php/#Choosing-PHP-versions-to-test-against
 language: php
 php:
@@ -40,6 +36,7 @@ matrix:
     - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
     # why does this one fail?
     - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
+    - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
 before_install:
   - sh scripts/download.sh
 #before_script:
