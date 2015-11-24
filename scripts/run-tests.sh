@@ -65,7 +65,7 @@ do
   # http://robbiemackay.com/2013/05/03/automating-behat-and-mink-tests-with-travis-ci/
   # webserver setup
   php -S 127.0.0.1:8000 -t WebAppRoot 1> php.stdout 2> php.stderr &
-  sleep 3
+  sleep 1 # how could we get rid of this stupid sleep?
 
   ls -l "WebAppRoot/index.php" >/dev/null || { echo "ouch" && exit 2 ; }
 
