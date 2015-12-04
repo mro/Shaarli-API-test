@@ -1,5 +1,5 @@
 diff --git a/index.php b/index.php
-index c102e42..7ee74b3 100644
+index c102e42..45438b6 100644
 --- a/index.php
 +++ b/index.php
 @@ -402,7 +402,12 @@ function ban_canLogin()
@@ -10,7 +10,7 @@ index c102e42..7ee74b3 100644
 +    logm($_POST['password']);
 +    logm($_POST['token']);
 +    logm($_POST['login']);
-+    $token_ok=tokenOk($_POST['token'])
++    $token_ok=tokenOk($_POST['token']);
 +    logm($token_ok);
 +    if (isset($_POST['password']) && $token_ok && (check_auth($_POST['login'], $_POST['password'])))
      {   // Login/password is ok.
