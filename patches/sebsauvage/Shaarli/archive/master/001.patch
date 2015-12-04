@@ -1,5 +1,5 @@
 diff --git a/index.php b/index.php
-index c102e42..6ba8942 100644
+index c102e42..3271e53 100644
 --- a/index.php
 +++ b/index.php
 @@ -43,7 +43,7 @@ define('WEB_PATH', substr($_SERVER["REQUEST_URI"], 0, 1+strrpos($_SERVER["REQUES
@@ -27,3 +27,11 @@ index c102e42..6ba8942 100644
      if (isset($_SESSION['tokens'][$token]))
      {
          unset($_SESSION['tokens'][$token]); // Token is used: destroy it.
+@@ -1355,6 +1357,7 @@ function renderPage()
+         exit;
+     }
+ 
++    logm("QUERY_STRING: '".$_SERVER["QUERY_STRING"]."'");
+     // -------- User wants to change his/her password.
+     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=changepasswd'))
+     {
