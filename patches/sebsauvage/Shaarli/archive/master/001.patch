@@ -1,37 +1,15 @@
 diff --git a/index.php b/index.php
-index c102e42..3271e53 100644
+index c102e42..22b82e9 100644
 --- a/index.php
 +++ b/index.php
-@@ -43,7 +43,7 @@ define('WEB_PATH', substr($_SERVER["REQUEST_URI"], 0, 1+strrpos($_SERVER["REQUES
+@@ -43,7 +43,9 @@ define('WEB_PATH', substr($_SERVER["REQUEST_URI"], 0, 1+strrpos($_SERVER["REQUES
  // Force cookie path (but do not change lifetime)
  $cookie=session_get_cookie_params();
  $cookiedir = ''; if(dirname($_SERVER['SCRIPT_NAME'])!='/') $cookiedir=dirname($_SERVER["SCRIPT_NAME"]).'/';
 -session_set_cookie_params($cookie['lifetime'],$cookiedir,$_SERVER['HTTP_HOST']); // Set default cookie expiration and path.
 +session_set_cookie_params($cookie['lifetime'],$cookiedir,$_SERVER['SERVER_NAME']); // Set default cookie expiration and path.
++
++logm("QUERY_STRING='".$_SERVER['QUERY_STRING']."'");
  
  // Set session parameters on server side.
  define('INACTIVITY_TIMEOUT',3600); // (in seconds). If the user does not access any page within this time, his/her session is considered expired.
-@@ -610,6 +610,7 @@ function getToken()
- {
-     $rnd = sha1(uniqid('',true).'_'.mt_rand().$GLOBALS['salt']);  // We generate a random string.
-     $_SESSION['tokens'][$rnd]=1;  // Store it on the server side.
-+    logm("getToken(); // token: ".$rnd);
-     return $rnd;
- }
- 
-@@ -617,6 +618,7 @@ function getToken()
- // true=token is ok.
- function tokenOk($token)
- {
-+    logm("tokenOk('".$token."'); // _SESSION['tokens']=[".implode(", ", array_keys($_SESSION['tokens']))."]");
-     if (isset($_SESSION['tokens'][$token]))
-     {
-         unset($_SESSION['tokens'][$token]); // Token is used: destroy it.
-@@ -1355,6 +1357,7 @@ function renderPage()
-         exit;
-     }
- 
-+    logm("QUERY_STRING: '".$_SERVER["QUERY_STRING"]."'");
-     // -------- User wants to change his/her password.
-     if (isset($_SERVER["QUERY_STRING"]) && startswith($_SERVER["QUERY_STRING"],'do=changepasswd'))
-     {
