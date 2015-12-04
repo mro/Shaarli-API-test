@@ -1,29 +1,16 @@
 diff --git a/index.php b/index.php
-index c102e42..fe03434 100644
+index c102e42..5764429 100644
 --- a/index.php
 +++ b/index.php
-@@ -402,7 +402,11 @@ function ban_canLogin()
- if (isset($_POST['login']))
- {
-     if (!ban_canLogin()) die('I said: NO. You are banned for the moment. Go away.');
--    if (isset($_POST['password']) && tokenOk($_POST['token']) && (check_auth($_POST['login'], $_POST['password'])))
-+    logm("password: ".$_POST['password']);
-+    logm("token   : ".$_POST['token']);
-+    logm("login   : ".$_POST['login']);
-+    logm("token_ok: ".(tokenOk($_POST['token']) ? "true" : "false"));
-+    if (isset($_POST['password']) && (check_auth($_POST['login'], $_POST['password'])))
-     {   // Login/password is ok.
-         ban_loginOk();
-         // If user wants to keep the session cookie even after the browser closes:
-@@ -610,6 +614,7 @@ function getToken()
+@@ -610,6 +610,7 @@ function getToken()
  {
      $rnd = sha1(uniqid('',true).'_'.mt_rand().$GLOBALS['salt']);  // We generate a random string.
      $_SESSION['tokens'][$rnd]=1;  // Store it on the server side.
-+    logm("getToken(); // token: ".$rnd);
++    // logm("getToken(); // token: ".$rnd);
      return $rnd;
  }
  
-@@ -617,6 +622,7 @@ function getToken()
+@@ -617,6 +618,7 @@ function getToken()
  // true=token is ok.
  function tokenOk($token)
  {
