@@ -87,7 +87,7 @@ do
   wait
 
   if [ $code -ne 0 ] ; then
-    for f in scripts/curl.* WebAppRoot/data/log.txt WebAppRoot/data/ipbans.php ; do
+    for f in scripts/curl.* WebAppRoot/data/log.txt WebAppRoot/data/ipbans.php WebAppRoot/data/config.php ; do
       printf " %-60s \n" "_${f}_" | tr ' _' '# '
       cat "$f"
     done
