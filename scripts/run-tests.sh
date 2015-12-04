@@ -84,9 +84,9 @@ do
   code=$?
 
   killall php 1>/dev/null 2>&1
+  wait
+
   if [ $code -ne 0 ] ; then
-    echo "pwd: $(pwd)"
-    echo "ls -d: $(ls -d)"
     for f in scripts/curl.* WebAppRoot/data/log.txt WebAppRoot/data/ipbans.php ; do
       printf " %-60s \n" "_${f}_" | tr ' _' '# '
       cat "$f"
@@ -101,7 +101,6 @@ do
     echo "${FGC_RED}✗${FGC_NONE} ${test_name} (code: $code)"
     status_code=1
   fi
-  wait
 done
 
 exit $status_code
