@@ -1,44 +1,33 @@
-diff --git a/patches/sebsauvage/Shaarli/archive/master/001.patch b/patches/sebsauvage/Shaarli/archive/master/001.patch
-index 896ff4a..e69de29 100644
---- a/patches/sebsauvage/Shaarli/archive/master/001.patch
-+++ b/patches/sebsauvage/Shaarli/archive/master/001.patch
-@@ -1,17 +0,0 @@
--diff --git a/index.php b/index.php
--index c102e42..e141da2 100644
----- a/index.php
--+++ b/index.php
--@@ -402,7 +402,11 @@ function ban_canLogin()
-- if (isset($_POST['login']))
-- {
--     if (!ban_canLogin()) die('I said: NO. You are banned for the moment. Go away.');
---    if (isset($_POST['password']) && tokenOk($_POST['token']) && (check_auth($_POST['login'], $_POST['password'])))
--+    logm("password: ".$_POST['password']);
--+    logm("token   : ".$_POST['token']);
--+    logm("login   : ".$_POST['login']);
--+    logm("token_ok: ".tokenOk($_POST['token']));
--+    if (isset($_POST['password']) && (check_auth($_POST['login'], $_POST['password'])))
--     {   // Login/password is ok.
--         ban_loginOk();
--         // If user wants to keep the session cookie even after the browser closes:
-diff --git a/scripts/test-login.sh b/scripts/test-login.sh
-index e2fad1f..4c308d4 100644
---- a/scripts/test-login.sh
-+++ b/scripts/test-login.sh
-@@ -26,7 +26,7 @@ xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
- [ "$BASE_URL" != "" ]           || assert_fail 3 "How strange, BASE_URL is unset."
+diff --git a/index.php b/index.php
+index c102e42..fe03434 100644
+--- a/index.php
++++ b/index.php
+@@ -402,7 +402,11 @@ function ban_canLogin()
+ if (isset($_POST['login']))
+ {
+     if (!ban_canLogin()) die('I said: NO. You are banned for the moment. Go away.');
+-    if (isset($_POST['password']) && tokenOk($_POST['token']) && (check_auth($_POST['login'], $_POST['password'])))
++    logm("password: ".$_POST['password']);
++    logm("token   : ".$_POST['token']);
++    logm("login   : ".$_POST['login']);
++    logm("token_ok: ".(tokenOk($_POST['token']) ? "true" : "false"));
++    if (isset($_POST['password']) && (check_auth($_POST['login'], $_POST['password'])))
+     {   // Login/password is ok.
+         ban_loginOk();
+         // If user wants to keep the session cookie even after the browser closes:
+@@ -610,6 +614,7 @@ function getToken()
+ {
+     $rnd = sha1(uniqid('',true).'_'.mt_rand().$GLOBALS['salt']);  // We generate a random string.
+     $_SESSION['tokens'][$rnd]=1;  // Store it on the server side.
++    logm("getToken(); // token: ".$rnd);
+     return $rnd;
+ }
  
- echo "###################################################"
--echo "## non-logged-in GET /?do=configure failure: 404 "
-+echo "## non-logged-in GET ${BASE_URL}/?do=configure failure: 404 "
- http_code=$(curl --url "${BASE_URL}/?do=configure" \
-   --cookie curl.cook --cookie-jar curl.cook \
-   --location --output curl.tmp.html \
-@@ -35,7 +35,7 @@ http_code=$(curl --url "${BASE_URL}/?do=configure" \
- [ 404 -eq $http_code ] || assert_fail "expected 404, got $http_code"
- 
- echo "###################################################"
--echo "## non-logged-in GET /?do=changepasswd failure: 404 "
-+echo "## non-logged-in GET ${BASE_URL}/?do=changepasswd failure: 404 "
- http_code=$(curl --url "${BASE_URL}/?do=changepasswd" \
-   --cookie curl.cook --cookie-jar curl.cook \
-   --location --output curl.tmp.html \
+@@ -617,6 +622,7 @@ function getToken()
+ // true=token is ok.
+ function tokenOk($token)
+ {
++    logm("tokenOk('".$token."'); // $_SESSION['tokens']=[".implode(", ", array_keys($_SESSION['tokens']))."]");
+     if (isset($_SESSION['tokens'][$token]))
+     {
+         unset($_SESSION['tokens'][$token]); // Token is used: destroy it.
