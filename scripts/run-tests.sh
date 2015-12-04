@@ -85,7 +85,9 @@ do
 
   killall php 1>/dev/null 2>&1
   if [ $code -ne 0 ] ; then
-    for f in scripts/curl.* WebAppRoot/data/log.txt ; do
+    echo "pwd: $(pwd)"
+    echo "ls -d: $(ls -d)"
+    for f in scripts/curl.* WebAppRoot/data/log.txt WebAppRoot/data/ipbans.php ; do
       printf " %-60s \n" "_${f}_" | tr ' _' '# '
       cat "$f"
     done
