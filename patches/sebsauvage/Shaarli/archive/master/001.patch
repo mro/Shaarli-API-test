@@ -1,18 +1,17 @@
 diff --git a/index.php b/index.php
-index c102e42..45438b6 100644
+index c102e42..e141da2 100644
 --- a/index.php
 +++ b/index.php
-@@ -402,7 +402,12 @@ function ban_canLogin()
+@@ -402,7 +402,11 @@ function ban_canLogin()
  if (isset($_POST['login']))
  {
      if (!ban_canLogin()) die('I said: NO. You are banned for the moment. Go away.');
 -    if (isset($_POST['password']) && tokenOk($_POST['token']) && (check_auth($_POST['login'], $_POST['password'])))
-+    logm($_POST['password']);
-+    logm($_POST['token']);
-+    logm($_POST['login']);
-+    $token_ok=tokenOk($_POST['token']);
-+    logm($token_ok);
-+    if (isset($_POST['password']) && $token_ok && (check_auth($_POST['login'], $_POST['password'])))
++    logm("password: ".$_POST['password']);
++    logm("token   : ".$_POST['token']);
++    logm("login   : ".$_POST['login']);
++    logm("token_ok: ".tokenOk($_POST['token']));
++    if (isset($_POST['password']) && (check_auth($_POST['login'], $_POST['password'])))
      {   // Login/password is ok.
          ban_loginOk();
          // If user wants to keep the session cookie even after the browser closes:
