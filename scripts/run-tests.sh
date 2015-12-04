@@ -62,6 +62,11 @@ do
   tar -xzf source.tar.gz || { echo "ouch" && exit 1 ; }
   mv $GITHUB_SRC_SUBDIR WebAppRoot
 
+  for patchfile in "patches/$GITHUB"/*.patch
+  do
+    patch -p1 -d WebAppRoot < "$patchfile"
+  done
+
   # http://robbiemackay.com/2013/05/03/automating-behat-and-mink-tests-with-travis-ci/
   # webserver setup
   php -S 127.0.0.1:8000 -t WebAppRoot 1> php.stdout 2> php.stderr &

