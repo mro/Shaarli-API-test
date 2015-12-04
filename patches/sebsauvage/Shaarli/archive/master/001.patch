@@ -1,12 +1,12 @@
 diff --git a/index.php b/index.php
-index c102e42..5764429 100644
+index c102e42..9eeb478 100644
 --- a/index.php
 +++ b/index.php
 @@ -610,6 +610,7 @@ function getToken()
  {
      $rnd = sha1(uniqid('',true).'_'.mt_rand().$GLOBALS['salt']);  // We generate a random string.
      $_SESSION['tokens'][$rnd]=1;  // Store it on the server side.
-+    // logm("getToken(); // token: ".$rnd);
++    logm("getToken(); // token: ".$rnd);
      return $rnd;
  }
  
@@ -14,7 +14,7 @@ index c102e42..5764429 100644
  // true=token is ok.
  function tokenOk($token)
  {
-+    logm("tokenOk('".$token."'); // $_SESSION['tokens']=[".implode(", ", array_keys($_SESSION['tokens']))."]");
++    logm("tokenOk('".$token."'); // _SESSION['tokens']=[".implode(", ", array_keys($_SESSION['tokens']))."]");
      if (isset($_SESSION['tokens'][$token]))
      {
          unset($_SESSION['tokens'][$token]); // Token is used: destroy it.
