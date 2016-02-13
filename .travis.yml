@@ -30,8 +30,6 @@ env:
 #    - GITHUB=mro/Shaarli/archive/feature/thumbnails
 matrix:
   allow_failures:
-    # vanilla may fail due to port 80/sudo issue
-    - env: GITHUB=sebsauvage/Shaarli/archive/master
     # first community release is known to fail, too:
     - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
     # why does this one fail?
