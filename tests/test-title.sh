@@ -15,14 +15,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-cd "$(dirname "$0")"
-. ./assert.sh
+cd "$(dirname "$0")/../tmp"
+. ../scripts/assert.sh
 
 # Check preliminaries
 curl --version >/dev/null       || assert_fail 101 "I need curl."
 xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
-[ "$BASE_URL" != "" ]           || assert_fail 1 "How strange, BASE_URL is unset."
+[ "${BASE_URL}" != "" ]         || assert_fail 1 "How strange, BASE_URL is unset."
 
-curl --silent "$BASE_URL/" | xmllint --html --encode utf8 --format - 2>/dev/null >/dev/null
+curl --url "${BASE_URL}" \
+  --cookie curl.cook --cookie-jar curl.cook \
+  --location --output curl.html \
+  --trace-ascii curl.trace --dump-header curl.head \
+  2>/dev/null
 
-exit $?
+title="$(xmllint --html --xpath 'normalize-space(string(/html/body//*[@id="shaarli_title"]))' curl.html 2>/dev/null)"
+[ "Review Shaarli" = "${title}" ] || assert_fail 2 "expected 'Review Shaarli' found '${title}'"

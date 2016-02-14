@@ -22,7 +22,8 @@ xmllint --version 2> /dev/null || { echo "I need xmllint." && exit 102 ; }
 ruby --version > /dev/null || { echo "I need xmllint." && exit 103 ; }
 
 cd "$(dirname "$0")/.."
-CWD=$(pwd)
+CWD="$(pwd)"
+WORK_DIR="${CWD}/tmp"
 
 # terminal colors (require bash)
 # http://www.tldp.org/HOWTO/Bash-Prompt-HOWTO/x329.html
@@ -48,36 +49,37 @@ BGC_WHITE="\033[7;37m"
 echo "\$ curl --version" ; curl --version
 
 status_code=0
-for tst in ./scripts/test*.sh
+for tst in "${CWD}/tests"/test-*.sh
 do
-  test_name="$(basename "$tst")"
+  test_name="$(basename "${tst}")"
   echo -n "travis_fold:start:${test_name}\r"
-  echo -n "Running $test_name "
+  echo -n "Running ${test_name} "
 
-  cd "$CWD"
   # prepare a clean test environment from scratch
-  rm scripts/curl.* 1>/dev/null 2>&1
-  rm -rf WebAppRoot
-  # ...and unpack into directory 'WebAppRoot'...
-  tar -xzf source.tar.gz || { echo "ouch" && exit 1 ; }
-  mv $GITHUB_SRC_SUBDIR WebAppRoot
+  cd "${CWD}"
+  rm -rf "${WORK_DIR}" && mkdir "${WORK_DIR}"
+  cd "${WORK_DIR}"
 
-  for patchfile in "patches/$GITHUB"/*.patch
+  # ...and unpack into directory 'WebAppRoot'...
+  tar -xzf "${CWD}/source.tar.gz" || { echo "ouch" && exit 1 ; }
+  mv ${GITHUB_SRC_SUBDIR} "WebAppRoot"
+
+  for patchfile in "${CWD}/patches/${GITHUB}"/*.patch
   do
-    patch -p1 -d WebAppRoot < "$patchfile"
+    patch -p1 -d "WebAppRoot" < "${patchfile}"
   done
 
   # http://robbiemackay.com/2013/05/03/automating-behat-and-mink-tests-with-travis-ci/
   # webserver setup
-  php -S 127.0.0.1:8000 -t WebAppRoot 1> php.stdout 2> php.stderr &
+  php -S 127.0.0.1:8000 -t "WebAppRoot" 1> php.stdout 2> php.stderr &
   sleep 1 # how could we get rid of this stupid sleep?
 
   ls -l "WebAppRoot/index.php" >/dev/null || { echo "ouch" && exit 2 ; }
 
   curl --silent --show-error \
-    --url "$BASE_URL" \
-    --data-urlencode "setlogin=$USERNAME" \
-    --data-urlencode "setpassword=$PASSWORD" \
+    --url "${BASE_URL}" \
+    --data-urlencode "setlogin=${USERNAME}" \
+    --data-urlencode "setpassword=${PASSWORD}" \
     --data-urlencode "continent=Europe" \
     --data-urlencode "city=Brussels" \
     --data-urlencode "title=Review Shaarli" \
@@ -85,27 +87,28 @@ do
     --output /dev/null
 
   # execute each test
-  sh "$tst"
+  /usr/bin/env bash "${tst}"
   code=$?
 
   killall php 1>/dev/null 2>&1
   wait
+  cd "${WORK_DIR}"
 
-  if [ $code -ne 0 ] ; then
-    for f in scripts/curl.* WebAppRoot/data/log.txt WebAppRoot/data/ipbans.php WebAppRoot/data/config.php ; do
+  if [ ${code} -ne 0 ] ; then
+    for f in curl.* WebAppRoot/data/log.txt WebAppRoot/data/ipbans.php WebAppRoot/data/config.php ; do
       printf " %-60s \n" "_${f}_" | tr ' _' '# '
-      cat "$f"
+      cat "${f}"
     done
     echo ". "
   fi
   echo -n "travis_fold:end:${test_name}\r"
 
-  if [ $code -eq 0 ] ; then
+  if [ ${code} -eq 0 ] ; then
     echo "${FGC_GREEN}✓${FGC_NONE} ${test_name}"
   else
-    echo "${FGC_RED}✗${FGC_NONE} ${test_name} (code: $code)"
+    echo "${FGC_RED}✗${FGC_NONE} ${test_name} (code: ${code})"
     status_code=1
   fi
 done
 
-exit $status_code
+exit ${status_code}
