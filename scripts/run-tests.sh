@@ -49,11 +49,13 @@ BGC_WHITE="\033[7;37m"
 echo "\$ curl --version" ; curl --version
 
 status_code=0
+test_counter=1
+echo "1..$(ls "${CWD}/tests"/test-*.sh | wc -l)"
 for tst in "${CWD}/tests"/test-*.sh
 do
   test_name="$(basename "${tst}")"
   echo -n "travis_fold:start:${test_name}\r"
-  echo -n "Running ${test_name} "
+  echo -n "# run ${test_counter} - ${test_name} "
 
   # prepare a clean test environment from scratch
   cd "${CWD}"
@@ -66,7 +68,7 @@ do
 
   for patchfile in "${CWD}/patches/${GITHUB}"/*.patch
   do
-    patch -p1 -d "WebAppRoot" < "${patchfile}"
+    [ -r "${patchfile}" ] && patch -p1 -d "WebAppRoot" < "${patchfile}"
   done
 
   # http://robbiemackay.com/2013/05/03/automating-behat-and-mink-tests-with-travis-ci/
@@ -96,19 +98,20 @@ do
 
   if [ ${code} -ne 0 ] ; then
     for f in curl.* WebAppRoot/data/log.txt WebAppRoot/data/ipbans.php WebAppRoot/data/config.php ; do
-      printf " %-60s \n" "_${f}_" | tr ' _' '# '
+      printf " _\$_cat%-50s\n" "_${f}_" | tr ' _' '# '
       cat "${f}"
     done
-    echo ". "
+    echo " "
   fi
   echo -n "travis_fold:end:${test_name}\r"
 
   if [ ${code} -eq 0 ] ; then
-    echo "${FGC_GREEN}✓${FGC_NONE} ${test_name}"
+    echo "${FGC_GREEN}ok ${test_counter}${FGC_NONE} - ${test_name}"
   else
-    echo "${FGC_RED}✗${FGC_NONE} ${test_name} (code: ${code})"
+    echo "${FGC_RED}not ok ${test_counter}${FGC_NONE} - ${test_name} (code: ${code})"
     status_code=1
   fi
+  test_counter=$((test_counter+1))
 done
 
 exit ${status_code}
