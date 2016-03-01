@@ -32,7 +32,7 @@ echo "## Non-logged-in Atom feed before adding a link (should have only the init
 curl --silent --show-error --output curl.tmp.atom "${BASE_URL}/?do=atom"
 xmllint --encode utf8 --format curl.tmp.atom
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
-[ ${entries} -eq 1 ] || assert_fail 4 "Atom feed expected 1 = ${entries}"
+[ "${entries}" -eq 1 ] || assert_fail 4 "Atom feed expected 1 = ${entries}"
 
 echo "####################################################"
 echo "## Step 1: fetch token to login and add a new link: "
@@ -116,4 +116,4 @@ echo "## Non-logged-in Atom feed after adding a link (should have the added + th
 curl --silent --show-error --output curl.tmp.atom "${BASE_URL}/?do=atom"
 xmllint --encode utf8 --format curl.tmp.atom
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
-[ ${entries} -eq 2 ] || assert_fail 10 "Atom feed expected 2 = ${entries}"
+[ "${entries}" -eq 2 ] || assert_fail 10 "Atom feed expected 2 = ${entries}"

@@ -56,7 +56,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 108 "error: '${errmsg}'"
+[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 59 "error: '${errmsg}'"
 
 
 
@@ -65,7 +65,7 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 6 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
+[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 68 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
 
 echo "POST ${LOCATION}"
 LOCATION=$(curl --url "${LOCATION}" \
@@ -78,7 +78,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 108 "error: '${errmsg}'"
+[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 81 "error: '${errmsg}'"
 
 
 
@@ -87,7 +87,7 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 6 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
+[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 90 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
 
 echo "POST ${LOCATION}"
 LOCATION=$(curl --url "${LOCATION}" \
@@ -100,7 +100,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 108 "error: '${errmsg}'"
+[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 103 "error: '${errmsg}'"
 
 
 
@@ -109,7 +109,7 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 6 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
+[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 112 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
 
 echo "POST ${LOCATION}"
 LOCATION=$(curl --url "${LOCATION}" \
@@ -122,7 +122,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 108 "error: '${errmsg}'"
+[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 125 "error: '${errmsg}'"
 
 
 
@@ -131,4 +131,4 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 errmsg=$(xmllint --html --nowarning --xpath 'string(normalize-space(/html/body//*[@id="headerform"]))' curl.tmp.html)
-[ "${errmsg}" = "You have been banned from login after too many failed attempts. Try later." ] || assert_fail 108 "error: '${errmsg}'"
+[ "${errmsg}" = "You have been banned from login after too many failed attempts. Try later." ] || assert_fail 134 "error: '${errmsg}'"
