@@ -25,6 +25,7 @@ env:
     - GITHUB=shaarli/Shaarli/archive/v0.0.45beta
     - GITHUB=shaarli/Shaarli/archive/v0.5.4
     - GITHUB=shaarli/Shaarli/archive/v0.6.3
+    - GITHUB=shaarli/Shaarli/archive/v0.6.4
     - GITHUB=shaarli/Shaarli/archive/master
     - GITHUB=shaarli/Shaarli/archive/stable
 #    - GITHUB=mro/Shaarli/archive/feature/thumbnails
@@ -35,6 +36,7 @@ matrix:
     # why does this one fail?
     - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
     - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
+    - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
     - env: GITHUB=shaarli/Shaarli/archive/stable
 before_install:
   - sh scripts/download.sh
