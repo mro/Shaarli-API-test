@@ -37,7 +37,6 @@ matrix:
     - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
     - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
     - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
-    - env: GITHUB=shaarli/Shaarli/archive/stable
 before_install:
   - sh scripts/download.sh
 #before_script:
