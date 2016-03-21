@@ -39,6 +39,10 @@ matrix:
     - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
 before_install:
   - sh scripts/download.sh
+addons:
+  apt:
+    packages:
+    - xsltproc
 #before_script:
 #  # http://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
 script:
