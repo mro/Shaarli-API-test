@@ -32,7 +32,7 @@ http_code=$(curl --url "${BASE_URL}/?do=configure" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{http_code}' 2>/dev/null)
-[ 404 -eq ${http_code} ] || assert_fail "expected 404, got ${http_code}"
+[ 404 -eq ${http_code} ] || assert_fail 35 "expected 404, got ${http_code}"
 
 echo "###################################################"
 echo "## non-logged-in GET /?do=changepasswd failure: 404 "
@@ -41,7 +41,7 @@ http_code=$(curl --url "${BASE_URL}/?do=changepasswd" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{http_code}' 2>/dev/null)
-[ 404 -eq ${http_code} ] || assert_fail "expected 404, got ${http_code}"
+[ 404 -eq ${http_code} ] || assert_fail 44 "expected 404, got ${http_code}"
 
 echo "####################################################"
 echo "## Step 1: fetch token to login "
@@ -96,7 +96,7 @@ http_code=$(curl --url "${BASE_URL}/?do=configure" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{http_code}' 2>/dev/null)
-[ 200 -eq ${http_code} ] || assert_fail "expected 200, got ${http_code}"
+[ 200 -eq ${http_code} ] || assert_fail 99 "expected 200, got ${http_code}"
 
 echo "###################################################"
 echo "## logged-in GET /?do=changepasswd success: 200 "
@@ -105,4 +105,4 @@ http_code=$(curl --url "${BASE_URL}/?do=changepasswd" \
   --location --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{http_code}' 2>/dev/null)
-[ 200 -eq ${http_code} ] || assert_fail "expected 404, got ${http_code}"
+[ 200 -eq ${http_code} ] || assert_fail 108 "expected 404, got ${http_code}"
