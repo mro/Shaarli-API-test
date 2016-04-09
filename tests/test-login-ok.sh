@@ -26,22 +26,13 @@ xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
 [ "${BASE_URL}" != "" ]         || assert_fail 3 "How strange, BASE_URL is unset."
 
 echo "###################################################"
-echo "## non-logged-in GET /?do=configure failure: 404 "
-http_code=$(curl --url "${BASE_URL}/?do=configure" \
+echo "## non-logged-in GET /?post return: 302 "
+http_code=$(curl --url "${BASE_URL}/?post" \
   --cookie curl.cook --cookie-jar curl.cook \
-  --location --output curl.tmp.html \
+  --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{http_code}' 2>/dev/null)
-[ 404 -eq ${http_code} ] || assert_fail 35 "expected 404, got ${http_code}"
-
-echo "###################################################"
-echo "## non-logged-in GET /?do=changepasswd failure: 404 "
-http_code=$(curl --url "${BASE_URL}/?do=changepasswd" \
-  --cookie curl.cook --cookie-jar curl.cook \
-  --location --output curl.tmp.html \
-  --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
-  --write-out '%{http_code}' 2>/dev/null)
-[ 404 -eq ${http_code} ] || assert_fail 44 "expected 404, got ${http_code}"
+assert_equal 302 "${http_code}" 35 "login check."
 
 echo "####################################################"
 echo "## Step 1: fetch token to login "
@@ -90,19 +81,10 @@ done
 
 
 echo "###################################################"
-echo "## logged-in GET /?do=configure success: 200 "
-http_code=$(curl --url "${BASE_URL}/?do=configure" \
+echo "## logged-in GET /?post return: 200 "
+http_code=$(curl --url "${BASE_URL}/?post" \
   --cookie curl.cook --cookie-jar curl.cook \
-  --location --output curl.tmp.html \
+  --output curl.tmp.html \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{http_code}' 2>/dev/null)
-[ 200 -eq ${http_code} ] || assert_fail 99 "expected 200, got ${http_code}"
-
-echo "###################################################"
-echo "## logged-in GET /?do=changepasswd success: 200 "
-http_code=$(curl --url "${BASE_URL}/?do=changepasswd" \
-  --cookie curl.cook --cookie-jar curl.cook \
-  --location --output curl.tmp.html \
-  --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
-  --write-out '%{http_code}' 2>/dev/null)
-[ 200 -eq ${http_code} ] || assert_fail 108 "expected 404, got ${http_code}"
+assert_equal 200 "${http_code}" 90 "login check."
