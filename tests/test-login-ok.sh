@@ -46,12 +46,12 @@ LOCATION=$(curl --get --url "${BASE_URL}/?do=login" \
   --write-out '%{url_effective}' 2>/dev/null)
 # todo:
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "" ] || assert_fail 107 "error: '${errmsg}'"
+assert_equal "" "${errmsg}" 58 "error: '${errmsg}'"
 TOKEN=$(xmllint --html --nowarning --xpath 'string(/html/body//form[@name="loginform"]//input[@name="token"]/@value)' curl.tmp.html)
 # string(..) http://stackoverflow.com/a/18390404
 
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 6 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
+assert_equal 40 $(printf "%s" ${TOKEN} | wc -c) 63 "found TOKEN=${TOKEN}"
 
 echo "######################################################"
 echo "## Step 2: follow the redirect, do the login and redirect to ?do=changepasswd "
@@ -68,15 +68,15 @@ LOCATION=$(curl --url "${LOCATION}" \
   --write-out '%{url_effective}' 2>/dev/null)
 # todo:
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "" ] || assert_fail 108 "error: '${errmsg}'"
-[ "${BASE_URL}/?do=changepasswd" = "${LOCATION}" ] || assert_fail 108 "expected to be redirected to do=changepassword, but got '${LOCATION}'"
+assert_equal "" "${errmsg}" 80 "error during login"
+assert_equal "${BASE_URL}/?do=changepasswd" "${LOCATION}" 81 "redirect after login"
 
 # [ 1 -eq $(xmllint --html --nowarning --xpath "count(/html/body//a[@href = '?do=logout'])" curl.tmp.html 2>/dev/null) ] || assert_fail 13 "I expected a logout link."
 
 # check presence of various mandatory form fields:
 for field in oldpassword setpassword token
 do
-  [ $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'changepasswordform']//input[@name='${field}'])" curl.tmp.html) -eq 1 ] || assert_fail 8 "expected to have a '${field}'"
+  assert_equal 1 $(xmllint --html --nowarning --xpath "count(/html/body//form[@name = 'changepasswordform']//input[@name='${field}'])" curl.tmp.html) 88 "expected to have a '${field}'"
 done
 
 

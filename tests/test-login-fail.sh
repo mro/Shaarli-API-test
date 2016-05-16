@@ -35,7 +35,7 @@ fetch_token() {
     --write-out '%{url_effective}' 2>/dev/null)
   # todo:
   errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-  [ "${errmsg}" = "" ] || assert_fail 107 "error: '${errmsg}'"
+  assert_equal "" "${errmsg}" 107 "error: '${errmsg}'"
   echo $(xmllint --html --nowarning --xpath 'string(/html/body//form[@name="loginform"]//input[@name="token"]/@value)' curl.tmp.html)
   # string(..) http://stackoverflow.com/a/18390404
 }
@@ -65,7 +65,7 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 68 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
+assert_equal 40 $(printf "%s" ${TOKEN} | wc -c) 68 "found TOKEN=${TOKEN}"
 
 echo "POST ${LOCATION}"
 LOCATION=$(curl --url "${LOCATION}" \
@@ -87,7 +87,7 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 90 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
+assert_equal 40 $(printf "%s" ${TOKEN} | wc -c) 90 "found TOKEN=${TOKEN}"
 
 echo "POST ${LOCATION}"
 LOCATION=$(curl --url "${LOCATION}" \
@@ -109,7 +109,7 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 # the precise length doesn't matter, it just has to be significantly larger than ''
-[ $(printf "%s" ${TOKEN} | wc -c) -eq 40 ] || assert_fail 112 "expected TOKEN of 40 characters, but found ${TOKEN} of $(printf "%s" ${TOKEN} | wc -c)"
+assert_equal 40 $(printf "%s" ${TOKEN} | wc -c) 112 "found TOKEN=${TOKEN}"
 
 echo "POST ${LOCATION}"
 LOCATION=$(curl --url "${LOCATION}" \
@@ -131,4 +131,4 @@ rm curl.*
 LOCATION="${BASE_URL}/?do=login"
 TOKEN="$(fetch_token "${LOCATION}")"
 errmsg=$(xmllint --html --nowarning --xpath 'string(normalize-space(/html/body//*[@id="headerform"]))' curl.tmp.html)
-[ "${errmsg}" = "You have been banned from login after too many failed attempts. Try later." ] || assert_fail 134 "error: '${errmsg}'"
+assert_equal "You have been banned from login after too many failed attempts. Try later." "${errmsg}" 134 "expected failure"
