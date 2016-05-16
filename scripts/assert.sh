@@ -51,3 +51,11 @@ assert_equal() {
     exit $3
   fi
 }
+
+assert_fgrep() {
+  local PATTERN="${1}" ACTUAL="${2}" CODE="${3}" MESSAGE="${4}"
+  if [ ! ( echo "${ACTUAL}" | fgrep "${PATTERN}" ) ] ; then
+    echo "${BGC_RED}assert_equal${FGC_NONE} (${CODE}): ${MESSAGE}  pattern: \"${FGC_GREEN}${PATTERN}${FGC_NONE}\" != actual: \"${FGC_RED}${ACTUAL}${FGC_NONE}\""
+    exit $3
+  fi
+}

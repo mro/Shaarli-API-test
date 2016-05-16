@@ -56,7 +56,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 59 "error: '${errmsg}'"
+assert_fgrep "alert(\"Wrong login/password.\");document.location='?do=login" "${errmsg}" 59 "expected failure"
 
 
 
@@ -78,7 +78,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 81 "error: '${errmsg}'"
+assert_fgrep "alert(\"Wrong login/password.\");document.location='?do=login" "${errmsg}" 81 "expected failure"
 
 
 
@@ -100,7 +100,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 103 "error: '${errmsg}'"
+assert_fgrep "alert(\"Wrong login/password.\");document.location='?do=login" "${errmsg}" 103 "expected failure"
 
 
 
@@ -122,7 +122,7 @@ LOCATION=$(curl --url "${LOCATION}" \
   --trace-ascii curl.tmp.trace --dump-header curl.tmp.head \
   --write-out '%{url_effective}' 2>/dev/null)
 errmsg=$(xmllint --html --nowarning --xpath 'string(/html[1 = count(*)]/head[1 = count(*)]/script[starts-with(.,"alert(")])' curl.tmp.html)
-[ "${errmsg}" = "alert(\"Wrong login/password.\");document.location='?do=login';" ] || assert_fail 125 "error: '${errmsg}'"
+assert_fgrep "alert(\"Wrong login/password.\");document.location='?do=login" "${errmsg}" 125 "expected failure"
 
 
 
