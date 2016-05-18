@@ -25,4 +25,4 @@ xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
 
 curl --silent --show-error --output "curl.tmp.atom" "${BASE_URL}/?do=atom"
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' "curl.tmp.atom")
-[ "${entries}" -eq 1 ] || assert_fail 2 "expected exactly one <entry>"
+assert_equal 1 "${entries}" 28 "expected exactly one <entry>"

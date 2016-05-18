@@ -30,4 +30,4 @@ curl --url "${BASE_URL}" \
   2>/dev/null
 
 title="$(xmllint --html --xpath 'normalize-space(string(/html/body//*[@id="shaarli_title"]))' curl.html 2>/dev/null)"
-[ "Review Shaarli" = "${title}" ] || assert_fail 2 "expected 'Review Shaarli' found '${title}'"
+assert_equal "Review Shaarli" "${title}" 33 "expected 'Review Shaarli' found '${title}'"
