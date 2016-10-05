@@ -71,6 +71,9 @@ do
     [ -r "${patchfile}" ] && patch -p1 -d "WebAppRoot" < "${patchfile}"
   done
 
+  # https://github.com/shaarli/Shaarli/issues/613
+  cd "WebAppRoot" && composer update --no-dev ; cd "${WORK_DIR}"
+
   # http://robbiemackay.com/2013/05/03/automating-behat-and-mink-tests-with-travis-ci/
   # webserver setup
   php -S 127.0.0.1:8000 -t "WebAppRoot" 1> php.stdout 2> php.stderr &
