@@ -30,6 +30,7 @@ env:
     - GITHUB=shaarli/Shaarli/archive/v0.8.0
     - GITHUB=shaarli/Shaarli/archive/master
     - GITHUB=shaarli/Shaarli/archive/stable
+    - GITHUB=sebsauvage/Shaarli/archive/webdesign    
 #    - GITHUB=mro/Shaarli/archive/feature/thumbnails
 matrix:
   allow_failures:
