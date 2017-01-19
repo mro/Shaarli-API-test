@@ -40,14 +40,14 @@ BGC_WHITE="\033[7;37m"
 
 assert_fail() {
   local CODE="${1}" MESSAGE="${2}"
-  echo "${BGC_RED}assert_fail (${CODE}): ${MESSAGE}${FGC_NONE}"
+  echo -e "${BGC_RED}assert_fail (${CODE}): ${MESSAGE}${FGC_NONE}"
   exit $1
 }
 
 assert_equal() {
   local EXPECTED="${1}" ACTUAL="${2}" CODE="${3}" MESSAGE="${4}"
   if [ ! "${EXPECTED}" = "${ACTUAL}" ] ; then
-    echo "${BGC_RED}assert_equal${FGC_NONE} (${CODE}): ${MESSAGE}  expected: \"${FGC_GREEN}${EXPECTED}${FGC_NONE}\" != actual: \"${FGC_RED}${ACTUAL}${FGC_NONE}\""
+    echo -e "${BGC_RED}assert_equal${FGC_NONE} (${CODE}): ${MESSAGE}  expected: \"${FGC_GREEN}${EXPECTED}${FGC_NONE}\" != actual: \"${FGC_RED}${ACTUAL}${FGC_NONE}\""
     exit $3
   fi
 }
@@ -55,7 +55,7 @@ assert_equal() {
 assert_fgrep() {
   local PATTERN="${1}" ACTUAL="${2}" CODE="${3}" MESSAGE="${4}"
   echo "${ACTUAL}" | fgrep "${PATTERN}" 1> /dev/null 2>&1 || { \
-    echo "${BGC_RED}assert_equal${FGC_NONE} (${CODE}): ${MESSAGE}  pattern: \"${FGC_GREEN}${PATTERN}${FGC_NONE}\" != actual: \"${FGC_RED}${ACTUAL}${FGC_NONE}\"" \
+    echo -e "${BGC_RED}assert_equal${FGC_NONE} (${CODE}): ${MESSAGE}  pattern: \"${FGC_GREEN}${PATTERN}${FGC_NONE}\" != actual: \"${FGC_RED}${ACTUAL}${FGC_NONE}\"" \
     && exit $3 ; \
   }
 }
