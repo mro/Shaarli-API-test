@@ -1,47 +1,51 @@
+---
 # http://docs.travis-ci.com/user/migrating-from-legacy/
 sudo: false
+branches:
+  only: [master, develop]
 # http://docs.travis-ci.com/user/languages/php/#Choosing-PHP-versions-to-test-against
 language: php
 php:
-  - 5.4
-  - 5.5
-  - 5.6
-  - 7.0
+- 5.4
+- 5.5
+- 5.6
+- 7.0
 # http://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
 # http://docs.travis-ci.com/user/customizing-the-build/#Build-Matrix
 env:
   global:
-    - GITHUB_SRC_SUBDIR=Shaarli-*
-    - BASE_URL=http://127.0.0.1:8000
-    - USERNAME=tast
-    - PASSWORD=tust
+  - GITHUB_SRC_SUBDIR=Shaarli-*
+  - BASE_URL=http://127.0.0.1:8000
+  - USERNAME=tast
+  - PASSWORD=tust
   matrix:
-    - GITHUB=sebsauvage/Shaarli/archive/master
-#    - GITHUB=shaarli/Shaarli/archive/v0.0.40beta
-    - GITHUB=shaarli/Shaarli/archive/v0.0.41beta
-    - GITHUB=shaarli/Shaarli/archive/v0.0.42beta
-#    - GITHUB=shaarli/Shaarli/archive/v0.0.43beta
-#    - GITHUB=shaarli/Shaarli/archive/v0.0.44beta
-    - GITHUB=shaarli/Shaarli/archive/v0.0.45beta
-    - GITHUB=shaarli/Shaarli/archive/v0.5.4
-    - GITHUB=shaarli/Shaarli/archive/v0.6.4
-    - GITHUB=shaarli/Shaarli/archive/v0.6.5
-    - GITHUB=shaarli/Shaarli/archive/v0.7.0
-    - GITHUB=shaarli/Shaarli/archive/v0.8.0
-    - GITHUB=shaarli/Shaarli/archive/master
-    - GITHUB=shaarli/Shaarli/archive/stable
-    - GITHUB=shaarli/Shaarli/archive/webdesign    
-#    - GITHUB=mro/Shaarli/archive/feature/thumbnails
+  - GITHUB=sebsauvage/Shaarli/archive/master
+  - GITHUB=shaarli/Shaarli/archive/v0.0.40beta
+  - GITHUB=shaarli/Shaarli/archive/v0.0.41beta
+  - GITHUB=shaarli/Shaarli/archive/v0.0.42beta
+#  - GITHUB=shaarli/Shaarli/archive/v0.0.43beta
+#  - GITHUB=shaarli/Shaarli/archive/v0.0.44beta
+  - GITHUB=shaarli/Shaarli/archive/v0.0.45beta
+  - GITHUB=shaarli/Shaarli/archive/v0.5.4
+  - GITHUB=shaarli/Shaarli/archive/v0.6.4
+  - GITHUB=shaarli/Shaarli/archive/v0.6.5
+  - GITHUB=shaarli/Shaarli/archive/v0.7.0
+  - GITHUB=shaarli/Shaarli/archive/v0.8.0
+  - GITHUB=shaarli/Shaarli/archive/master
+  - GITHUB=shaarli/Shaarli/archive/stable
+  - GITHUB=shaarli/Shaarli/archive/webdesign
 matrix:
   allow_failures:
-    # first community release is known to fail, too:
-    - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
-    # why does this one fail?
-    - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
-    - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
-    - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
+  - php: 5.4
+  # first community release is known to fail, too:
+  - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
+  # why does this one fail?
+  - env: GITHUB=shaarli/Shaarli/archive/v0.0.42beta
+  - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
+  - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
+  - env: GITHUB=shaarli/Shaarli/archive/webdesign
 before_install:
-  - sh scripts/download.sh
+- sh scripts/download.sh
 addons:
   apt:
     packages:
@@ -49,4 +53,4 @@ addons:
 #before_script:
 #  # http://docs.travis-ci.com/user/customizing-the-build/#Implementing-Complex-Build-Steps
 script:
-  - sh scripts/run-tests.sh
+- sh scripts/run-tests.sh
