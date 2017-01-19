@@ -73,19 +73,18 @@ curl --url "${BASE_URL}/?do=atom" \
 entries=$(xmllint --xpath 'count(/*/*[local-name()="entry"])' curl.tmp.atom)
 assert_equal "2" "${entries}" 74 "Atom feed entries"
 
-
 # now figure out the precise lf_linkdate and token for each entry to delete
 while true
 do
   # re-extract the token from the most recent HTTP response as it's consumed after each
   # HTTP request. So a simple for loop doesn't do the trick.
 
-  line="$(xsltproc --html --nonet "$0".xslt curl.tmp.html 2>/dev/null | head -n 1)"
+  line="$(xsltproc --html --nonet "${0}".xslt curl.tmp.html 2>/dev/null | head -n 1)"
   [ "" = "$line" ] && break
 
-  echo "$line" | while read lf_linkdate token
+  echo "${line}" | while read lf_linkdate token
   do
-    echo "lf_linkdate=${lf_linkdate}  token=${token}"
+    echo "lf_linkdate=${lf_linkdate} token=${token}"
     http_code=$(curl --url "${BASE_URL}/" \
       --data-urlencode "lf_linkdate=${lf_linkdate}" \
       --data-urlencode "token=${token}" \
