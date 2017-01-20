@@ -31,6 +31,9 @@ env:
   - GITHUB=shaarli/Shaarli/archive/v0.6.5
   - GITHUB=shaarli/Shaarli/archive/v0.7.0
   - GITHUB=shaarli/Shaarli/archive/v0.8.0
+  - GITHUB=shaarli/Shaarli/archive/v0.8.1
+  - GITHUB=shaarli/Shaarli/archive/v0.8.2
+  - GITHUB=shaarli/Shaarli/archive/v0.8.3
   - GITHUB=shaarli/Shaarli/archive/master
   - GITHUB=shaarli/Shaarli/archive/stable
   - GITHUB=shaarli/Shaarli/archive/webdesign
