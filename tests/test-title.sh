@@ -30,4 +30,6 @@ curl --url "${BASE_URL}" \
   2>/dev/null
 
 title="$(xmllint --html --xpath 'normalize-space(string(/html/body//*[@id="shaarli_title"]))' curl.html 2>/dev/null)"
+# ignore @id, use a/@href
+title="$(xmllint --html --xpath 'normalize-space(string(/html/body//a[@href="?"]))' curl.html 2>/dev/null)"
 assert_equal "Review Shaarli" "${title}" 33 "expected 'Review Shaarli' found '${title}'"
