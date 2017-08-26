@@ -27,10 +27,17 @@
   https://web.archive.org/web/20130716150512/http://www.atomenabled.org:80/developers/protocol/atom-protocol-spec.php#schema
 </xsl:comment>
     <app:categories scheme="?searchtags=">
+      <xsl:variable name="traditional_count_prefix" select="1 = count(.//a[starts-with(@href, '?searchtags=')][1]/preceding-sibling::*[@class='count'][1])"/>
+
       <xsl:for-each select=".//a[starts-with(@href, '?searchtags=')]">
         <xsl:sort select="." data-type="text" order="ascending"/>
 
-        <xsl:variable name="count" select="preceding-sibling::*[@class='count'][1]"/>
+        <xsl:variable name="count">
+          <xsl:choose>
+            <xsl:when test="$traditional_count_prefix"><xsl:value-of select="preceding-sibling::*[@class='count'][1]"/></xsl:when>
+            <xsl:otherwise><xsl:value-of select="following-sibling::*[@class='count'][1]"/></xsl:otherwise>
+          </xsl:choose>
+        </xsl:variable>
 
         <category term="{.}" foo:count="{$count}"/>
       </xsl:for-each>
