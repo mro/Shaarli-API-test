@@ -24,6 +24,6 @@ xmllint --version 2> /dev/null  || assert_fail 102 "I need xmllint (libxml2)."
 [ "${BASE_URL}" != "" ]         || assert_fail 1 "How strange, BASE_URL is unset."
 
 entries=$(curl --silent "${BASE_URL}/?do=tagcloud" | xsltproc --html ../scripts/tagcloud-html2atom.xslt - | xmllint --relaxng ../scripts/categories.rng - | xmllint --xpath 'count(/*/*[local-name()="category"])' -)
-assert_equal "1" "${entries}" 27 "Categories"
+assert_equal "2" "${entries}" 27 "Categories"
 
 exit $?
