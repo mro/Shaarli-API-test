@@ -46,6 +46,9 @@ matrix:
   - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
   - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
   - env: GITHUB=shaarli/Shaarli/archive/webdesign
+  - { php: 5.5, env: GITHUB=shaarli/Shaarli/archive/v0.10.0 }
+  - { php: 5.5, env: GITHUB=shaarli/Shaarli/archive/master }
+  - { php: 5.5, env: GITHUB=shaarli/Shaarli/archive/stable }
 before_install:
 - sh scripts/download.sh
 addons:
