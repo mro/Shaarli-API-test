@@ -70,6 +70,7 @@ do
   # ...and unpack into directory 'WebAppRoot'...
   tar -xzf "${CWD}/source.tar.gz" || { echo "ouch" && exit 1 ; }
   mv ${GITHUB_SRC_SUBDIR} "WebAppRoot"
+  cp "${CWD}/pinboard.cgi" "WebAppRoot/"
 
   for patchfile in "${CWD}/patches/${GITHUB}"/*.patch
   do

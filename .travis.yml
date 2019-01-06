@@ -59,7 +59,7 @@ before_install:
 - go vet -x
 - go test -v
 install:
-- go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o WebAppRoot/pinboard.cgi
+- go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o pinboard.cgi
 addons:
   apt:
     packages:
