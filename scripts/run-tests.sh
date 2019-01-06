@@ -21,7 +21,12 @@ curl --version >/dev/null || { echo "I need curl." && exit 101 ; }
 xmllint --version 2> /dev/null || { echo "I need xmllint." && exit 102 ; }
 ruby --version > /dev/null || { echo "I need ruby." && exit 103 ; }
 
-cd "$(dirname "$0")/.."
+[ "${GITHUB_SRC_SUBDIR}" != "" ] || { echo 'I need ${GITHUB_SRC_SUBDIR}, e.g. Shaarli-*' && exit 2; }
+[ "${BASE_URL}" != "" ] || { echo 'I need ${BASE_URL}, e.g. http://127.0.0.1:8000' && exit 2; }
+[ "${USERNAME}" != "" ] || { echo 'I need ${USERNAME}, e.g. tast' && exit 2; }
+[ "${PASSWORD}" != "" ] || { echo 'I need ${PASSWORD}, e.g. tust' && exit 2; }
+
+cd "$(dirname "$0")/.." || exit 1
 CWD="$(pwd)"
 WORK_DIR="${CWD}/tmp"
 

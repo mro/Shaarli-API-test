@@ -15,8 +15,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/.." || exit 1
+
+[ "${GITHUB}" != "" ] || { echo 'I need ${GITHUB}, e.g. shaarli/Shaarli/archive/v0.0.40beta' && exit 2; }
 
 # Download the tarball...
 GITHUB_SRC_URL="https://github.com/${GITHUB}.tar.gz"
-curl --location --output source.tar.gz --url "${GITHUB_SRC_URL}" || { echo "ouch" && exit 1 ; }
+curl --location --output source.tar.gz --url "${GITHUB_SRC_URL}" || { echo "ouch" && exit 3; }
