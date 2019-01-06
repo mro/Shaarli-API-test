@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login - Shaarli demo (master)</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="same-origin">
+<link rel="alternate" type="application/atom+xml" href="https://demo.shaarli.org/?do=atom" title="ATOM Feed" />
+<link rel="alternate" type="application/rss+xml" href="https://demo.shaarli.org/?do=rss" title="RSS Feed" />
+<link href="tpl/default/./img/favicon.png" rel="shortcut icon" type="image/png" />
+<link href="tpl/default/./img/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180" />
+<link type="text/css" rel="stylesheet" href="tpl/default/./css/shaarli.min.css?v=5ada135e9157e4477fd78314662cf56b575d2a938c79c8794e725bf6d712b9d5" />
+
+
+<link rel="search" type="application/opensearchdescription+xml" href="?do=opensearch" title="Shaarli search - Shaarli demo (master)"/>
+
+
+</head>
+<body>
+<div class="shaarli-menu pure-g" id="shaarli-menu">
+  <div class="pure-u-lg-0 pure-u-1">
+    <div class="pure-menu">
+      <a href="?" class="pure-menu-link shaarli-title" id="shaarli-title-mobile">
+        <img src="tpl/default/./img/icon.png" width="16" height="16" class="head-logo" alt="" />
+        Shaarli demo (master)
+      </a>
+      <a href="#" class="menu-toggle" id="menu-toggle"><s class="bar"></s><s class="bar"></s></a>
+    </div>
+  </div>
+  <div class="pure-u-1">
+    <div class="pure-menu menu-transform pure-menu-horizontal pure-g">
+      <ul class="pure-menu-list pure-u-lg-5-6 pure-u-1">
+        <li class="pure-menu-item pure-u-0 pure-u-lg-visible">
+          <a href="?" class="pure-menu-link shaarli-title" id="shaarli-title-desktop">
+            <img src="tpl/default/./img/icon.png" width="16" height="16" class="head-logo" alt="" />
+            Shaarli demo (master)
+          </a>
+        </li>
+        
+        <li class="pure-menu-item" id="shaarli-menu-tags">
+          <a href="?do=tagcloud" class="pure-menu-link">Tag cloud</a>
+        </li>
+        
+          <li class="pure-menu-item" id="shaarli-menu-picwall">
+            <a href="?do=picwall" class="pure-menu-link">Picture wall</a>
+          </li>
+        
+        <li class="pure-menu-item" id="shaarli-menu-daily">
+          <a href="?do=daily" class="pure-menu-link">Daily</a>
+        </li>
+        
+        <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-rss">
+            <a href="?do=atom" class="pure-menu-link">RSS Feed</a>
+        </li>
+        
+          <li class="pure-menu-item pure-u-lg-0 shaarli-menu-mobile" id="shaarli-menu-mobile-login">
+            <a href="?do=login" class="pure-menu-link">Login</a>
+          </li>
+        
+      </ul>
+      <div class="header-buttons pure-u-lg-1-6 pure-u-0 pure-u-lg-visible">
+        <ul class="pure-menu-list">
+          <li class="pure-menu-item" id="shaarli-menu-desktop-search">
+            <a href="#" class="pure-menu-link subheader-opener"
+               data-open-id="search"
+               id="search-button" title="Search">
+              <i class="fa fa-search"></i>
+            </a>
+          </li>
+          <li class="pure-menu-item" id="shaarli-menu-desktop-rss">
+            <a href="?do=atom" class="pure-menu-link" title="RSS Feed">
+              <i class="fa fa-rss"></i>
+            </a>
+          </li>
+          
+            <li class="pure-menu-item" id="shaarli-menu-desktop-login">
+              <a href="?do=login" class="pure-menu-link"
+                 data-open-id="header-login-form"
+                 id="login-button" title="Login">
+                <i class="fa fa-user"></i>
+              </a>
+            </li>
+          
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="content" class="container">
+  <div id="search" class="subheader-form searchform-block header-search">
+    <form method="GET" class="pure-form searchform" name="searchform">
+      <input type="text" tabindex="1" id="searchform_value" name="searchterm" placeholder="Search text"
+             
+      >
+      <input type="text" tabindex="2" name="searchtags" id="tagfilter_value" placeholder="Filter by tag"
+             
+      autocomplete="off" data-multiple data-autofirst data-minChars="1"
+      data-list="opensource, software, "
+      >
+      <button type="submit" class="search-button"><i class="fa fa-search"></i></button>
+    </form>
+  </div>
+  <div id="actions" class="subheader-form">
+    <div class="pure-g">
+      <div class="pure-u-1">
+        <a href="" id="actions-delete" class="button">Delete</a>
+      </div>
+    </div>
+  </div>
+  
+    <form method="post" name="loginform">
+      <div class="subheader-form header-login-form" id="header-login-form">
+        <input type="text" name="login" placeholder="Username" tabindex="3">
+        <input type="password" name="password" placeholder="Password" tabindex="5">
+        <div class="remember-me">
+          <input type="checkbox" name="longlastingsession" id="longlastingsession" tabindex="6" checked>
+          <label for="longlastingsession">Remember me</label>
+        </div>
+        <input type="hidden" name="token" value="26f8581e78f78f286c7dc11dcc85fda88125c83c">
+        <input type="hidden" name="returnurl">
+        <input type="submit" value="Login" tabindex="7">
+      </div>
+    </form>
+  
+
+
+
+
+
+
+  <div class="clear"></div>
+
+
+  <div class="pure-g">
+    <div class="pure-u-lg-1-3 pure-u-1-24"></div>
+    <div id="login-form" class="page-form page-form-light pure-u-lg-1-3 pure-u-22-24 login-form-container">
+      <form method="post" name="loginform">
+        <h2 class="window-title">Login</h2>
+        <div>
+          <input type="text" name="login" placeholder="Username"
+              class="autofocus" tabindex="20">
+        </div>
+        <div>
+          <input type="password" name="password" placeholder="Password" class="autofocus" tabindex="21">
+        </div>
+        <div class="remember-me">
+          <input type="checkbox" name="longlastingsession" id="longlastingsessionform"
+             checked="checked"
+             tabindex="22">
+          <label for="longlastingsessionform">Remember me</label>
+        </div>
+        <div>
+          <input type="submit" value="Login" class="bigbutton" tabindex="23">
+        </div>
+        <input type="hidden" name="token" value="26f8581e78f78f286c7dc11dcc85fda88125c83c">
+        
+      </form>
+    </div>
+    <div class="pure-u-lg-1-3 pure-u-1-8"></div>
+  </div>
+
+
+</div>
+
+<div class="pure-g">
+  <div class="pure-u-2-24"></div>
+  <div id="footer" class="pure-u-20-24 footer-container">
+    <strong><a href="https://github.com/shaarli/Shaarli">Shaarli</a></strong>
+    
+    &middot;
+    The personal, minimalist, super-fast, database free, bookmarking service by the Shaarli community &middot;
+    <a href="doc/html/index.html" rel="nofollow">Documentation</a>
+      
+  </div>
+  <div class="pure-u-2-24"></div>
+</div>
+
+<input type="hidden" name="token" value="26f8581e78f78f286c7dc11dcc85fda88125c83c" id="token" />
+
+
+
+
+
+<div id="js-translations" class="hidden">
+  <span id="translation-fold">Fold</span>
+  <span id="translation-fold-all">Fold all</span>
+  <span id="translation-expand">Expand</span>
+  <span id="translation-expand-all">Expand all</span>
+  <span id="translation-delete-link">Are you sure you want to delete this link?</span>
+  <span id="translation-shaarli-desc">
+    The personal, minimalist, super-fast, database free, bookmarking service by the Shaarli community
+  </span>
+</div>
+
+<script src="tpl/default/./js/shaarli.min.js?v=5ada135e9157e4477fd78314662cf56b575d2a938c79c8794e725bf6d712b9d5"></script>
+
+</body>
+</html>
+
