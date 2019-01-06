@@ -51,6 +51,15 @@ matrix:
   - { php: 5.5, env: GITHUB=shaarli/Shaarli/archive/stable }
 before_install:
 - sh scripts/download.sh
+- go get github.com/yhat/scrape
+- go get golang.org/x/net/html
+- go get golang.org/x/net/html/atom
+  # for testing only:
+- go get github.com/stretchr/testify
+- go vet -x
+- go test -v
+install:
+- go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o WebAppRoot/pinboard.cgi
 addons:
   apt:
     packages:
