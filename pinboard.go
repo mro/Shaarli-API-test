@@ -90,6 +90,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if "GET" != r.Method {
+			w.Header().Set("Allow", "GET")
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
@@ -189,6 +190,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if "GET" != r.Method {
+			w.Header().Set("Allow", "GET")
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
@@ -210,6 +212,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if "GET" != r.Method {
+			w.Header().Set("Allow", "GET")
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
@@ -226,6 +229,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if "GET" != r.Method {
+			w.Header().Set("Allow", "GET")
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
@@ -303,7 +307,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		t, err := time.Parse("2006-01-02_150405", formLink.Get("lf_linkdate")) // rather ParseInLocation
+		t, err := time.Parse("20060102_150405", formLink.Get("lf_linkdate")) // rather ParseInLocation
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
@@ -324,7 +328,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		rawText("<post href='")
 		xmlForm("lf_url")
 		rawText("' hash='")
-		xmlText("...id...")
+		xmlForm("lf_linkdate")
 		rawText("' description='")
 		xmlForm("lf_title")
 		rawText("' extended='")
