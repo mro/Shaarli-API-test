@@ -87,7 +87,7 @@ func TestFormValuesFromHtml(t *testing.T) {
 	assert.Equal(t, "20190106_172531", ips["lf_linkdate"][0], "form.lf_linkdate")
 	assert.Equal(t, "", ips["lf_url"][0], "form.lf_url")
 	assert.Equal(t, "uhu", ips["lf_title"][0], "form.lf_title")
-	assert.Equal(t, "", ips["lf_description"][0], "form.lf_description")
+	assert.Equal(t, "content", ips["lf_description"][0], "form.lf_description")
 	assert.Equal(t, "", ips["lf_tags"][0], "form.lf_tags")
 	assert.Equal(t, "Save", ips["save_edit"][0], "form.save_edit")
 	file.Close()

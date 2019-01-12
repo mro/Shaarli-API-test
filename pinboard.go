@@ -18,10 +18,7 @@
 package main
 
 import (
-	"github.com/yhat/scrape"
-	"golang.org/x/net/html"
-	"golang.org/x/net/html/atom"
-	"golang.org/x/net/publicsuffix"
+	"encoding/xml"
 	"io"
 	"log"
 	"net/http"
@@ -31,6 +28,12 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/yhat/scrape"
+	"golang.org/x/net/html"
+	"golang.org/x/net/html/atom"
+	// "golang.org/x/net/html/charset"
+	"golang.org/x/net/publicsuffix"
 )
 
 var GitSHA1 = "Please set -ldflags \"-X main.GitSHA1=$(git rev-parse --short HEAD)\"" // https://medium.com/@joshroppo/setting-go-1-5-variables-at-compile-time-for-versioning-5b30a965d33e
@@ -116,7 +119,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		v := url.Values{}
 		v.Set("post", p_url)
-		v.Set("title", p_description)
 		base.RawQuery = v.Encode()
 
 		// https://stackoverflow.com/a/18414432
@@ -129,46 +131,47 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		client := http.Client{Jar: jar}
+
 		resp, err := client.Get(base.String())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
-		form, err := formValuesFromReader(resp.Body, "loginform")
+		formLogi, err := formValuesFromReader(resp.Body, "loginform")
 		resp.Body.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		form.Set("login", uid)
-		form.Set("password", pwd)
-		form.Set("returnurl", r.URL.String())
-		resp, err = client.PostForm(resp.Request.URL.String(), form)
+		formLogi.Set("login", uid)
+		formLogi.Set("password", pwd)
+		formLogi.Set("returnurl", r.URL.String())
+		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
 
-		form, err = formValuesFromReader(resp.Body, "linkform")
+		formLink, err := formValuesFromReader(resp.Body, "linkform")
 		resp.Body.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
 		// if we do not have a linkform, auth must have failed.
-		if 0 == len(form) {
+		if 0 == len(formLink) {
 			http.Error(w, "Authentication failed", http.StatusForbidden)
 			return
 		}
 
-		// form.Set("lf_linkdate", "20190106_172531")
-		form.Set("lf_url", p_url)
-		form.Set("lf_title", p_description)
-		form.Set("lf_description", p_extended)
-		form.Set("lf_tags", p_tags)
+		// formLink.Set("lf_linkdate", "20190106_172531")
+		// formLink.Set("lf_url", p_url)
+		formLink.Set("lf_title", p_description)
+		formLink.Set("lf_description", p_extended)
+		formLink.Set("lf_tags", p_tags)
 
-		resp, err = client.PostForm(resp.Request.URL.String(), form)
+		resp, err = client.PostForm(resp.Request.URL.String(), formLink)
 		resp.Body.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
@@ -215,7 +218,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8' ?><update time='2011-03-24T19:02:07Z' />")
 		return
 	case "/v1/posts/get":
-		_, _, ok := r.BasicAuth()
+		// pretend to add, but don't actually do it, but return the form preset values.
+		uid, pwd, ok := r.BasicAuth()
 		if !ok {
 			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
 			return
@@ -231,7 +235,108 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
 			return
 		}
-		// p_url := params["url"][0]
+		p_url := params["url"][0]
+
+		/*
+			if 1 != len(params["description"]) {
+				http.Error(w, "Required parameter missing: description", http.StatusBadRequest)
+				return
+			}
+			p_description := params["description"][0]
+
+			p_extended := ""
+			if 1 == len(params["extended"]) {
+				p_extended = params["extended"][0]
+			}
+
+			p_tags := ""
+			if 1 == len(params["tags"]) {
+				p_tags = params["tags"][0]
+			}
+		*/
+
+		v := url.Values{}
+		v.Set("post", p_url)
+		base.RawQuery = v.Encode()
+
+		// https://stackoverflow.com/a/18414432
+		options := cookiejar.Options{
+			PublicSuffixList: publicsuffix.List,
+		}
+		jar, err := cookiejar.New(&options)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		client := http.Client{Jar: jar}
+
+		resp, err := client.Get(base.String())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		formLogi, err := formValuesFromReader(resp.Body, "loginform")
+		resp.Body.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		formLogi.Set("login", uid)
+		formLogi.Set("password", pwd)
+		formLogi.Set("returnurl", r.URL.String())
+		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+
+		formLink, err := formValuesFromReader(resp.Body, "linkform")
+		resp.Body.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		// if we do not have a linkform, auth must have failed.
+		if 0 == len(formLink) {
+			http.Error(w, "Authentication failed", http.StatusForbidden)
+			return
+		}
+
+		t, err := time.Parse("2006-01-02_150405", formLink.Get("lf_linkdate")) // rather ParseInLocation
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
+
+		rawText := func(s string) { io.WriteString(w, s) }
+		xmlText := func(s string) { xml.EscapeText(w, []byte(s)) }
+		xmlForm := func(s string) { xmlText(formLink.Get(s)) }
+
+		rawText("<?xml version='1.0' encoding='UTF-8' ?>")
+		rawText("<posts user='")
+		xmlText(uid)
+		rawText("' dt='")
+		xmlText(time.Now().Format("2006-01-02"))
+		rawText("' tag=''>")
+		rawText("<post href='")
+		xmlForm("lf_url")
+		rawText("' hash='")
+		xmlText("...id...")
+		rawText("' description='")
+		xmlForm("lf_title")
+		rawText("' extended='")
+		xmlForm("lf_description")
+		rawText("' tag='")
+		xmlForm("lf_tags")
+		rawText("' time='")
+		xmlText(t.Format(time.RFC3339))
+		rawText("' others='")
+		xmlText("0")
+		rawText("' />")
+		rawText("</posts>")
 
 		return
 	case "/v1/posts/recent":
@@ -251,7 +356,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 }
 
 func formValuesFromReader(r io.Reader, name string) (ret url.Values, err error) {
-	root, err := html.Parse(r)
+	root, err := html.Parse(r) // assumes r is UTF8
 	if err != nil {
 		return ret, err
 	}
@@ -266,9 +371,12 @@ func formValuesFromReader(r io.Reader, name string) (ret url.Values, err error) 
 			if n == "" {
 				n = scrape.Attr(inp, "id")
 			}
+
 			ty := scrape.Attr(inp, "type")
 			v := scrape.Attr(inp, "value")
-			if v == "" && ty == "checkbox" {
+			if atom.Textarea == inp.DataAtom {
+				v = scrape.Text(inp)
+			} else if v == "" && ty == "checkbox" {
 				v = scrape.Attr(inp, "checked")
 			}
 			ret.Set(n, v)
