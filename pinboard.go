@@ -57,17 +57,11 @@ func main() {
 }
 
 // https://pinboard.in/api
-//
-// All API methods are GET requests, even when good REST habits suggest they should use a different verb.
-//
-// v1/posts/add
-// v1/posts/delete
-// v1/posts/get
 func handleMux(w http.ResponseWriter, r *http.Request) {
 	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
 	// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
-	// w.Header().Set("X-Powered-By", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
-	//	now := time.Now()
+	w.Header().Set("X-Powered-By", strings.Join([]string{"https://code.mro.name/mro/Shaarli-API-test", "#", version, "+", GitSHA1}, ""))
+	now := time.Now()
 
 	path_info := os.Getenv("PATH_INFO")
 	base := *r.URL
@@ -76,6 +70,17 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	//	urlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
 
+	// https://stackoverflow.com/a/18414432
+	options := cookiejar.Options{
+		PublicSuffixList: publicsuffix.List,
+	}
+	jar, err := cookiejar.New(&options)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	client := http.Client{Jar: jar}
+
 	switch path_info {
 	case "/v1/info":
 		io.WriteString(w, "r.URL: "+r.URL.String()+"\n")
@@ -83,6 +88,10 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		return
 	case "/v1/posts/add":
+		// extract parameters
+		// agent := r.Header.Get("User-Agent")
+		shared := true
+
 		uid, pwd, ok := r.BasicAuth()
 		if !ok {
 			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
@@ -122,17 +131,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		v.Set("post", p_url)
 		base.RawQuery = v.Encode()
 
-		// https://stackoverflow.com/a/18414432
-		options := cookiejar.Options{
-			PublicSuffixList: publicsuffix.List,
-		}
-		jar, err := cookiejar.New(&options)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		client := http.Client{Jar: jar}
-
 		resp, err := client.Get(base.String())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
@@ -147,7 +145,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		formLogi.Set("login", uid)
 		formLogi.Set("password", pwd)
-		formLogi.Set("returnurl", r.URL.String())
 		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
@@ -171,16 +168,22 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		formLink.Set("lf_title", p_description)
 		formLink.Set("lf_description", p_extended)
 		formLink.Set("lf_tags", p_tags)
+		if shared {
+			formLink.Del("lf_private")
+		} else {
+			formLink.Set("lf_private", "lf_private")
+		}
 
 		resp, err = client.PostForm(resp.Request.URL.String(), formLink)
-		resp.Body.Close()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
+		resp.Body.Close()
 
 		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8' ?><result code='done' />")
+		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8'?><result code='done' />")
+
 		return
 	case "/v1/posts/delete":
 		_, _, ok := r.BasicAuth()
@@ -263,17 +266,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		v.Set("post", p_url)
 		base.RawQuery = v.Encode()
 
-		// https://stackoverflow.com/a/18414432
-		options := cookiejar.Options{
-			PublicSuffixList: publicsuffix.List,
-		}
-		jar, err := cookiejar.New(&options)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		client := http.Client{Jar: jar}
-
 		resp, err := client.Get(base.String())
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
@@ -288,7 +280,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		formLogi.Set("login", uid)
 		formLogi.Set("password", pwd)
-		formLogi.Set("returnurl", r.URL.String())
 		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
@@ -323,7 +314,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		rawText("<posts user='")
 		xmlText(uid)
 		rawText("' dt='")
-		xmlText(time.Now().Format("2006-01-02"))
+		xmlText(now.Format("2006-01-02"))
 		rawText("' tag=''>")
 		rawText("<post href='")
 		xmlForm("lf_url")
