@@ -307,7 +307,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		t, err := time.Parse("20060102_150405", formLink.Get("lf_linkdate")) // rather ParseInLocation
+		tim, err := time.ParseInLocation("20060102_150405", formLink.Get("lf_linkdate"), time.Now().Location()) // can we do any better?
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
@@ -336,7 +336,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		rawText("' tag='")
 		xmlForm("lf_tags")
 		rawText("' time='")
-		xmlText(t.Format(time.RFC3339))
+		xmlText(tim.Format(time.RFC3339))
 		rawText("' others='")
 		xmlText("0")
 		rawText("' />")

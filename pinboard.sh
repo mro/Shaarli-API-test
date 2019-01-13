@@ -51,11 +51,12 @@ env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-p
 gzip --force --best "${PROG_NAME}"-*-"${VERSION}" \
 && chmod a-x "${PROG_NAME}"-*-"${VERSION}.gz" \
 && rsync -vp --bwlimit=1234 "${PROG_NAME}"-*-"${VERSION}.gz" "simply:/tmp/" \
-&& ssh simply "sh -c 'cd /var/www/lighttpd/l.mro.name/public_html/ && cp "/tmp/${PROG_NAME}-linux-amd64-${VERSION}.gz" pinboard_cgi.gz && gunzip < pinboard_cgi.gz > pinboard.cgi && chmod a+x pinboard.cgi && ls -l pinboard?cgi*'" \
-&& ssh simply "sh -c 'cd /var/www/lighttpd/b.r-2.eu/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/pinboard?cgi* .'"
+&& ssh simply "sh -c 'cd /var/www/lighttpd/demo.mro.name/ && gunzip < "/tmp/${PROG_NAME}-linux-amd64-${VERSION}.gz" > pinboard.cgi && chmod a+x pinboard.cgi && ls -l pinboard?cgi*'"
 
-ssh simply "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/pinboard?cgi* . && ls -l pinboard?cgi*'"
+# ssh simply "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/pinboard?cgi* . && ls -l pinboard?cgi*'"
 "${say}" "ok"
+
+exit 0
 
 "${say}" "vario"
 # scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
