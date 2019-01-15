@@ -26,6 +26,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"path"
 	"strings"
 	"time"
 
@@ -34,6 +35,11 @@ import (
 	"golang.org/x/net/html/atom"
 	// "golang.org/x/net/html/charset"
 	"golang.org/x/net/publicsuffix"
+)
+
+const (
+	ShaarliDate = "20060102_150405"
+	IsoDate     = "2006-01-02"
 )
 
 var GitSHA1 = "Please set -ldflags \"-X main.GitSHA1=$(git rev-parse --short HEAD)\"" // https://medium.com/@joshroppo/setting-go-1-5-variables-at-compile-time-for-versioning-5b30a965d33e
@@ -58,17 +64,37 @@ func main() {
 
 // https://pinboard.in/api
 func handleMux(w http.ResponseWriter, r *http.Request) {
-	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
-	// w.Header().Set("Server", strings.Join([]string{myselfNamespace, CurrentShaarliGoVersion}, "#"))
-	w.Header().Set("X-Powered-By", strings.Join([]string{"https://code.mro.name/mro/Shaarli-API-test", "#", version, "+", GitSHA1}, ""))
-	now := time.Now()
+	raw := func(s ...string) {
+		for _, txt := range s {
+			io.WriteString(w, txt)
+		}
+	}
+	elmS := func(e string, close bool, atts ...string) {
+		raw("<", e)
+		for i, v := range atts {
+			if i%2 == 0 {
+				raw(" ", v, "=")
+			} else {
+				raw("'")
+				xml.EscapeText(w, []byte(v))
+				raw("'")
+			}
+		}
+		if close {
+			raw(" /")
+		}
+		raw(">", "\n")
+	}
+	elmE := func(e string) { raw("</", e, ">", "\n") }
 
+	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
+	now := time.Now()
 	path_info := os.Getenv("PATH_INFO")
 	base := *r.URL
-	base.Path = base.Path[0:len(base.Path)-len(path_info)] + "/../index.php"
-	// script_name := os.Getenv("SCRIPT_NAME")
-	//	urlBase := mustParseURL(string(xmlBaseFromRequestURL(r.URL, os.Getenv("SCRIPT_NAME"))))
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "..", "index.php")
+
+	w.Header().Set(http.CanonicalHeaderKey("X-Powered-By"), strings.Join([]string{"https://code.mro.name/mro/Shaarli-API-test", "#", version, "+", GitSHA1}, ""))
+	w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/xml; charset=utf-8")
 
 	// https://stackoverflow.com/a/18414432
 	options := cookiejar.Options{
@@ -82,9 +108,9 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	client := http.Client{Jar: jar}
 
 	switch path_info {
-	case "/v1/info":
-		io.WriteString(w, "r.URL: "+r.URL.String()+"\n")
-		io.WriteString(w, "base: "+base.String()+"\n")
+	case "":
+		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/plain; charset=utf-8")
+		raw("\n", "subset conforming https://pinboard.in/api/", "\n")
 
 		return
 	case "/v1/posts/add":
@@ -98,8 +124,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if "GET" != r.Method {
-			w.Header().Set("Allow", "GET")
+		if http.MethodGet != r.Method {
+			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
@@ -129,6 +155,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		v := url.Values{}
 		v.Set("post", p_url)
+		v.Set("title", p_description)
 		base.RawQuery = v.Encode()
 
 		resp, err := client.Get(base.String())
@@ -163,9 +190,9 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// formLink.Set("lf_linkdate", "20190106_172531")
+		// formLink.Set("lf_linkdate", ShaarliDate)
 		// formLink.Set("lf_url", p_url)
-		formLink.Set("lf_title", p_description)
+		// formLink.Set("lf_title", p_description)
 		formLink.Set("lf_description", p_extended)
 		formLink.Set("lf_tags", p_tags)
 		if shared {
@@ -181,8 +208,9 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 		resp.Body.Close()
 
-		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8'?><result code='done' />")
+		raw(xml.Header)
+		elmS("result", true,
+			"code", "done")
 
 		return
 	case "/v1/posts/delete":
@@ -192,8 +220,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if "GET" != r.Method {
-			w.Header().Set("Allow", "GET")
+		if http.MethodGet != r.Method {
+			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
@@ -205,7 +233,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 		// p_url := params["url"][0]
 
-		io.WriteString(w, "bhb")
+		elmS("result", true,
+			"code", "not implemented yet")
 		return
 	case "/v1/posts/update":
 		_, _, ok := r.BasicAuth()
@@ -214,14 +243,15 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if "GET" != r.Method {
-			w.Header().Set("Allow", "GET")
+		if http.MethodGet != r.Method {
+			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
 
-		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-		io.WriteString(w, "<?xml version='1.0' encoding='UTF-8' ?><update time='2011-03-24T19:02:07Z' />")
+		raw(xml.Header)
+		elmS("update", true,
+			"time", "2011-03-24T19:02:07Z")
 		return
 	case "/v1/posts/get":
 		// pretend to add, but don't actually do it, but return the form preset values.
@@ -231,8 +261,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if "GET" != r.Method {
-			w.Header().Set("Allow", "GET")
+		if http.MethodGet != r.Method {
+			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
 			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
 			return
 		}
@@ -298,40 +328,28 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		tim, err := time.ParseInLocation("20060102_150405", formLink.Get("lf_linkdate"), time.Now().Location()) // can we do any better?
+		fv := func(s string) string { return formLink.Get(s) }
+
+		tim, err := time.ParseInLocation(ShaarliDate, fv("lf_linkdate"), now.Location()) // can we do any better?
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
 
-		w.Header().Set("Content-Type", "text/xml; charset=utf-8")
-
-		rawText := func(s string) { io.WriteString(w, s) }
-		xmlText := func(s string) { xml.EscapeText(w, []byte(s)) }
-		xmlForm := func(s string) { xmlText(formLink.Get(s)) }
-
-		rawText("<?xml version='1.0' encoding='UTF-8' ?>")
-		rawText("<posts user='")
-		xmlText(uid)
-		rawText("' dt='")
-		xmlText(now.Format("2006-01-02"))
-		rawText("' tag=''>")
-		rawText("<post href='")
-		xmlForm("lf_url")
-		rawText("' hash='")
-		xmlForm("lf_linkdate")
-		rawText("' description='")
-		xmlForm("lf_title")
-		rawText("' extended='")
-		xmlForm("lf_description")
-		rawText("' tag='")
-		xmlForm("lf_tags")
-		rawText("' time='")
-		xmlText(tim.Format(time.RFC3339))
-		rawText("' others='")
-		xmlText("0")
-		rawText("' />")
-		rawText("</posts>")
+		raw(xml.Header)
+		elmS("posts", false,
+			"user", uid,
+			"dt", tim.Format(IsoDate),
+			"tag", fv("lf_tags"))
+		elmS("post", true,
+			"href", fv("lf_url"),
+			"hash", fv("lf_linkdate"),
+			"description", fv("lf_title"),
+			"extended", fv("lf_description"),
+			"tag", fv("lf_tags"),
+			"time", tim.Format(time.RFC3339),
+			"others", "0")
+		elmE("posts")
 
 		return
 	case "/v1/posts/recent":
@@ -356,12 +374,14 @@ func formValuesFromReader(r io.Reader, name string) (ret url.Values, err error) 
 		return ret, err
 	}
 
-	for _, form := range scrape.FindAll(root, func(n *html.Node) bool { return atom.Form == n.DataAtom }) {
-		if name != scrape.Attr(form, "name") && name != scrape.Attr(form, "id") {
-			continue
-		}
+	for _, form := range scrape.FindAll(root, func(n *html.Node) bool {
+		return atom.Form == n.DataAtom &&
+			(name == scrape.Attr(n, "name") || name == scrape.Attr(n, "id"))
+	}) {
 		ret := url.Values{}
-		for _, inp := range scrape.FindAll(form, func(n *html.Node) bool { return atom.Input == n.DataAtom || atom.Textarea == n.DataAtom }) {
+		for _, inp := range scrape.FindAll(form, func(n *html.Node) bool {
+			return atom.Input == n.DataAtom || atom.Textarea == n.DataAtom
+		}) {
 			n := scrape.Attr(inp, "name")
 			if n == "" {
 				n = scrape.Attr(inp, "id")
