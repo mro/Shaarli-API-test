@@ -2,19 +2,20 @@
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns="http://usefulinc.com/ns/doap#">
   <Project>
-    <bug-database rdf:resource="https://gogs.mro.name/mro/Shaarli-API-test/issues"/>
-    <homepage rdf:resource="http://purl.mro.name/ios/Shaarli-API-test"/>
-    <license rdf:resource="https://gogs.mro.name/mro/Shaarli-API-test/raw/master/LICENSE"/>
+    <bug-database rdf:resource="https://code.mro.name/mro/Shaarli-API-test/issues"/>
+    <homepage rdf:resource="https://code.mro.name/mro/Shaarli-API-test/"/>
+    <license rdf:resource="https://code.mro.name/mro/Shaarli-API-test/src/master/LICENSE"/>
     <maintainer rdf:resource="http://mro.name/~me"/>
     <name>Shaarli-API-test</name>
     <programming-language>shell</programming-language>
+    <programming-language>golang</programming-language>
     <repository>
       <GitRepository>
-        <browse rdf:resource="https://gogs.mro.name/mro/Shaarli-API-test"/>
-        <location rdf:resource="https://gogs.mro.name/mro/Shaarli-API-test.git"/>
+        <browse rdf:resource="https://code.mro.name/mro/Shaarli-API-test"/>
+        <location rdf:resource="https://code.mro.name/mro/Shaarli-API-test.git"/>
       </GitRepository>
     </repository>
     <short-description>Run sh test scripts against multiple PHP & http://github.com/shaarli/Shaarli versions.</short-description>
-    <wiki rdf:resource="https://gogs.mro.name/mro/Shaarli-API-test/wiki"/>
+    <wiki rdf:resource="https://code.mro.name/mro/Shaarli-API-test/wiki"/>
   </Project>
 </rdf:RDF>

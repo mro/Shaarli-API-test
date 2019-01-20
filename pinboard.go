@@ -108,9 +108,51 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	client := http.Client{Jar: jar}
 
 	switch path_info {
-	case "":
-		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/plain; charset=utf-8")
-		raw("\n", "subset conforming https://pinboard.in/api/", "\n")
+	case "",
+		"/about":
+		base := *r.URL
+		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about") + "/"
+		http.Redirect(w, r, base.Path, http.StatusFound)
+
+		return
+	case "/about/":
+		// w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "application/rdf+xml")
+		raw(`<?xml version="1.0" encoding="utf-8"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns="http://usefulinc.com/ns/doap#">
+  <Project>
+    <name xml:lang="en">🛠 Shaarli Pinboard API</name>
+    <short-description xml:lang="en">subset conforming https://pinboard.in/api/</short-description>
+    <implements rdf:resource="https://pinboard.in/api/"/>
+    <platform rdf:resource="https://sebsauvage.net/wiki/doku.php?id=php:shaarli"/>
+    <homepage rdf:resource="https://code.mro.name/mro/Shaarli-API-test/"/>
+    <bug-database rdf:resource="https://code.mro.name/mro/Shaarli-API-test/issues"/>
+    <wiki rdf:resource="https://code.mro.name/mro/Shaarli-API-test/wiki"/>
+    <license rdf:resource="https://code.mro.name/mro/Shaarli-API-test/src/master/LICENSE"/>
+    <maintainer rdf:resource="http://mro.name/~me"/>
+    <programming-language>golang</programming-language>
+    <category>microblogging</category>
+    <category>shaarli</category>
+    <category>nodb</category>
+    <category>api</category>
+    <category>pinboard</category>
+    <category>delicious</category>
+    <category>cgi</category>
+    <repository>
+      <GitRepository>
+        <browse rdf:resource="https://code.mro.name/mro/Shaarli-API-test"/>
+        <location rdf:resource="https://code.mro.name/mro/Shaarli-API-test.git"/>
+      </GitRepository>
+    </repository>
+    <release>
+      <Version>
+        <name>`, version, "+", GitSHA1, `</name>
+        <revision>`, GitSHA1, `</revision>
+        <description>…</description>
+      </Version>
+    </release>
+  </Project>
+</rdf:RDF>`)
 
 		return
 	case "/v1/posts/add":
@@ -352,16 +394,16 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		elmE("posts")
 
 		return
-	case "/v1/posts/recent":
-	case "/v1/posts/dates":
-	case "/v1/posts/suggest":
-	case "/v1/tags/get":
-	case "/v1/tags/delete":
-	case "/v1/tags/rename":
-	case "/v1/user/secret":
-	case "/v1/user/api_token":
-	case "/v1/notes/list":
-	case "/v1/notes/ID":
+	case "/v1/posts/recent",
+		"/v1/posts/dates",
+		"/v1/posts/suggest",
+		"/v1/tags/get",
+		"/v1/tags/delete",
+		"/v1/tags/rename",
+		"/v1/user/secret",
+		"/v1/user/api_token",
+		"/v1/notes/list",
+		"/v1/notes/ID":
 		http.Error(w, "Not Implemented", http.StatusNotImplemented)
 		return
 	}

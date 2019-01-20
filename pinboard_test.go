@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
+	"path"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -28,6 +29,8 @@ import (
 
 func TestURL(t *testing.T) {
 	t.Parallel()
+
+	assert.Equal(t, "a/b", path.Join("a", "b", "/"), "ach")
 
 	u, _ := url.Parse("https://l.mro.name/pinboard.cgi/v1/info")
 	assert.Equal(t, "https://l.mro.name/pinboard.cgi/v1/info", u.String(), "ach")
