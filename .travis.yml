@@ -32,7 +32,7 @@ env:
   - GITHUB=shaarli/Shaarli/archive/v0.7.0
   - GITHUB=shaarli/Shaarli/archive/v0.8.5
   - GITHUB=shaarli/Shaarli/archive/v0.9.5
-  - GITHUB=shaarli/Shaarli/archive/v0.10.0
+  - GITHUB=shaarli/Shaarli/archive/v0.10.3
   - GITHUB=shaarli/Shaarli/archive/master
   - GITHUB=shaarli/Shaarli/archive/stable
   - GITHUB=shaarli/Shaarli/archive/webdesign
@@ -46,9 +46,12 @@ matrix:
   - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
   - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
   - env: GITHUB=shaarli/Shaarli/archive/webdesign
-  - { php: 5.5, env: GITHUB=shaarli/Shaarli/archive/v0.10.0 }
-  - { php: 5.5, env: GITHUB=shaarli/Shaarli/archive/master }
-  - { php: 5.5, env: GITHUB=shaarli/Shaarli/archive/stable }
+  - php: 5.5
+    env: GITHUB=shaarli/Shaarli/archive/v0.10.3
+  - php: 5.5
+    env: GITHUB=shaarli/Shaarli/archive/master
+  - php: 5.5
+    env: GITHUB=shaarli/Shaarli/archive/stable
 before_install:
 - sh scripts/download.sh
 - go get github.com/yhat/scrape
