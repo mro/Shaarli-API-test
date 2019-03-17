@@ -88,7 +88,6 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	elmE := func(e string) { raw("</", e, ">", "\n") }
 
 	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
-	now := time.Now()
 	path_info := os.Getenv("PATH_INFO")
 	base := *r.URL
 	base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "..", "index.php")
@@ -372,7 +371,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		fv := func(s string) string { return formLink.Get(s) }
 
-		tim, err := time.ParseInLocation(ShaarliDate, fv("lf_linkdate"), now.Location()) // can we do any better?
+		tim, err := time.ParseInLocation(ShaarliDate, fv("lf_linkdate"), time.Local) // can we do any better?
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return

@@ -15,7 +15,7 @@
         <location rdf:resource="https://code.mro.name/mro/Shaarli-API-test.git"/>
       </GitRepository>
     </repository>
-    <short-description>Run sh test scripts against multiple PHP & http://github.com/shaarli/Shaarli versions.</short-description>
+    <short-description>Run sh test scripts against multiple PHP &amp; http://github.com/shaarli/Shaarli versions.</short-description>
     <wiki rdf:resource="https://code.mro.name/mro/Shaarli-API-test/wiki"/>
   </Project>
 </rdf:RDF>
