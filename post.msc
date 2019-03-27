@@ -1,0 +1,36 @@
+# 
+# http://www.mcternan.me.uk/mscgen/
+# mscgen -T png post.msc ; optipng -o 7 post.png
+msc {
+  hscale = "1";
+
+  ios [label="Client"],
+  cgi [label="pinboard4shaarli.cgi"],
+  php [label="shaarli.php"],
+  www [label="www.example.com"];
+
+  ios -> cgi [ label = "GET get?url=..." ];
+  cgi -> php [ label = "GET post=..." ];
+  cgi << php [ label = "loginform"];
+  cgi -> php [ label = "POST login" ];
+  cgi << php [ label = "301" ];
+  cgi -> php [ label = "GET post=..." ];
+  php -> www [ label = "GET" ];
+  php << www [ label = "<title>" ];
+  cgi << php [ label = "linkform" ];
+  ios << cgi [ label = "cookie+token?" ];
+  ...;
+  ---  [ label = "manually edit description & tags" ];
+  ios -> cgi [ label = "GET add?url=..." ];
+  cgi -> php [ label = "GET post=..." ];
+  cgi << php [ label = "loginform"];
+  cgi -> php [ label = "POST login" ];
+  cgi << php [ label = "301" ];
+  cgi -> php [ label = "GET post=..." ];
+  php -> www [ label = "GET" ];
+  php << www [ label = "<title>" ];
+  cgi << php [ label = "linkform"];
+  cgi -> php [ label = "POST post=..." ];
+  cgi << php;
+  ios << cgi;
+}

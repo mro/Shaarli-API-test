@@ -1,0 +1,406 @@
+---
+openapi: 3.0.1
+info:
+  title: Subset of the Pinboard API
+  description: |-
+    The Pinboard API is a way to interact programatically with your bookmarks,
+    notes and other Pinboard data.
+
+    Wherever possible the Pinboard API uses the same syntax and method names as
+    the Delicious V1 API. See differences from Delicious for a full list of
+    areas where the APIs diverge.
+
+    Future issues may be
+    - auto-fill on /posts/get for unknown urls
+    - non UTC timezones
+    - enclosures (images, thumbnails)
+  contact:
+    email: pinboard-api@mro.name
+  version: '1'
+externalDocs:
+  description: Pinboard API
+  url: https://pinboard.in/api/
+servers:
+- url: https://demo.mro.name/shaarli-v0.41b/shaarlios.cgi/v1
+- url: https://demo.mro.name/shaarli-v0.10.2/shaarlios.cgi/v1
+- url: https://demo.mro.name/shaarligo/shaarligo.cgi/v1
+- url: https://api.pinboard.in/v1
+paths:
+  "/about":
+    get:
+      tags:
+      - about
+      summary: a DOAP RDF+XML
+      operationId: aboutDoap
+      responses:
+        '200':
+          description: a DOAP RDF+XML
+          content:
+            application/rdf+xml:
+              schema:
+                xml:
+                  name: rdf:RDF
+  "/user/api_token":
+    get:
+      tags:
+      - user
+      summary: Returns the user's API token (for making API calls without a password).
+      operationId: apiToken
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      responses:
+        '200':
+          description: A auth-token
+          content:
+            application/xml:
+              schema:
+                xml:
+                  name: result
+                type: string
+                example: XOG86E7JIYMI
+            application/json:
+              schema:
+                properties:
+                  result:
+                    example: XOG86E7JIYMI
+        '501':
+          description: |-
+            Cannot tell a token. Imagine a stateless façade hiding a shaarli backend that has no idea of such a thing as an API token.
+            Only if auth was successful, otherwise you get a 401/403.
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: 501 token auth not supported, use HTTP Basic.
+  "/posts/add":
+    get:
+      tags:
+      - posts
+      summary: Add a bookmark. Arguments with shaded background are required.
+      operationId: addPost
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      - "$ref": "#/components/parameters/urlParam"
+      - name: description
+        in: query
+        description: Title of the item. This field is unfortunately named 'description'
+          for backwards compatibility with the delicious API
+        required: true
+        schema:
+          "$ref": "#/components/schemas/title"
+      - name: extended
+        in: query
+        description: Description of the item. Called 'extended' for backwards compatibility
+          with delicious API
+        schema:
+          "$ref": "#/components/schemas/text"
+      - name: tags
+        in: query
+        description: List of up to 100 tags
+        schema:
+          "$ref": "#/components/schemas/tag"
+      - name: dt
+        in: query
+        description: creation time for this bookmark. Defaults to current time. Datestamps
+          more than 10 minutes ahead of server time will be reset to current server
+          time
+        schema:
+          "$ref": "#/components/schemas/datetime"
+      - name: replace
+        in: query
+        description: Replace any existing bookmark with this URL. Default is yes.
+          If set to no, will throw an error if bookmark exists
+        schema:
+          "$ref": "#/components/schemas/yes_no"
+      - name: shared
+        in: query
+        description: Make bookmark public. Default is 'yes' unless user has enabled
+          the 'save all bookmarks as private' user setting, in which case default
+          is 'no'
+        schema:
+          "$ref": "#/components/schemas/yes_no"
+      - name: toread
+        in: query
+        description: Marks the bookmark as unread. Default is 'no'
+        schema:
+          "$ref": "#/components/schemas/yes_no"
+      responses:
+        '200':
+          "$ref": "#/components/responses/Done"
+  "/posts/get":
+    get:
+      tags:
+      - posts
+      summary: Returns one or more posts on a single day matching the arguments. If
+        no date or url is given, date of most recent bookmark will be used.
+      description: If called with a yet unknown URL, http GET the title and guess
+        tags from the URL
+      operationId: getPost
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      - name: tag
+        in: query
+        description: filter by up to three tags
+        schema:
+          "$ref": "#/components/schemas/tag"
+      - name: dt
+        in: query
+        description: return results bookmarked on this day
+        schema:
+          "$ref": "#/components/schemas/date"
+      - "$ref": "#/components/parameters/urlParamOpt"
+      - name: meta
+        in: query
+        description: include a change detection signature in a meta attribute
+        schema:
+          "$ref": "#/components/schemas/yes_no"
+      responses:
+        '200':
+          description: foo
+          content:
+            application/xml:
+              schema:
+                "$ref": "#/components/schemas/posts"
+  "/posts/delete":
+    get:
+      tags:
+      - posts
+      summary: Delete a bookmark.
+      operationId: deletePost
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      - "$ref": "#/components/parameters/urlParam"
+      responses:
+        '200':
+          "$ref": "#/components/responses/Done"
+  "/tags/get":
+    get:
+      tags:
+      - tags
+      summary: Returns a full list of the user's tags along with the number of times
+        they were used.
+      operationId: getTags
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      responses:
+        '200':
+          description: All tags
+          content:
+            application/xml:
+              schema:
+                xml:
+                  name: tags
+                properties:
+                  tag:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        count:
+                          xml:
+                            attribute: true
+                          type: integer
+                          example: 5
+                        tag:
+                          xml:
+                            attribute: true
+                          example: foo
+  "/tags/delete":
+    get:
+      tags:
+      - tags
+      summary: Delete an existing tag.
+      operationId: deleteTag
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      - name: tag
+        in: query
+        required: true
+        schema:
+          "$ref": "#/components/schemas/tag"
+      responses:
+        '200':
+          "$ref": "#/components/responses/Done"
+  "/tags/rename":
+    get:
+      tags:
+      - tags
+      summary: Rename an tag, or fold it in to an existing tag.
+      operationId: renameTag
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      - name: old
+        in: query
+        description: 'note: match is not case sensitive'
+        required: true
+        schema:
+          "$ref": "#/components/schemas/tag"
+      - name: new
+        in: query
+        description: if empty, nothing will happen
+        required: true
+        schema:
+          "$ref": "#/components/schemas/tag"
+      responses:
+        '200':
+          "$ref": "#/components/responses/Done"
+components:
+  parameters:
+    formatParam:
+      name: format
+      in: query
+      schema:
+        "$ref": "#/components/schemas/format"
+    urlParam:
+      name: url
+      in: query
+      required: true
+      schema:
+        "$ref": "#/components/schemas/URL"
+    urlParamOpt:
+      name: url
+      in: query
+      schema:
+        "$ref": "#/components/schemas/URL"
+  responses:
+    Done:
+      description: A normal response
+      content:
+        application/xml:
+          schema:
+            xml:
+              name: result
+            properties:
+              code:
+                example:
+                - done
+                - something went wrong
+                xml:
+                  attribute: true
+  schemas:
+    tag:
+      type: string
+      description: up to 255 characters. May not contain commas or whitespace. Please
+        be aware that tags beginning with a period are treated as private and trigger
+        special private tag semantics.
+    URL:
+      type: string
+      description: as defined by RFC 3986. Allowed schemes are http, https, javascript,
+        mailto, ftp and file. The Safari-specific feed scheme is allowed but will
+        be treated as a synonym for http.
+    title:
+      type: string
+      description: up to 255 characters long
+    text:
+      type: string
+      description: up to 65536 characters long. Any URLs will be auto-linkified when
+        displayed.
+    datetime:
+      type: string
+      description: 'UTC timestamp in this format: 2010-12-11T19:48:02Z. Valid date
+        range is Jan 1, 1 AD to January 1, 2100 (but see note below about future timestamps).'
+      example: '2010-12-11T19:48:02Z'
+    date:
+      type: string
+      description: 'UTC date in this format: 2010-12-11. Same range as datetime above'
+      example: '2010-12-11'
+    yes_no:
+      type: string
+      description: the literal string 'yes' or 'no'
+      example: 'no'
+    md5:
+      type: string
+      description: 32 character hexadecimal MD5 hash
+    integer:
+      type: integer
+      description: integer in the range 0..2^32
+    format:
+      type: string
+      description: the literal string 'json' or 'xml'
+      example: json
+      default: xml
+    posts:
+      type: array
+      properties:
+        dt:
+          type: string
+          xml:
+            attribute: true
+          example: '2010-12-11T19:48:02Z'
+        tag:
+          type: string
+          xml:
+            attribute: true
+          example: webdev
+        user:
+          type: string
+          xml:
+            attribute: true
+          example: user
+      items:
+        type: object
+        xml:
+          name: post
+        properties:
+          href:
+            type: string
+            xml:
+              attribute: true
+            example: http://www.howtocreate.co.uk/tutorials/texterise.php?dom=1
+          description:
+            type: string
+            xml:
+              attribute: true
+            example: JavaScript DOM reference
+          extended:
+            type: string
+            xml:
+              attribute: true
+            example: dom reference
+          hash:
+            type: string
+            xml:
+              attribute: true
+            example: c0238dc0c44f07daedd9a1fd9bbdeebd
+          meta:
+            type: string
+            xml:
+              attribute: true
+            example: 92959a96fd69146c5fe7cbde6e5720f2
+          others:
+            type: string
+            xml:
+              attribute: true
+            example: 55
+          tag:
+            type: string
+            xml:
+              attribute: true
+            example: dom javascript webdev
+          time:
+            type: string
+            xml:
+              attribute: true
+            example: '2005-11-28T05:26:09.000Z'
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    AuthToken:
+      type: apiKey
+      in: query
+      name: auth_token
+      description: |-
+        An authentication token is a short opaque identifier in the form
+        'username:TOKEN'.
+
+        Users can find their API token on their settings page. They can request
+        a new token at any time; this will invalidate their previous API token.
+
+        Any third-party sites making API requests on behalf of Pinboard users
+        from an outside server MUST use this authentication method instead of
+        storing the user's password. Violators will be blocked from using the
+        API.
+security:
+- AuthToken: []
+- BasicAuth: []
