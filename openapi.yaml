@@ -21,8 +21,8 @@ externalDocs:
   description: Pinboard API
   url: https://pinboard.in/api/
 servers:
-- url: https://demo.mro.name/shaarli-v0.41b/shaarlios.cgi/v1
-- url: https://demo.mro.name/shaarli-v0.10.2/shaarlios.cgi/v1
+- url: https://demo.mro.name/shaarli-v0.41b/pinboard4shaarli.cgi/v1
+- url: https://demo.mro.name/shaarli-v0.10.2/pinboard4shaarli.cgi/v1
 - url: https://demo.mro.name/shaarligo/shaarligo.cgi/v1
 - url: https://api.pinboard.in/v1
 paths:

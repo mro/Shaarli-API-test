@@ -19,6 +19,7 @@ package main
 
 import (
 	"encoding/xml"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -27,6 +28,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -51,6 +53,10 @@ func trace(name string) (string, time.Time) { return name, time.Now() }
 func un(name string, start time.Time)       { log.Printf("%s took %s", name, time.Since(start)) }
 
 func main() {
+	if cli() {
+		return
+	}
+
 	if true {
 		// lighttpd doesn't seem to like more than one (per-vhost) server.breakagelog
 		log.SetOutput(os.Stderr)
@@ -60,6 +66,64 @@ func main() {
 	if err := cgi.Serve(http.HandlerFunc(handleMux)); err != nil {
 		log.Fatal(err)
 	}
+}
+
+/// $ ./pinboard4shaarli.cgi --help | -h | -?
+/// $ ./pinboard4shaarli.cgi https://demo.shaarli.org/pinboard4shaarli.cgi/v1/about/
+/// $ ./pinboard4shaarli.cgi 'https://uid:pwd@demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/get?url=http://m.heise.de/12'
+/// $ ./pinboard4shaarli.cgi 'https://uid:pwd@demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/add?url=http://m.heise.de/12&description=foo'
+/// todo
+/// $ ./pinboard4shaarli.cgi https://uid:pwd@demo.shaarli.org/pinboard4shaarli.cgi/v1/user/api_token
+/// $ ./pinboard4shaarli.cgi https://demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/get --auth_token=uid:XYZUUU --url=https://m.heise.de/foo
+///
+func cli() bool {
+	// test if we're running cli
+	if len(os.Args) == 1 {
+		return false
+	}
+
+	for i, a := range os.Args[2:] {
+		fmt.Fprintf(os.Stderr, "  %d: %s\n", i, a)
+	}
+
+	// todo?: add parameters
+
+	if req, err := http.NewRequest(http.MethodGet, os.Args[1], nil); err != nil {
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
+	} else {
+		usr := req.URL.User
+		if pwd, isset := usr.Password(); isset {
+			req.SetBasicAuth(usr.Username(), pwd)
+		}
+		bin := filepath.Base(os.Args[0])
+		str := req.URL.Path
+		idx := strings.LastIndex(str, bin)
+		os.Setenv("PATH_INFO", str[idx+len(bin):])
+		handleMux(reqWri{r: req, f: os.Stderr, h: http.Header{}}, req)
+	}
+
+	return true
+}
+
+type reqWri struct {
+	r *http.Request
+	f io.Writer
+	h http.Header
+}
+
+func (w reqWri) Header() http.Header {
+	return w.h
+}
+func (w reqWri) Write(b []byte) (int, error) {
+	return w.f.Write(b)
+}
+func (w reqWri) WriteHeader(statusCode int) {
+	const LF = "\r\n"
+	fmt.Fprintf(w.f, "%s %d %s"+LF, w.r.Proto, statusCode, http.StatusText(statusCode))
+	for k, v := range w.Header() {
+		fmt.Fprintf(w.f, "%s: %s"+LF, k, strings.Join(v, " "))
+	}
+	fmt.Fprintf(w.f, LF)
 }
 
 // https://pinboard.in/api
@@ -120,14 +184,15 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns="http://usefulinc.com/ns/doap#">
   <Project>
-    <name xml:lang="en">🛠 Shaarli Pinboard API</name>
+    <name xml:lang="en">🛠 Pinboard API for Shaarlis</name>
     <short-description xml:lang="en">subset conforming https://pinboard.in/api/</short-description>
     <implements rdf:resource="https://pinboard.in/api/"/>
+    <implements rdf:resource="https://code.mro.name/mro/pinboard4shaarli/src/develop/openapi.yaml"/>
     <platform rdf:resource="https://sebsauvage.net/wiki/doku.php?id=php:shaarli"/>
-    <homepage rdf:resource="https://code.mro.name/mro/Shaarli-API-test/"/>
-    <bug-database rdf:resource="https://code.mro.name/mro/Shaarli-API-test/issues"/>
-    <wiki rdf:resource="https://code.mro.name/mro/Shaarli-API-test/wiki"/>
-    <license rdf:resource="https://code.mro.name/mro/Shaarli-API-test/src/master/LICENSE"/>
+    <homepage rdf:resource="https://code.mro.name/mro/pinboard4shaarli/"/>
+    <bug-database rdf:resource="https://code.mro.name/mro/pinboard4shaarli/issues"/>
+    <wiki rdf:resource="https://code.mro.name/mro/pinboard4shaarli/wiki"/>
+    <license rdf:resource="https://code.mro.name/mro/pinboard4shaarli/src/master/LICENSE"/>
     <maintainer rdf:resource="http://mro.name/~me"/>
     <programming-language>golang</programming-language>
     <category>microblogging</category>
@@ -139,8 +204,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
     <category>cgi</category>
     <repository>
       <GitRepository>
-        <browse rdf:resource="https://code.mro.name/mro/Shaarli-API-test"/>
-        <location rdf:resource="https://code.mro.name/mro/Shaarli-API-test.git"/>
+        <browse rdf:resource="https://code.mro.name/mro/pinboard4shaarli"/>
+        <location rdf:resource="https://code.mro.name/mro/pinboard4shaarli.git"/>
       </GitRepository>
     </repository>
     <release>

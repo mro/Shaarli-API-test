@@ -19,7 +19,7 @@ parm="" # "-u"
     github.com/yhat/scrape
 }
 
-PROG_NAME="pinboard"
+PROG_NAME="pinboard4shaarli"
 VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"
 
 rm "${PROG_NAME}"-*-"${VERSION}" 2>/dev/null
@@ -30,13 +30,16 @@ go fmt && go vet && go test --short || { exit $?; }
 "${say}" "ok"
 
 "${say}" "build localhost"
-go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o ~/public_html/b/pinboard.cgi || { echo "Aua" 1>&2 && exit 1; }
+go build -ldflags "-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o ~/"public_html/b/${PROG_NAME}.cgi" || { echo "Aua" 1>&2 && exit 1; }
 "${say}" "ok"
+ls -l ~/"public_html/b/${PROG_NAME}.cgi"
 # open "http://localhost/~$(whoami)/b/pinboard.cgi"
 
 "${say}" bench
 go test -bench=.
 "${say}" ok
+
+exit
 
 "${say}" "linux build"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
@@ -51,7 +54,7 @@ env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-p
 gzip --force --best "${PROG_NAME}"-*-"${VERSION}" \
 && chmod a-x "${PROG_NAME}"-*-"${VERSION}.gz" \
 && rsync -vp --bwlimit=1234 "${PROG_NAME}"-*-"${VERSION}.gz" "simply:/tmp/" \
-&& ssh simply "sh -c 'cd /var/www/lighttpd/demo.mro.name/ && gunzip < "/tmp/${PROG_NAME}-linux-amd64-${VERSION}.gz" > pinboard.cgi && chmod a+x pinboard.cgi && ls -l pinboard?cgi*'"
+&& ssh simply "sh -c 'cd /var/www/lighttpd/demo.mro.name/ && gunzip < "/tmp/${PROG_NAME}-linux-amd64-${VERSION}.gz" > "${PROG_NAME}.cgi" && chmod a+x "${PROG_NAME}.cgi" && ls -l "${PROG_NAME}"?cgi*'"
 
 # ssh simply "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/pinboard?cgi* . && ls -l pinboard?cgi*'"
 "${say}" "ok"
@@ -60,6 +63,6 @@ exit 0
 
 "${say}" "vario"
 # scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
-ssh vario "sh -c 'cd ~/mro.name/webroot/b/ && curl -L http://purl.mro.name/pinboard_cgi.gz | tee pinboard_cgi.gz | gunzip > pinboard.cgi && chmod a+x pinboard.cgi && ls -l pinboard?cgi*'"
+ssh vario "sh -c 'cd ~/mro.name/webroot/b/ && curl -L http://purl.mro.name/${PROG_NAME}_cgi.gz | tee ${PROG_NAME}_cgi.gz | gunzip > ${PROG_NAME}.cgi && chmod a+x ${PROG_NAME}.cgi && ls -l ${prog_NAME}?cgi*'"
 "${say}" "ok"
 
