@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2019-2019 Marcus Rohrmoser, https://code.mro.name/mro/Shaarli-API-test
+// Copyright (C) 2019-2019 Marcus Rohrmoser, https://code.mro.name/mro/pinboard4shaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,7 +18,9 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -83,6 +85,18 @@ func TestURL(t *testing.T) {
 	v.Set("post", "uhu")
 	base.RawQuery = v.Encode()
 	assert.Equal(t, "https://l.mro.name/pinboard.cgi/../index.php?post=uhu", base.String(), "ach")
+}
+
+func TestForm(t *testing.T) {
+	t.Parallel()
+
+	f := url.Values{}
+	f.Set("login", "u i d")
+	f.Set("password", "p & =d")
+	r := bytes.NewReader([]byte(f.Encode()))
+	b, err := ioutil.ReadAll(r)
+	assert.Nil(t, err, "zzz")
+	assert.Equal(t, "login=u+i+d&password=p+%26+%3Dd", string(b), "zzz")
 }
 
 func TestFormValuesFromHtml(t *testing.T) {

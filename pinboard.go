@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2019-2019 Marcus Rohrmoser, https://code.mro.name/mro/Shaarli-API-test
+// Copyright (C) 2019-2019 Marcus Rohrmoser, https://code.mro.name/mro/pinboard4shaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -128,35 +129,13 @@ func (w reqWri) WriteHeader(statusCode int) {
 
 // https://pinboard.in/api
 func handleMux(w http.ResponseWriter, r *http.Request) {
-	raw := func(s ...string) {
-		for _, txt := range s {
-			io.WriteString(w, txt)
-		}
-	}
-	elmS := func(e string, close bool, atts ...string) {
-		raw("<", e)
-		for i, v := range atts {
-			if i%2 == 0 {
-				raw(" ", v, "=")
-			} else {
-				raw("'")
-				xml.EscapeText(w, []byte(v))
-				raw("'")
-			}
-		}
-		if close {
-			raw(" /")
-		}
-		raw(">", "\n")
-	}
-	elmE := func(e string) { raw("</", e, ">", "\n") }
-
 	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
 	path_info := os.Getenv("PATH_INFO")
 	base := *r.URL
 	base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "..", "index.php")
 
-	w.Header().Set(http.CanonicalHeaderKey("X-Powered-By"), strings.Join([]string{"https://code.mro.name/mro/pinboard4shaarli", "#", version, "+", GitSHA1}, ""))
+	agent := strings.Join([]string{"https://code.mro.name/mro/pinboard4shaarli", "#", version, "+", GitSHA1}, "")
+	w.Header().Set(http.CanonicalHeaderKey("X-Powered-By"), agent)
 	w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/xml; charset=utf-8")
 
 	// https://stackoverflow.com/a/18414432
@@ -171,13 +150,15 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	client := http.Client{Jar: jar}
 
 	switch path_info {
-	case "":
+	case
+		"":
 		base := *r.URL
 		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about")
 		http.Redirect(w, r, base.Path, http.StatusFound)
 
 		return
-	case "/about":
+	case
+		"/about":
 		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "application/rdf+xml")
 		if b, err := Asset("doap.rdf"); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -185,7 +166,8 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			w.Write(b)
 		}
 		return
-	case "/v1/openapi.yaml":
+	case
+		"/v1/openapi.yaml":
 		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/x-yaml; charset=utf-8")
 		if b, err := Asset("openapi.yaml"); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -193,11 +175,12 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			w.Write(b)
 		}
 		return
-	case "/v1/posts/get":
+	case
+		"/v1/posts/get":
 		// pretend to add, but don't actually do it, but return the form preset values.
 		uid, pwd, ok := r.BasicAuth()
 		if !ok {
-			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
+			http.Error(w, "Basic Pre-Authentication required.", http.StatusForbidden)
 			return
 		}
 
@@ -236,7 +219,13 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		v.Set("post", p_url)
 		base.RawQuery = v.Encode()
 
-		resp, err := client.Get(base.String())
+		req, err := http.NewRequest(http.MethodGet, base.String(), nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+		resp, err := client.Do(req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
@@ -250,7 +239,16 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		formLogi.Set("login", uid)
 		formLogi.Set("password", pwd)
-		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
+
+		req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLogi.Encode())))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
+		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+		resp, err = client.Do(req)
+		// resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
@@ -276,30 +274,36 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		raw(xml.Header)
-		elmS("posts", false,
-			"user", uid,
-			"dt", tim.Format(IsoDate),
-			"tag", fv("lf_tags"))
-		elmS("post", true,
-			"href", fv("lf_url"),
-			"hash", fv("lf_linkdate"),
-			"description", fv("lf_title"),
-			"extended", fv("lf_description"),
-			"tag", fv("lf_tags"),
-			"time", tim.Format(time.RFC3339),
-			"others", "0")
-		elmE("posts")
+		w.Write([]byte(xml.Header))
+		pp := Posts{
+			User: uid,
+			Dt:   tim.Format(IsoDate),
+			Tag:  fv("lf_tags"),
+			Posts: []Post{
+				Post{
+					Href:        fv("lf_url"),
+					Hash:        fv("lf_linkdate"),
+					Description: fv("lf_title"),
+					Extended:    fv("lf_description"),
+					Tag:         fv("lf_tags"),
+					Time:        tim.Format(time.RFC3339),
+				},
+			},
+		}
+		enc := xml.NewEncoder(w)
+		enc.Encode(pp)
+		enc.Flush()
 
 		return
-	case "/v1/posts/add":
+	case
+		"/v1/posts/add":
 		// extract parameters
 		// agent := r.Header.Get("User-Agent")
 		shared := true
 
 		uid, pwd, ok := r.BasicAuth()
 		if !ok {
-			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
+			http.Error(w, "Basic Pre-Authentication required.", http.StatusForbidden)
 			return
 		}
 
@@ -337,7 +341,13 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		v.Set("title", p_description)
 		base.RawQuery = v.Encode()
 
-		resp, err := client.Get(base.String())
+		req, err := http.NewRequest(http.MethodGet, base.String(), nil)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+		resp, err := client.Do(req)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
@@ -351,7 +361,16 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 
 		formLogi.Set("login", uid)
 		formLogi.Set("password", pwd)
-		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
+
+		req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLogi.Encode())))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
+		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+		resp, err = client.Do(req)
+		// resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
@@ -380,19 +399,30 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			formLink.Set("lf_private", "lf_private")
 		}
 
-		resp, err = client.PostForm(resp.Request.URL.String(), formLink)
+		req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLink.Encode())))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
+		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+		resp, err = client.Do(req)
+		// resp, err = client.PostForm(resp.Request.URL.String(), formLink)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
 		resp.Body.Close()
 
-		raw(xml.Header)
-		elmS("result", true,
-			"code", "done")
+		w.Write([]byte(xml.Header))
+		pp := Result{Code: "done"}
+		enc := xml.NewEncoder(w)
+		enc.Encode(pp)
+		enc.Flush()
 
 		return
-	case "/v1/posts/delete":
+	case
+		"/v1/posts/delete":
 		_, _, ok := r.BasicAuth()
 		if !ok {
 			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
@@ -412,37 +442,24 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 		// p_url := params["url"][0]
 
-		elmS("result", true,
-			"code", "not implemented yet")
+		w.Write([]byte(xml.Header))
+		pp := Result{Code: "not implemented yet"}
+		enc := xml.NewEncoder(w)
+		enc.Encode(pp)
+		enc.Flush()
 		return
-	case "/v1/posts/update":
-		_, _, ok := r.BasicAuth()
-		if !ok {
-			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
-			return
-		}
-
-		if http.MethodGet != r.Method {
-			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
-			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
-			return
-		}
-
-		raw(xml.Header)
-		elmS("update", true,
-			"time", "2011-03-24T19:02:07Z")
-		return
-
-	case "/v1/posts/recent",
+	case
+		"/v1/notes/ID",
+		"/v1/notes/list",
 		"/v1/posts/dates",
 		"/v1/posts/suggest",
-		"/v1/tags/get",
+		"/v1/posts/update",
 		"/v1/tags/delete",
+		"/v1/tags/get",
 		"/v1/tags/rename",
-		"/v1/user/secret",
 		"/v1/user/api_token",
-		"/v1/notes/list",
-		"/v1/notes/ID":
+		"/v1/user/secret",
+		"/v1/posts/recent":
 		http.Error(w, "Not Implemented", http.StatusNotImplemented)
 		return
 	}
