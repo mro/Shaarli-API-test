@@ -13,11 +13,14 @@ parm="" # "-u"
 {
   "${say}" "go get"
     go get ${parm} \
+    github.com/jteeuwen/go-bindata/... \
     golang.org/x/net/html \
     \
     github.com/stretchr/testify \
     github.com/yhat/scrape
 }
+
+"$(go env GOPATH)/bin/go-bindata" doap.rdf openapi.yaml
 
 PROG_NAME="pinboard4shaarli"
 VERSION="$(grep -F 'version = ' version.go | cut -d \" -f 2)"

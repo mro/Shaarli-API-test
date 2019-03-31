@@ -69,12 +69,12 @@ func main() {
 }
 
 /// $ ./pinboard4shaarli.cgi --help | -h | -?
-/// $ ./pinboard4shaarli.cgi https://demo.shaarli.org/pinboard4shaarli.cgi/v1/about/
+/// $ ./pinboard4shaarli.cgi https://demo.shaarli.org/pinboard4shaarli.cgi/v1/about
 /// $ ./pinboard4shaarli.cgi 'https://uid:pwd@demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/get?url=http://m.heise.de/12'
 /// $ ./pinboard4shaarli.cgi 'https://uid:pwd@demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/add?url=http://m.heise.de/12&description=foo'
 /// todo
 /// $ ./pinboard4shaarli.cgi https://uid:pwd@demo.shaarli.org/pinboard4shaarli.cgi/v1/user/api_token
-/// $ ./pinboard4shaarli.cgi https://demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/get --auth_token=uid:XYZUUU --url=https://m.heise.de/foo
+/// $ ./pinboard4shaarli.cgi --data-urlencode auth_token=uid:XYZUUU --data-urlencode url=https://m.heise.de/foo https://demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/get
 ///
 func cli() bool {
 	// test if we're running cli
@@ -156,7 +156,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	base := *r.URL
 	base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "..", "index.php")
 
-	w.Header().Set(http.CanonicalHeaderKey("X-Powered-By"), strings.Join([]string{"https://code.mro.name/mro/Shaarli-API-test", "#", version, "+", GitSHA1}, ""))
+	w.Header().Set(http.CanonicalHeaderKey("X-Powered-By"), strings.Join([]string{"https://code.mro.name/mro/pinboard4shaarli", "#", version, "+", GitSHA1}, ""))
 	w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/xml; charset=utf-8")
 
 	// https://stackoverflow.com/a/18414432
@@ -171,52 +171,125 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 	client := http.Client{Jar: jar}
 
 	switch path_info {
-	case "",
-		"/about":
+	case "":
 		base := *r.URL
-		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about") + "/"
+		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about")
 		http.Redirect(w, r, base.Path, http.StatusFound)
 
 		return
-	case "/about/":
-		// w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "application/rdf+xml")
-		raw(`<?xml version="1.0" encoding="utf-8"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns="http://usefulinc.com/ns/doap#">
-  <Project>
-    <name xml:lang="en">🛠 Pinboard API for Shaarlis</name>
-    <short-description xml:lang="en">subset conforming https://pinboard.in/api/</short-description>
-    <implements rdf:resource="https://pinboard.in/api/"/>
-    <implements rdf:resource="https://code.mro.name/mro/pinboard4shaarli/src/develop/openapi.yaml"/>
-    <platform rdf:resource="https://sebsauvage.net/wiki/doku.php?id=php:shaarli"/>
-    <homepage rdf:resource="https://code.mro.name/mro/pinboard4shaarli/"/>
-    <bug-database rdf:resource="https://code.mro.name/mro/pinboard4shaarli/issues"/>
-    <wiki rdf:resource="https://code.mro.name/mro/pinboard4shaarli/wiki"/>
-    <license rdf:resource="https://code.mro.name/mro/pinboard4shaarli/src/master/LICENSE"/>
-    <maintainer rdf:resource="http://mro.name/~me"/>
-    <programming-language>golang</programming-language>
-    <category>microblogging</category>
-    <category>shaarli</category>
-    <category>nodb</category>
-    <category>api</category>
-    <category>pinboard</category>
-    <category>delicious</category>
-    <category>cgi</category>
-    <repository>
-      <GitRepository>
-        <browse rdf:resource="https://code.mro.name/mro/pinboard4shaarli"/>
-        <location rdf:resource="https://code.mro.name/mro/pinboard4shaarli.git"/>
-      </GitRepository>
-    </repository>
-    <release>
-      <Version>
-        <name>`, version, "+", GitSHA1, `</name>
-        <revision>`, GitSHA1, `</revision>
-        <description>…</description>
-      </Version>
-    </release>
-  </Project>
-</rdf:RDF>`)
+	case "/about":
+		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "application/rdf+xml")
+		if b, err := Asset("doap.rdf"); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			w.Write(b)
+		}
+		return
+	case "/v1/openapi.yaml":
+		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/x-yaml; charset=utf-8")
+		if b, err := Asset("openapi.yaml"); err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		} else {
+			w.Write(b)
+		}
+		return
+	case "/v1/posts/get":
+		// pretend to add, but don't actually do it, but return the form preset values.
+		uid, pwd, ok := r.BasicAuth()
+		if !ok {
+			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
+			return
+		}
+
+		if http.MethodGet != r.Method {
+			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
+			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
+			return
+		}
+
+		params := r.URL.Query()
+		if 1 != len(params["url"]) {
+			http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
+			return
+		}
+		p_url := params["url"][0]
+
+		/*
+			if 1 != len(params["description"]) {
+				http.Error(w, "Required parameter missing: description", http.StatusBadRequest)
+				return
+			}
+			p_description := params["description"][0]
+
+			p_extended := ""
+			if 1 == len(params["extended"]) {
+				p_extended = params["extended"][0]
+			}
+
+			p_tags := ""
+			if 1 == len(params["tags"]) {
+				p_tags = params["tags"][0]
+			}
+		*/
+
+		v := url.Values{}
+		v.Set("post", p_url)
+		base.RawQuery = v.Encode()
+
+		resp, err := client.Get(base.String())
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		formLogi, err := formValuesFromReader(resp.Body, "loginform")
+		resp.Body.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		formLogi.Set("login", uid)
+		formLogi.Set("password", pwd)
+		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+
+		formLink, err := formValuesFromReader(resp.Body, "linkform")
+		resp.Body.Close()
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		// if we do not have a linkform, auth must have failed.
+		if 0 == len(formLink) {
+			http.Error(w, "Authentication failed", http.StatusForbidden)
+			return
+		}
+
+		fv := func(s string) string { return formLink.Get(s) }
+
+		tim, err := time.ParseInLocation(ShaarliDate, fv("lf_linkdate"), time.Local) // can we do any better?
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+
+		raw(xml.Header)
+		elmS("posts", false,
+			"user", uid,
+			"dt", tim.Format(IsoDate),
+			"tag", fv("lf_tags"))
+		elmS("post", true,
+			"href", fv("lf_url"),
+			"hash", fv("lf_linkdate"),
+			"description", fv("lf_title"),
+			"extended", fv("lf_description"),
+			"tag", fv("lf_tags"),
+			"time", tim.Format(time.RFC3339),
+			"others", "0")
+		elmE("posts")
 
 		return
 	case "/v1/posts/add":
@@ -359,105 +432,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		elmS("update", true,
 			"time", "2011-03-24T19:02:07Z")
 		return
-	case "/v1/posts/get":
-		// pretend to add, but don't actually do it, but return the form preset values.
-		uid, pwd, ok := r.BasicAuth()
-		if !ok {
-			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
-			return
-		}
 
-		if http.MethodGet != r.Method {
-			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
-			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
-			return
-		}
-
-		params := r.URL.Query()
-		if 1 != len(params["url"]) {
-			http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
-			return
-		}
-		p_url := params["url"][0]
-
-		/*
-			if 1 != len(params["description"]) {
-				http.Error(w, "Required parameter missing: description", http.StatusBadRequest)
-				return
-			}
-			p_description := params["description"][0]
-
-			p_extended := ""
-			if 1 == len(params["extended"]) {
-				p_extended = params["extended"][0]
-			}
-
-			p_tags := ""
-			if 1 == len(params["tags"]) {
-				p_tags = params["tags"][0]
-			}
-		*/
-
-		v := url.Values{}
-		v.Set("post", p_url)
-		base.RawQuery = v.Encode()
-
-		resp, err := client.Get(base.String())
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		formLogi, err := formValuesFromReader(resp.Body, "loginform")
-		resp.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		formLogi.Set("login", uid)
-		formLogi.Set("password", pwd)
-		resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-
-		formLink, err := formValuesFromReader(resp.Body, "linkform")
-		resp.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		// if we do not have a linkform, auth must have failed.
-		if 0 == len(formLink) {
-			http.Error(w, "Authentication failed", http.StatusForbidden)
-			return
-		}
-
-		fv := func(s string) string { return formLink.Get(s) }
-
-		tim, err := time.ParseInLocation(ShaarliDate, fv("lf_linkdate"), time.Local) // can we do any better?
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-
-		raw(xml.Header)
-		elmS("posts", false,
-			"user", uid,
-			"dt", tim.Format(IsoDate),
-			"tag", fv("lf_tags"))
-		elmS("post", true,
-			"href", fv("lf_url"),
-			"hash", fv("lf_linkdate"),
-			"description", fv("lf_title"),
-			"extended", fv("lf_description"),
-			"tag", fv("lf_tags"),
-			"time", tim.Format(time.RFC3339),
-			"others", "0")
-		elmE("posts")
-
-		return
 	case "/v1/posts/recent",
 		"/v1/posts/dates",
 		"/v1/posts/suggest",
