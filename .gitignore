@@ -3,4 +3,4 @@ scripts/response.rnc
 scripts/categories.rnc
 source.tar.gz
 tmp/
-pinboard-linux-amd64-*.gz
+pinboard4shaarli-linux-amd64-*.gz

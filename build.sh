@@ -42,8 +42,6 @@ ls -l ~/"public_html/b/${PROG_NAME}.cgi"
 go test -bench=.
 "${say}" ok
 
-exit
-
 "${say}" "linux build"
 # http://dave.cheney.net/2015/08/22/cross-compilation-with-go-1-5
 env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-parse --short HEAD)" -o "${PROG_NAME}-linux-amd64-${VERSION}" || { echo "Aua" 1>&2 && exit 1; }
@@ -51,13 +49,12 @@ env GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -X main.GitSHA1=$(git rev-p
 # env GOOS=linux GOARCH=386 GO386=387 go build -o "${PROG_NAME}-linux-386-${VERSION}" # https://github.com/golang/go/issues/11631
 # env GOOS=darwin GOARCH=amd64 go build -o "${PROG_NAME}-darwin-amd64-${VERSION}"
 
-
 "${say}" "simply"
 # scp "ServerInfo.cgi" simply:/var/www/lighttpd/h4u.r-2.eu/public_html/"info.cgi"
 gzip --force --best "${PROG_NAME}"-*-"${VERSION}" \
 && chmod a-x "${PROG_NAME}"-*-"${VERSION}.gz" \
 && rsync -vp --bwlimit=1234 "${PROG_NAME}"-*-"${VERSION}.gz" "simply:/tmp/" \
-&& ssh simply "sh -c 'cd /var/www/lighttpd/demo.mro.name/ && gunzip < "/tmp/${PROG_NAME}-linux-amd64-${VERSION}.gz" > "${PROG_NAME}.cgi" && chmod a+x "${PROG_NAME}.cgi" && ls -l "${PROG_NAME}"?cgi*'"
+&& ssh simply "sh -c 'cd /var/www/lighttpd/demo.mro.name/ && gunzip < /tmp/${PROG_NAME}-linux-amd64-${VERSION}.gz > ${PROG_NAME}.cgi && chmod a+x ${PROG_NAME}.cgi && ls -l ${PROG_NAME}?cgi*'"
 
 # ssh simply "sh -c 'cd /var/www/lighttpd/b.mro.name/public_html/u/ && cp /var/www/lighttpd/l.mro.name/public_html/pinboard?cgi* . && ls -l pinboard?cgi*'"
 "${say}" "ok"
@@ -66,6 +63,6 @@ exit 0
 
 "${say}" "vario"
 # scp "ServerInfo.cgi" vario:~/mro.name/webroot/b/"info.cgi"
-ssh vario "sh -c 'cd ~/mro.name/webroot/b/ && curl -L http://purl.mro.name/${PROG_NAME}_cgi.gz | tee ${PROG_NAME}_cgi.gz | gunzip > ${PROG_NAME}.cgi && chmod a+x ${PROG_NAME}.cgi && ls -l ${prog_NAME}?cgi*'"
+ssh vario "sh -c 'cd ~/mro.name/webroot/b/ && curl -L http://purl.mro.name/${PROG_NAME}_cgi.gz | tee ${PROG_NAME}_cgi.gz | gunzip > ${PROG_NAME}.cgi && chmod a+x ${PROG_NAME}.cgi && ls -l ${PROG_NAME}?cgi*'"
 "${say}" "ok"
 

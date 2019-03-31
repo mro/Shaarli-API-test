@@ -2,6 +2,7 @@
 openapi: 3.0.1
 info:
   title: Subset of the Pinboard API
+  version: '1'
   description: |-
     The Pinboard API is a way to interact programatically with your bookmarks,
     notes and other Pinboard data.
@@ -10,36 +11,36 @@ info:
     the Delicious V1 API. See differences from Delicious for a full list of
     areas where the APIs diverge.
 
-    Future issues may be
+    Future features may be
     - auto-fill on /posts/get for unknown urls
-    - non UTC timezones
-    - enclosures (images, thumbnails)
+    - non UTC times
+    - enclosures (images, thumbnails, audio, video)
   contact:
     email: pinboard-api@mro.name
-  version: '1'
+    name: mro.name
+    url: https://code.mro.name/mro/pinboard4shaarli
 externalDocs:
-  description: Pinboard API
-  url: https://pinboard.in/api/
+  url: "../about"
+  description: DOAP RDF
 servers:
 - url: https://demo.mro.name/shaarli-v0.41b/pinboard4shaarli.cgi/v1
 - url: https://demo.mro.name/shaarli-v0.10.2/pinboard4shaarli.cgi/v1
 - url: https://demo.mro.name/shaarligo/shaarligo.cgi/v1
 - url: https://api.pinboard.in/v1
 paths:
-  "/about":
+  "/openapi.yaml":
     get:
       tags:
-      - about
-      summary: a DOAP RDF+XML
-      operationId: aboutDoap
+      - api
+      summary: API description
+      operationId: aboutOpenapi
       responses:
         '200':
-          description: a DOAP RDF+XML
+          description: API description
           content:
-            application/rdf+xml:
+            text/x-yaml:
               schema:
-                xml:
-                  name: rdf:RDF
+                type: string
   "/user/api_token":
     get:
       tags:
@@ -404,3 +405,8 @@ components:
 security:
 - AuthToken: []
 - BasicAuth: []
+tags:
+- name: api
+  externalDocs:
+    url: https://pinboard.in/api
+    description: The original Pinboard API
