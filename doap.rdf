@@ -4,8 +4,9 @@
   <Project>
     <bug-database rdf:resource="https://code.mro.name/mro/pinboard4shaarli/issues"/>
     <homepage rdf:resource="https://code.mro.name/mro/pinboard4shaarli/"/>
+    <implements rdf:resource="v1/openapi.yaml"/>
     <license rdf:resource="https://code.mro.name/mro/pinboard4shaarli/src/master/LICENSE"/>
-    <maintainer rdf:resource="http://mro.name/~me"/>
+    <maintainer rdf:resource="https://code.mro.name/mro"/>
     <name>pinboard4shaarli.cgi</name>
     <programming-language>golang</programming-language>
     <repository>
@@ -14,7 +15,8 @@
         <location rdf:resource="https://code.mro.name/mro/pinboard4shaarli.git"/>
       </GitRepository>
     </repository>
-    <short-description>Run sh test scripts against multiple PHP &amp; http://github.com/shaarli/Shaarli versions.</short-description>
+    <short-description xml:lang="en">Make the essential subset for posting to a shaarli available via a subset of the pinboard/delicious API.</short-description>
+    <short-description xml:lang="fr">Rendre le sous-ensemble essentiel pour l'affichage dans un shaarli disponible via un sous-ensemble de l'API pinboard/delicious mature et éprouvée.</short-description>
     <wiki rdf:resource="https://code.mro.name/mro/pinboard4shaarli/wiki"/>
   </Project>
 </rdf:RDF>

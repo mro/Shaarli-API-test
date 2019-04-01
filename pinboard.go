@@ -167,6 +167,11 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	case
+		"/v1":
+		http.Redirect(w, r, "v1/openapi.yaml", http.StatusFound)
+
+		return
+	case
 		"/v1/openapi.yaml":
 		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/x-yaml; charset=utf-8")
 		if b, err := Asset("openapi.yaml"); err != nil {

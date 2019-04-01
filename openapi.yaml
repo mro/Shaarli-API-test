@@ -73,6 +73,40 @@ paths:
               schema:
                 type: string
                 example: 501 token auth not supported, use HTTP Basic.
+  "/posts/get":
+    get:
+      tags:
+      - posts
+      summary: Returns one or more posts on a single day matching the arguments. If
+        no date or url is given, date of most recent bookmark will be used.
+      description: If called with a yet unknown URL, http GET the title and guess
+        tags from the URL
+      operationId: getPost
+      parameters:
+      - "$ref": "#/components/parameters/formatParam"
+      - name: tag
+        in: query
+        description: filter by up to three tags
+        schema:
+          "$ref": "#/components/schemas/tag"
+      - name: dt
+        in: query
+        description: return results bookmarked on this day
+        schema:
+          "$ref": "#/components/schemas/date"
+      - "$ref": "#/components/parameters/urlParamOpt"
+      - name: meta
+        in: query
+        description: include a change detection signature in a meta attribute
+        schema:
+          "$ref": "#/components/schemas/yes_no"
+      responses:
+        '200':
+          description: foo
+          content:
+            application/xml:
+              schema:
+                "$ref": "#/components/schemas/posts"
   "/posts/add":
     get:
       tags:
@@ -128,40 +162,6 @@ paths:
       responses:
         '200':
           "$ref": "#/components/responses/Done"
-  "/posts/get":
-    get:
-      tags:
-      - posts
-      summary: Returns one or more posts on a single day matching the arguments. If
-        no date or url is given, date of most recent bookmark will be used.
-      description: If called with a yet unknown URL, http GET the title and guess
-        tags from the URL
-      operationId: getPost
-      parameters:
-      - "$ref": "#/components/parameters/formatParam"
-      - name: tag
-        in: query
-        description: filter by up to three tags
-        schema:
-          "$ref": "#/components/schemas/tag"
-      - name: dt
-        in: query
-        description: return results bookmarked on this day
-        schema:
-          "$ref": "#/components/schemas/date"
-      - "$ref": "#/components/parameters/urlParamOpt"
-      - name: meta
-        in: query
-        description: include a change detection signature in a meta attribute
-        schema:
-          "$ref": "#/components/schemas/yes_no"
-      responses:
-        '200':
-          description: foo
-          content:
-            application/xml:
-              schema:
-                "$ref": "#/components/schemas/posts"
   "/posts/delete":
     get:
       tags:
