@@ -20,41 +20,55 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/json"
 	"encoding/xml"
 
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
-func TestEncodeResult(t *testing.T) {
-	t.Parallel()
+// api_token {"result":"692D3D4BD4A2825D5A4A"}
+// add {"result_code":"item already exists"}
+// {"result_code":"done"}
 
-	r := Result{Code: "done"}
+// get {"date":"2018-04-09T19:26:54Z","user":"mro","posts":[]}
 
+func xm(o interface{}) string {
 	var b bytes.Buffer
 	w := bufio.NewWriter(&b)
 	enc := xml.NewEncoder(w)
-	enc.Encode(r)
+	enc.Encode(o)
 	enc.Flush()
-
-	s := string(b.Bytes())
-	assert.Equal(t, "<result code=\"done\"></result>", s, "ach")
+	return string(b.Bytes())
 }
 
-func TestEncodePosts(t *testing.T) {
-	t.Parallel()
-
-	r := Posts{Posts: []Post{
-		Post{Href: "uhu"},
-		Post{Href: "aha"},
-	}}
-
+func js(o interface{}) string {
 	var b bytes.Buffer
 	w := bufio.NewWriter(&b)
-	enc := xml.NewEncoder(w)
-	enc.Encode(r)
-	enc.Flush()
+	enc := json.NewEncoder(w)
+	enc.Encode(o)
+	w.Flush()
+	return string(b.Bytes())
+}
 
-	s := string(b.Bytes())
-	assert.Equal(t, "<posts user=\"\" dt=\"\" tag=\"\"><post href=\"uhu\" description=\"\" extended=\"\" hash=\"\" others=\"0\" tag=\"\" time=\"\"></post><post href=\"aha\" description=\"\" extended=\"\" hash=\"\" others=\"0\" tag=\"\" time=\"\"></post></posts>", s, "ach")
+func TestXmlEncodeResult(t *testing.T) {
+	t.Parallel()
+	r := Result{Code: "done"}
+	assert.Equal(t, "<result code=\"done\"></result>", xm(r), "ach")
+	assert.Equal(t, "{\"result_code\":\"done\"}\n", js(r), "ach")
+}
+
+func TestXmlEncodePosts(t *testing.T) {
+	t.Parallel()
+
+	assert.Equal(t, "<posts user=\"\" dt=\"\"><post href=\"uhu\" description=\"\" extended=\"\" hash=\"\" others=\"0\" tag=\"\" time=\"\"></post><post href=\"aha\" description=\"\" extended=\"\" hash=\"\" others=\"0\" tag=\"\" time=\"\"></post></posts>",
+		xm(Posts{Posts: []Post{
+			Post{Href: "uhu"},
+			Post{Href: "aha"},
+		}}), "ach")
+	assert.Equal(t, "{\"user\":\"\",\"date\":\"\",\"posts\":[{\"href\":\"uhu\",\"description\":\"\",\"extended\":\"\",\"hash\":\"\",\"meta\":\"\",\"others\":0,\"tag\":\"\",\"time\":\"\"},{\"href\":\"aha\",\"description\":\"\",\"extended\":\"\",\"hash\":\"\",\"meta\":\"\",\"others\":0,\"tag\":\"\",\"time\":\"\"}]}\n",
+		js(Posts{Posts: []Post{
+			Post{Href: "uhu"},
+			Post{Href: "aha"},
+		}}), "ach")
 }

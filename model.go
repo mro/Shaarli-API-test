@@ -22,25 +22,27 @@ import (
 )
 
 type Result struct {
-	XMLName xml.Name `xml:"result"`
-	Code    string   `xml:"code,attr,omitempty"`
+	XMLName xml.Name `xml:"result" json:"-"`
+	Code    string   `xml:"code,attr,omitempty" json:"result_code"`
 }
 
 type Post struct {
-	Href        string `xml:"href,attr"`
-	Description string `xml:"description,attr"`
-	Extended    string `xml:"extended,attr"`
-	Hash        string `xml:"hash,attr"`
-	Meta        string `xml:"meta,attr,omitempty"`
-	Others      int    `xml:"others,attr"`
-	Tag         string `xml:"tag,attr"`
-	Time        string `xml:"time,attr"`
+	Href        string `xml:"href,attr" json:"href"`
+	Description string `xml:"description,attr" json:"description"`
+	Extended    string `xml:"extended,attr" json:"extended"`
+	Hash        string `xml:"hash,attr" json:"hash"`
+	Meta        string `xml:"meta,attr,omitempty" json:"meta"`
+	Others      int    `xml:"others,attr" json:"others"`
+	Tag         string `xml:"tag,attr" json:"tag"`
+	Time        string `xml:"time,attr" json:"time"`
+	Shared      string `xml:"shared,attr,omitempty" json:"shared,omitempty"`
+	Toread      string `xml:"toread,attr,omitempty" json:"toread,omitempty"`
 }
 
 type Posts struct {
-	XMLName xml.Name `xml:"posts"`
-	User    string   `xml:"user,attr"`
-	Dt      string   `xml:"dt,attr"`
-	Tag     string   `xml:"tag,attr"`
-	Posts   []Post   `xml:"post"`
+	XMLName xml.Name `xml:"posts" json:"-"`
+	User    string   `xml:"user,attr" json:"user"`
+	Dt      string   `xml:"dt,attr" json:"date"`
+	Tag     string   `xml:"tag,attr,omitempty" json:"tag,omitempty"`
+	Posts   []Post   `xml:"post" json:"posts"`
 }
