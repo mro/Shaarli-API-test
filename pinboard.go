@@ -147,7 +147,7 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	client := http.Client{Jar: jar}
+	client := http.Client{Jar: jar, Timeout: 5 * time.Second}
 
 	switch path_info {
 	case
