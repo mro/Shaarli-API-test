@@ -64,6 +64,13 @@ func main() {
 	} else { // log to custom logfile rather than stderr (may not be reachable on shared hosting)
 	}
 
+	// - http.StripPrefix (and just keep PATH_INFO as Request.URL.path)
+	// - route
+	// - authenticate
+	// - extract parameters
+	// - call api backend method
+	// - build response
+
 	if err := cgi.Serve(http.HandlerFunc(handleMux)); err != nil {
 		log.Fatal(err)
 	}

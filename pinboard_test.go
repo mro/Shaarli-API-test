@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	//	"net/http/cgi"
 	"net/url"
 	"os"
 	"path"
@@ -29,6 +30,7 @@ import (
 	"strings"
 
 	"github.com/stretchr/testify/assert"
+	"net/http/httptest"
 	"testing"
 )
 
@@ -50,6 +52,27 @@ func TestPath(t *testing.T) {
 	str := "https://demo.shaarli.org/pinboard4shaarli.cgi/v1/about/"
 	idx := strings.LastIndex(str, cgi)
 	assert.Equal(t, "/v1/about/", str[idx+len(cgi):], "wowo")
+}
+
+func TestCgi(t *testing.T) {
+	t.Parallel()
+
+	// rq := httptest.NewRequest(http.MethodGet, "/", nil)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, client, %s\n", r.URL.String())
+	}))
+	defer ts.Close()
+
+	// assert.Equal(t, "", ts.Config, "wowo")
+	// assert.Equal(t, "", ts.Config.Addr, "wowo")
+	res, _ := http.Get(ts.URL + "/" + path.Join("pinboard4shaarli.cgi"))
+	assert.Equal(t, http.StatusOK, res.StatusCode, "wowo")
+	assert.Equal(t, int64(37), res.ContentLength, "wowo")
+	assert.Equal(t, "text/plain; charset=utf-8", res.Header.Get("Content-Type"), "wowo")
+
+	body, _ := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	assert.Equal(t, "Hello, client, /pinboard4shaarli.cgi\n", string(body), "wowo")
 }
 
 func TestBasicAuth(t *testing.T) {
