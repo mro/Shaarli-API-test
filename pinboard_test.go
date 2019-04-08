@@ -36,8 +36,8 @@ import (
 
 func TestString(t *testing.T) {
 	t.Parallel()
-	const s = "abc"
-	assert.Equal(t, "c", s[len(s)-1:], "ach")
+	const s = "abcde"
+	assert.Equal(t, "de", s[len(s)-2:], "ach")
 }
 
 func TestPath(t *testing.T) {

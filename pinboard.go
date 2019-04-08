@@ -71,7 +71,8 @@ func main() {
 	// - call api backend method
 	// - build response
 
-	if err := cgi.Serve(http.HandlerFunc(handleMux)); err != nil {
+	h := handleMux(os.Getenv("PATH_INFO"))
+	if err := cgi.Serve(http.TimeoutHandler(h, 5*time.Second, "🐌")); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -106,8 +107,8 @@ func cli() bool {
 		bin := filepath.Base(os.Args[0])
 		str := req.URL.Path
 		idx := strings.LastIndex(str, bin)
-		os.Setenv("PATH_INFO", str[idx+len(bin):])
-		handleMux(reqWri{r: req, f: os.Stderr, h: http.Header{}}, req)
+		pi := str[idx+len(bin):]
+		handleMux(pi)(reqWri{r: req, f: os.Stderr, h: http.Header{}}, req)
 	}
 
 	return true
@@ -135,66 +136,16 @@ func (w reqWri) WriteHeader(statusCode int) {
 }
 
 // https://pinboard.in/api
-func handleMux(w http.ResponseWriter, r *http.Request) {
-	defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
-	path_info := os.Getenv("PATH_INFO")
-	base := *r.URL
-	base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "..", "index.php")
-
+func handleMux(path_info string) http.HandlerFunc {
 	agent := strings.Join([]string{"https://code.mro.name/mro/pinboard4shaarli", "#", version, "+", GitSHA1}, "")
-	w.Header().Set(http.CanonicalHeaderKey("X-Powered-By"), agent)
-	w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/xml; charset=utf-8")
-
 	// https://stackoverflow.com/a/18414432
-	options := cookiejar.Options{
-		PublicSuffixList: publicsuffix.List,
-	}
-	jar, err := cookiejar.New(&options)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	client := http.Client{Jar: jar, Timeout: 5 * time.Second}
+	options := cookiejar.Options{PublicSuffixList: publicsuffix.List}
+	
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer un(trace(strings.Join([]string{"v", version, "+", GitSHA1, " ", r.RemoteAddr, " ", r.Method, " ", r.URL.String()}, "")))
 
-	switch path_info {
-	case
-		"":
-		base := *r.URL
-		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "about")
-		http.Redirect(w, r, base.Path, http.StatusFound)
-
-		return
-	case
-		"/about":
-		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "application/rdf+xml")
-		if b, err := Asset("doap.rdf"); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		} else {
-			w.Write(b)
-		}
-		return
-	case
-		"/v1":
-		http.Redirect(w, r, "v1/openapi.yaml", http.StatusFound)
-
-		return
-	case
-		"/v1/openapi.yaml":
-		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/x-yaml; charset=utf-8")
-		if b, err := Asset("openapi.yaml"); err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		} else {
-			w.Write(b)
-		}
-		return
-	case
-		"/v1/posts/get":
-		// pretend to add, but don't actually do it, but return the form preset values.
-		uid, pwd, ok := r.BasicAuth()
-		if !ok {
-			http.Error(w, "Basic Pre-Authentication required.", http.StatusForbidden)
-			return
-		}
+		w.Header().Set(http.CanonicalHeaderKey("X-Powered-By"), agent)
+		w.Header().Set(http.CanonicalHeaderKey("Content-Type"), "text/xml; charset=utf-8")
 
 		if http.MethodGet != r.Method {
 			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
@@ -202,14 +153,173 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		params := r.URL.Query()
-		if 1 != len(params["url"]) {
-			http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
+		jar, err := cookiejar.New(&options)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		p_url := params["url"][0]
+		client := http.Client{Jar: jar, Timeout: 2 * time.Second}
 
-		/*
+		asset := func(name, mime string) {
+			w.Header().Set(http.CanonicalHeaderKey("Content-Type"), mime)
+			if b, err := Asset(name); err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			} else {
+				w.Write(b)
+			}
+		}
+
+		base := *r.URL
+		base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "..", "index.php")
+
+		switch path_info {
+		case "":
+			http.Redirect(w, r, "about", http.StatusFound)
+			return
+		case "/about":
+			asset("doap.rdf", "application/rdf+xml")
+			return
+		case "/v1":
+			http.Redirect(w, r, "v1/openapi.yaml", http.StatusFound)
+			return
+		case "/v1/openapi.yaml":
+			asset("openapi.yaml", "text/x-yaml; charset=utf-8")
+			return
+
+			// now comes the /real/ API
+		case
+			"/v1/posts/get":
+			// pretend to add, but don't actually do it, but return the form preset values.
+			uid, pwd, ok := r.BasicAuth()
+			if !ok {
+				http.Error(w, "Basic Pre-Authentication required.", http.StatusForbidden)
+				return
+			}
+
+			params := r.URL.Query()
+			if 1 != len(params["url"]) {
+				http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
+				return
+			}
+			p_url := params["url"][0]
+
+			/*
+				if 1 != len(params["description"]) {
+					http.Error(w, "Required parameter missing: description", http.StatusBadRequest)
+					return
+				}
+				p_description := params["description"][0]
+
+				p_extended := ""
+				if 1 == len(params["extended"]) {
+					p_extended = params["extended"][0]
+				}
+
+				p_tags := ""
+				if 1 == len(params["tags"]) {
+					p_tags = params["tags"][0]
+				}
+			*/
+
+			v := url.Values{}
+			v.Set("post", p_url)
+			base.RawQuery = v.Encode()
+
+			req, err := http.NewRequest(http.MethodGet, base.String(), nil)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+			resp, err := client.Do(req)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+			formLogi, err := formValuesFromReader(resp.Body, "loginform")
+			resp.Body.Close()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			formLogi.Set("login", uid)
+			formLogi.Set("password", pwd)
+
+			req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLogi.Encode())))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
+			req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+			resp, err = client.Do(req)
+			// resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+
+			formLink, err := formValuesFromReader(resp.Body, "linkform")
+			resp.Body.Close()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+			// if we do not have a linkform, auth must have failed.
+			if 0 == len(formLink) {
+				http.Error(w, "Authentication failed", http.StatusForbidden)
+				return
+			}
+
+			fv := func(s string) string { return formLink.Get(s) }
+
+			tim, err := time.ParseInLocation(ShaarliDate, fv("lf_linkdate"), time.Local) // can we do any better?
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+
+			w.Write([]byte(xml.Header))
+			pp := Posts{
+				User: uid,
+				Dt:   tim.Format(IsoDate),
+				Tag:  fv("lf_tags"),
+				Posts: []Post{
+					Post{
+						Href:        fv("lf_url"),
+						Hash:        fv("lf_linkdate"),
+						Description: fv("lf_title"),
+						Extended:    fv("lf_description"),
+						Tag:         fv("lf_tags"),
+						Time:        tim.Format(time.RFC3339),
+					},
+				},
+			}
+			enc := xml.NewEncoder(w)
+			enc.Encode(pp)
+			enc.Flush()
+
+			return
+		case
+			"/v1/posts/add":
+			// extract parameters
+			// agent := r.Header.Get("User-Agent")
+			shared := true
+
+			uid, pwd, ok := r.BasicAuth()
+			if !ok {
+				http.Error(w, "Basic Pre-Authentication required.", http.StatusForbidden)
+				return
+			}
+
+			params := r.URL.Query()
+			if 1 != len(params["url"]) {
+				http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
+				return
+			}
+			p_url := params["url"][0]
+
 			if 1 != len(params["description"]) {
 				http.Error(w, "Required parameter missing: description", http.StatusBadRequest)
 				return
@@ -225,257 +335,130 @@ func handleMux(w http.ResponseWriter, r *http.Request) {
 			if 1 == len(params["tags"]) {
 				p_tags = params["tags"][0]
 			}
-		*/
 
-		v := url.Values{}
-		v.Set("post", p_url)
-		base.RawQuery = v.Encode()
+			v := url.Values{}
+			v.Set("post", p_url)
+			v.Set("title", p_description)
+			base.RawQuery = v.Encode()
 
-		req, err := http.NewRequest(http.MethodGet, base.String(), nil)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			req, err := http.NewRequest(http.MethodGet, base.String(), nil)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+			resp, err := client.Do(req)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+			formLogi, err := formValuesFromReader(resp.Body, "loginform")
+			resp.Body.Close()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			formLogi.Set("login", uid)
+			formLogi.Set("password", pwd)
+
+			req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLogi.Encode())))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
+			req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+			resp, err = client.Do(req)
+			// resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+
+			formLink, err := formValuesFromReader(resp.Body, "linkform")
+			resp.Body.Close()
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+			// if we do not have a linkform, auth must have failed.
+			if 0 == len(formLink) {
+				http.Error(w, "Authentication failed", http.StatusForbidden)
+				return
+			}
+
+			// formLink.Set("lf_linkdate", ShaarliDate)
+			// formLink.Set("lf_url", p_url)
+			// formLink.Set("lf_title", p_description)
+			formLink.Set("lf_description", p_extended)
+			formLink.Set("lf_tags", p_tags)
+			if shared {
+				formLink.Del("lf_private")
+			} else {
+				formLink.Set("lf_private", "lf_private")
+			}
+
+			req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLink.Encode())))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
+			req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
+			resp, err = client.Do(req)
+			// resp, err = client.PostForm(resp.Request.URL.String(), formLink)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadGateway)
+				return
+			}
+			resp.Body.Close()
+
+			w.Write([]byte(xml.Header))
+			pp := Result{Code: "done"}
+			enc := xml.NewEncoder(w)
+			enc.Encode(pp)
+			enc.Flush()
+
+			return
+		case
+			"/v1/posts/delete":
+			_, _, ok := r.BasicAuth()
+			if !ok {
+				http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
+				return
+			}
+
+			params := r.URL.Query()
+			if 1 != len(params["url"]) {
+				http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
+				return
+			}
+			// p_url := params["url"][0]
+
+			w.Write([]byte(xml.Header))
+			pp := Result{Code: "not implemented yet"}
+			enc := xml.NewEncoder(w)
+			enc.Encode(pp)
+			enc.Flush()
+			return
+		case
+			"/v1/notes/ID",
+			"/v1/notes/list",
+			"/v1/posts/dates",
+			"/v1/posts/suggest",
+			"/v1/posts/update",
+			"/v1/tags/delete",
+			"/v1/tags/get",
+			"/v1/tags/rename",
+			"/v1/user/api_token",
+			"/v1/user/secret",
+			"/v1/posts/recent":
+			http.Error(w, "Not Implemented", http.StatusNotImplemented)
 			return
 		}
-		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
-		resp, err := client.Do(req)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		formLogi, err := formValuesFromReader(resp.Body, "loginform")
-		resp.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		formLogi.Set("login", uid)
-		formLogi.Set("password", pwd)
-
-		req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLogi.Encode())))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
-		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
-		resp, err = client.Do(req)
-		// resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-
-		formLink, err := formValuesFromReader(resp.Body, "linkform")
-		resp.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		// if we do not have a linkform, auth must have failed.
-		if 0 == len(formLink) {
-			http.Error(w, "Authentication failed", http.StatusForbidden)
-			return
-		}
-
-		fv := func(s string) string { return formLink.Get(s) }
-
-		tim, err := time.ParseInLocation(ShaarliDate, fv("lf_linkdate"), time.Local) // can we do any better?
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-
-		w.Write([]byte(xml.Header))
-		pp := Posts{
-			User: uid,
-			Dt:   tim.Format(IsoDate),
-			Tag:  fv("lf_tags"),
-			Posts: []Post{
-				Post{
-					Href:        fv("lf_url"),
-					Hash:        fv("lf_linkdate"),
-					Description: fv("lf_title"),
-					Extended:    fv("lf_description"),
-					Tag:         fv("lf_tags"),
-					Time:        tim.Format(time.RFC3339),
-				},
-			},
-		}
-		enc := xml.NewEncoder(w)
-		enc.Encode(pp)
-		enc.Flush()
-
-		return
-	case
-		"/v1/posts/add":
-		// extract parameters
-		// agent := r.Header.Get("User-Agent")
-		shared := true
-
-		uid, pwd, ok := r.BasicAuth()
-		if !ok {
-			http.Error(w, "Basic Pre-Authentication required.", http.StatusForbidden)
-			return
-		}
-
-		if http.MethodGet != r.Method {
-			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
-			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
-			return
-		}
-
-		params := r.URL.Query()
-		if 1 != len(params["url"]) {
-			http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
-			return
-		}
-		p_url := params["url"][0]
-
-		if 1 != len(params["description"]) {
-			http.Error(w, "Required parameter missing: description", http.StatusBadRequest)
-			return
-		}
-		p_description := params["description"][0]
-
-		p_extended := ""
-		if 1 == len(params["extended"]) {
-			p_extended = params["extended"][0]
-		}
-
-		p_tags := ""
-		if 1 == len(params["tags"]) {
-			p_tags = params["tags"][0]
-		}
-
-		v := url.Values{}
-		v.Set("post", p_url)
-		v.Set("title", p_description)
-		base.RawQuery = v.Encode()
-
-		req, err := http.NewRequest(http.MethodGet, base.String(), nil)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
-		resp, err := client.Do(req)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		formLogi, err := formValuesFromReader(resp.Body, "loginform")
-		resp.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		formLogi.Set("login", uid)
-		formLogi.Set("password", pwd)
-
-		req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLogi.Encode())))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
-		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
-		resp, err = client.Do(req)
-		// resp, err = client.PostForm(resp.Request.URL.String(), formLogi)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-
-		formLink, err := formValuesFromReader(resp.Body, "linkform")
-		resp.Body.Close()
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		// if we do not have a linkform, auth must have failed.
-		if 0 == len(formLink) {
-			http.Error(w, "Authentication failed", http.StatusForbidden)
-			return
-		}
-
-		// formLink.Set("lf_linkdate", ShaarliDate)
-		// formLink.Set("lf_url", p_url)
-		// formLink.Set("lf_title", p_description)
-		formLink.Set("lf_description", p_extended)
-		formLink.Set("lf_tags", p_tags)
-		if shared {
-			formLink.Del("lf_private")
-		} else {
-			formLink.Set("lf_private", "lf_private")
-		}
-
-		req, err = http.NewRequest(http.MethodPost, resp.Request.URL.String(), bytes.NewReader([]byte(formLink.Encode())))
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		req.Header.Set(http.CanonicalHeaderKey("Content-Type"), "application/x-www-form-urlencoded")
-		req.Header.Set(http.CanonicalHeaderKey("User-Agent"), agent)
-		resp, err = client.Do(req)
-		// resp, err = client.PostForm(resp.Request.URL.String(), formLink)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadGateway)
-			return
-		}
-		resp.Body.Close()
-
-		w.Write([]byte(xml.Header))
-		pp := Result{Code: "done"}
-		enc := xml.NewEncoder(w)
-		enc.Encode(pp)
-		enc.Flush()
-
-		return
-	case
-		"/v1/posts/delete":
-		_, _, ok := r.BasicAuth()
-		if !ok {
-			http.Error(w, "Basic Pre-Authentication required.", http.StatusUnauthorized)
-			return
-		}
-
-		if http.MethodGet != r.Method {
-			w.Header().Set(http.CanonicalHeaderKey("Allow"), http.MethodGet)
-			http.Error(w, "All API methods are GET requests, even when good REST habits suggest they should use a different verb.", http.StatusMethodNotAllowed)
-			return
-		}
-
-		params := r.URL.Query()
-		if 1 != len(params["url"]) {
-			http.Error(w, "Required parameter missing: url", http.StatusBadRequest)
-			return
-		}
-		// p_url := params["url"][0]
-
-		w.Write([]byte(xml.Header))
-		pp := Result{Code: "not implemented yet"}
-		enc := xml.NewEncoder(w)
-		enc.Encode(pp)
-		enc.Flush()
-		return
-	case
-		"/v1/notes/ID",
-		"/v1/notes/list",
-		"/v1/posts/dates",
-		"/v1/posts/suggest",
-		"/v1/posts/update",
-		"/v1/tags/delete",
-		"/v1/tags/get",
-		"/v1/tags/rename",
-		"/v1/user/api_token",
-		"/v1/user/secret",
-		"/v1/posts/recent":
-		http.Error(w, "Not Implemented", http.StatusNotImplemented)
-		return
+		http.NotFound(w, r)
 	}
-	http.NotFound(w, r)
 }
 
 func formValuesFromReader(r io.Reader, name string) (ret url.Values, err error) {
