@@ -6,10 +6,9 @@ branches:
 # http://docs.travis-ci.com/user/languages/php/#Choosing-PHP-versions-to-test-against
 language: php
 php:
-- 5.4
-- 5.5
 - 5.6
 - 7.0
+- 7.3
 # http://docs.travis-ci.com/user/customizing-the-build/#The-Build-Lifecycle
 # http://docs.travis-ci.com/user/customizing-the-build/#Build-Matrix
 env:
@@ -39,7 +38,6 @@ env:
   - GITHUB=shaarli/Shaarli/archive/webdesign
 matrix:
   allow_failures:
-  - php: 5.4
   # first community release is known to fail, too:
   - env: GITHUB=shaarli/Shaarli/archive/v0.0.40beta
   # why does this one fail?
@@ -47,14 +45,6 @@ matrix:
   - env: GITHUB=shaarli/Shaarli/archive/v0.5.4
   - env: GITHUB=shaarli/Shaarli/archive/v0.6.4
   - env: GITHUB=shaarli/Shaarli/archive/webdesign
-  - php: 5.5
-    env: GITHUB=shaarli/Shaarli/archive/v0.10.3
-  - php: 5.5
-    env: GITHUB=shaarli/Shaarli/archive/v0.11.0
-  - php: 5.5
-    env: GITHUB=shaarli/Shaarli/archive/master
-  - php: 5.5
-    env: GITHUB=shaarli/Shaarli/archive/stable
 before_install:
 - sh scripts/download.sh
 - go get github.com/yhat/scrape
