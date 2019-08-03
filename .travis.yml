@@ -32,7 +32,7 @@ env:
   - GITHUB=shaarli/Shaarli/archive/v0.8.5
   - GITHUB=shaarli/Shaarli/archive/v0.9.5
   - GITHUB=shaarli/Shaarli/archive/v0.10.3
-  - GITHUB=shaarli/Shaarli/archive/v0.11.0
+  - GITHUB=shaarli/Shaarli/archive/v0.11.1
   - GITHUB=shaarli/Shaarli/archive/master
   - GITHUB=shaarli/Shaarli/archive/stable
   - GITHUB=shaarli/Shaarli/archive/webdesign
