@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2019-2019 Marcus Rohrmoser, https://code.mro.name/mro/Shaarli-API-test
+// Copyright (C) 2019-2019 Marcus Rohrmoser, https://code.mro.name/mro/pinboard4shaarli
 //
 // This program is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,14 +18,76 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	//	"net/http/cgi"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
+	"strings"
 
 	"github.com/stretchr/testify/assert"
+	"net/http/httptest"
 	"testing"
 )
+
+func TestString(t *testing.T) {
+	t.Parallel()
+	const s = "abcde"
+	assert.Equal(t, "de", s[len(s)-2:], "ach")
+}
+
+func TestPath(t *testing.T) {
+	t.Parallel()
+	path_info := "pinboard4shaarli.cgi"
+	base, _ := url.Parse("https://demo.shaarli.org/pinboard4shaarli.cgi/v1/about/")
+	base.Path = path.Join(base.Path[0:len(base.Path)-len(path_info)], "..", "index.php")
+	assert.Equal(t, "/index.php", base.Path, "ach")
+	assert.Equal(t, "https://demo.shaarli.org/index.php", base.String(), "ach")
+
+	cgi := filepath.Base("../uhu/pinboard4shaarli.cgi")
+	str := "https://demo.shaarli.org/pinboard4shaarli.cgi/v1/about/"
+	idx := strings.LastIndex(str, cgi)
+	assert.Equal(t, "/v1/about/", str[idx+len(cgi):], "wowo")
+}
+
+func TestCgi(t *testing.T) {
+	t.Parallel()
+
+	// rq := httptest.NewRequest(http.MethodGet, "/", nil)
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Hello, client, %s\n", r.URL.String())
+	}))
+	defer ts.Close()
+
+	// assert.Equal(t, "", ts.Config, "wowo")
+	// assert.Equal(t, "", ts.Config.Addr, "wowo")
+	res, _ := http.Get(ts.URL + "/" + path.Join("pinboard4shaarli.cgi"))
+	assert.Equal(t, http.StatusOK, res.StatusCode, "wowo")
+	assert.Equal(t, int64(37), res.ContentLength, "wowo")
+	assert.Equal(t, "text/plain; charset=utf-8", res.Header.Get("Content-Type"), "wowo")
+
+	body, _ := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+	assert.Equal(t, "Hello, client, /pinboard4shaarli.cgi\n", string(body), "wowo")
+}
+
+func TestBasicAuth(t *testing.T) {
+	t.Parallel()
+	url := "https://dema:demu@demo.shaarli.org/pinboard4shaarli.cgi/v1/posts/add?url=http://m.heise.de/12"
+	r, err := http.NewRequest(http.MethodGet, url, nil)
+	assert.Equal(t, nil, err, "wowo")
+	usr := r.URL.User
+	pwd, _ := usr.Password()
+	r.SetBasicAuth(usr.Username(), pwd)
+	uid, pwd, ok := r.BasicAuth()
+	assert.Equal(t, true, ok, "wowo")
+	assert.Equal(t, "dema", uid, "wowo")
+	assert.Equal(t, "demu", pwd, "wowo")
+}
 
 func TestURL(t *testing.T) {
 	t.Parallel()
@@ -46,6 +108,18 @@ func TestURL(t *testing.T) {
 	v.Set("post", "uhu")
 	base.RawQuery = v.Encode()
 	assert.Equal(t, "https://l.mro.name/pinboard.cgi/../index.php?post=uhu", base.String(), "ach")
+}
+
+func TestForm(t *testing.T) {
+	t.Parallel()
+
+	f := url.Values{}
+	f.Set("login", "u i d")
+	f.Set("password", "p & =d")
+	r := bytes.NewReader([]byte(f.Encode()))
+	b, err := ioutil.ReadAll(r)
+	assert.Nil(t, err, "zzz")
+	assert.Equal(t, "login=u+i+d&password=p+%26+%3Dd", string(b), "zzz")
 }
 
 func TestFormValuesFromHtml(t *testing.T) {
