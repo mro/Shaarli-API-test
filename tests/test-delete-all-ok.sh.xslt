@@ -1,1 +1,0 @@
-test-delete-ok.sh.xslt

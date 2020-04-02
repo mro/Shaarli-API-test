@@ -2,21 +2,22 @@
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns="http://usefulinc.com/ns/doap#">
   <Project>
-    <bug-database rdf:resource="https://code.mro.name/mro/pinboard4shaarli/issues"/>
-    <homepage rdf:resource="https://code.mro.name/mro/pinboard4shaarli/"/>
-    <implements rdf:resource="v1/openapi.yaml"/>
-    <license rdf:resource="https://code.mro.name/mro/pinboard4shaarli/src/master/LICENSE"/>
+    <bug-database rdf:resource="https://code.mro.name/mro/pin4sha/issues"/>
+    <homepage rdf:resource="https://code.mro.name/mro/pin4sha/"/>
+		<implements rdf:resource="pinboard.in/v1/openapi.yaml"/>
+    <license rdf:resource="LICENSE"/>
     <maintainer rdf:resource="https://code.mro.name/mro"/>
-    <name>pinboard4shaarli.cgi</name>
+    <name>pin4sha.cgi</name>
     <programming-language>golang</programming-language>
+    <programming-language>ocaml</programming-language>
     <repository>
       <GitRepository>
-        <browse rdf:resource="https://code.mro.name/mro/pinboard4shaarli"/>
-        <location rdf:resource="https://code.mro.name/mro/pinboard4shaarli.git"/>
+        <browse rdf:resource="https://code.mro.name/mro/pin4sha"/>
+        <location rdf:resource="https://code.mro.name/mro/pin4sha.git"/>
       </GitRepository>
     </repository>
     <short-description xml:lang="en">Make the essential subset for posting to a shaarli available via a subset of the pinboard/delicious API.</short-description>
     <short-description xml:lang="fr">Rendre le sous-ensemble essentiel pour l'affichage dans un shaarli disponible via un sous-ensemble de l'API pinboard/delicious mature et éprouvée.</short-description>
-    <wiki rdf:resource="https://code.mro.name/mro/pinboard4shaarli/wiki"/>
+    <wiki rdf:resource="https://code.mro.name/mro/pin4sha/wiki"/>
   </Project>
 </rdf:RDF>
