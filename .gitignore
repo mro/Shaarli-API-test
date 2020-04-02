@@ -1,6 +1,4 @@
-scripts/curl.*
-scripts/response.rnc
-scripts/categories.rnc
-source.tar.gz
-tmp/
-pinboard4shaarli-linux-amd64-*.gz
+_build/
+.merlin
+dune-project
+bin/version.ml

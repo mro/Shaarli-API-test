@@ -1,38 +1,41 @@
-# pinboard4shaarli.cgi
+# pinboard.in.cgi
 
 The natural API for shaarli.
 
-[![Build Status](https://travis-ci.org/mro/Shaarli-API-test.svg?branch=master)](https://travis-ci.org/mro/Shaarli-API-test)
-
 ## Why?
 
-The wish to have an API goes back to the [early days](https://sebsauvage.net/wiki/doku.php?id=php:shaarli:ideas).
+The wish to have an API goes back to the [early
+days](https://sebsauvage.net/wiki/doku.php?id=php:shaarli:ideas).
 
-And because shaarli started as a personal, minimal delicious clone, using a minimal subset of just
-the delicious API, seems natural to me. [pinboard](https://pinboard.in/api/) prooves the API
-is not only seasoned and mature, but also still up the job today.
+And because shaarli started as a personal, minimal, delicious clone, using a
+minimal subset of just that very API seems natural to me.
+[pinboard.in](https://pinboard.in/api/) prooves the API is not only seasoned and
+mature, but also still up the job today.
 
-Also I need a drop-in API compatibility layer for a wide range of shaarli versions out there being
-fed to by [ShaarliOS](https://code.mro.name/mro/ShaarliOS/).
+Also another project of mine, [ShaarliOS](/mro/ShaarliOS/) needs a drop-in API
+compatibility layer for a wide range of shaarlis out in the wild.
 
 ## How?
 
-You find a single, statically linked, zero-dependencies ([Go](https://golang.org/)) binary which is both a
+You find a single, statically linked, zero-dependencies ([🐫
+Ocaml](https://ocaml.org/)) binary which is both a
 
-1. cgi to drop into your shaarli php webapplication next to index.php – as the API endpoint,
-2. commandline client to any shaarli out there, mostly for debugging purposes.
+1. cgi to drop into your shaarli php webapplication next to index.php – as the API
+   endpoint,
+2. commandline client to any shaarli out there, mostly for debugging and
+   compatibility-testing purposes.
 
 ![post flow](post.png)
 
 ## Compatibility
 
-All shaarlis from the old ages until at least spring 2019 (v0.10.3).
+All shaarlis from the old ages until spring 2020
+([v0.11.1](https://github.com/shaarli/Shaarli/releases/tag/v0.11.1)).
 
-All systems [Go](https://golang.org/) can produce binaries for.
+All systems [🐫 Ocaml](https://ocaml.org/) can produce binaries for.
 
-Just the delicious API calls in [openapi.yaml](openapi.yaml)
-
-The API server code (delicious implementation) is the same as in [ShaarliGo](https://code.mro.name/mro/ShaarliGo).
+Just the delicious API calls in
+[pinboard.in/v1/openapi.yaml](pinboard.in/v1/openapi.yaml)
 
 ## Design Goals
 
