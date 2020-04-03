@@ -32,6 +32,38 @@ let err i msgs =
     |> prerr_endline;
   i
 
+open Lib.Url
+
+let exec_posts_get_url _ u =
+  Error ["not implemented yet"; u]
+
+let exec_posts_get ep q =
+  let p = Lib.Pinboard.get_params q (Ok Lib.Pinboard.empty_par) in
+  match p with
+  | Error e -> Error e
+  | Ok p'   -> match p'.url with
+    | None   -> Error ["I need the url parameter"]
+    | Some u -> exec_posts_get_url ep u
+
+let exec_posts url verb' =
+  match verb' with
+  | Dir "/get" -> exec_posts_get url url.query
+  | Dir verb   -> Error ["unknown verb"; verb]
+
+let exec_url url =
+  let url' : Lib.Url.t = url in
+  let htap = List.rev url'.path in
+  let verb'= List.hd htap
+  and noun'= List.hd (List.tl htap) in
+  match noun' with
+  | Dir "/posts" -> exec_posts url verb'
+  | Dir noun     -> Error ["unknown noun"; noun]
+
+let exec_str str =
+  match Lib.Url.parse str with
+  | Ok url  -> exec_url url
+  | Error _ -> Error ["aua"]
+
 let run () =
   let status = match Sys.argv |> Array.to_list |> List.tl with
   | []  -> err 2 ["get help with -h"]
@@ -41,7 +73,9 @@ let run () =
     | "--help"    -> print_help ()
     | "-v"
     | "--version" -> print_version ()
-    | n           -> err 2 ["unknown noun"; n]
+    | url         -> match exec_str url with
+      | Ok ret    -> ret
+      | Error e   -> err 2 e
     end
   in
   exit status;;

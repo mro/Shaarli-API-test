@@ -14,7 +14,7 @@ type port   = Port   of int
 let  p_https= Port 443
 let  p_http = Port 80
 
-type path   = Path   of string
+type dir    = Dir    of string
 type name   = Name   of string
 type value  = Value  of string
 
@@ -33,7 +33,7 @@ type t = {
   auth     : auth option ;
   host     : host ;
   port     : port option ;
-  path     : path ;
+  path     : dir list ;
   query    : par list ;
   (* no fragment *)
 }
@@ -72,10 +72,13 @@ module P = struct
     and of_  (Port o) = string_of_int o in
     conv to_ of_ (pcre "[0-9]+")
 
+  let dir' =
+    let to_ s = Dir s
+    and of_ (Dir o) = o in
+    conv to_ of_ (pcre "/[^/?&]*")
+
   let path' =
-    let to_ s = Path s
-    and of_ (Path o) = o in
-    conv to_ of_ (pcre "(/[^?&]*)?")
+    list dir'
 
   let name' =
     let to_ s = Name s
