@@ -4,6 +4,8 @@
 #
 .PHONY: all build clean test install uninstall doc examples
 
+final: build _build/pinboard.cgi
+
 build:
 	@echo "let git_sha = \""`git rev-parse --short HEAD`"\"" > bin/version.ml
 	@echo "let date = \""`date`"\""                         >> bin/version.ml
@@ -28,4 +30,11 @@ doc:
 
 clean:
 	rm -rf _build *.install
+
+
+_build/pinboard.cgi: _build/default/bin/pinboard.exe
+	cp $< $@
+	chmod u+w $@
+	strip $@
+	ls -l $@
 

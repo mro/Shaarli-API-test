@@ -4,13 +4,24 @@
  *)
 
 type scheme = Scheme of string
+let  https  = Scheme "https"
+let  http   = Scheme "http"
+
 type uid    = Uid    of string
 type pwd    = Pwd    of string
 type host   = Host   of string
-type port   = Port   of string
+type port   = Port   of int
+let  p_https= Port 443
+let  p_http = Port 80
+
 type path   = Path   of string
 type name   = Name   of string
 type value  = Value  of string
+
+type auth    = {
+  uid      : uid ;
+  pwd      : pwd ;
+}
 
 type par    = {
   name     : name ;
@@ -19,10 +30,9 @@ type par    = {
 
 type t = {
   scheme   : scheme ;
-  uid      : uid ;
-  pwd      : pwd ;
+  auth     : auth option ;
   host     : host ;
-  port     : port ;
+  port     : port option ;
   path     : path ;
   query    : par list ;
   (* no fragment *)
@@ -46,20 +56,26 @@ module P = struct
     and of_ (Pwd o) = o in
     conv to_ of_ (pcre "[^@]*")
 
+  let auth' =
+    let to_ (uid, pwd) = {uid; pwd}
+    and of_ {uid; pwd} = (uid, pwd)
+    in
+    conv to_ of_ (uid' <* char ':' <&> pwd' <* char '@')
+
   let host' =
     let to_ s = Host s
     and of_ (Host o) = o in
-    conv to_ of_ (pcre "[^:/?]*")
+    conv to_ of_ (pcre "[^:/&?]*")
 
   let port' =
-    let to_ s = Port s
-    and of_ (Port o) = o in
+    let to_ s = Port (int_of_string s)
+    and of_  (Port o) = string_of_int o in
     conv to_ of_ (pcre "[0-9]+")
 
   let path' =
     let to_ s = Path s
     and of_ (Path o) = o in
-    conv to_ of_ (pcre "[^?&]*")
+    conv to_ of_ (pcre "(/[^?&]*)?")
 
   let name' =
     let to_ s = Name s
@@ -75,30 +91,29 @@ module P = struct
     let to_ (name, value) = {name; value}
     and of_ {name; value} = (name, value)
     in
-    conv to_ of_ (str "&" *> name' <&> str "=" *> value')
+    conv to_ of_ (name' <&> char '=' *> value')
 
   let query' =
-    list par'
+    (* TODO: allow also the empty string. *)
+    char '?' *> separated_list ~sep:(char '&') par'
 
   (* https://gabriel.radanne.net/papers/tyre/tyre_paper.pdf#page=9 *)
   let full =
-    let to_ ((scheme, ((uid, pwd), (host, port))), (path, query)) =
-      {scheme; uid; pwd; host; port; path; query}
-    and of_ {scheme; uid; pwd; host; port; path; query} =
-      ((scheme, ((uid, pwd), (host, port))), (path, query))
+    let to_ ((scheme, (auth, (host, port))), (path, query)) =
+      {scheme; auth; host; port; path; query}
+    and of_ {scheme; auth; host; port; path; query} =
+      ((scheme, (auth, (host, port))), (path, query))
     in
     conv to_ of_ (
-      (scheme' <* char ':' <* str "//" <&>
-       ((uid' <* char ':' <&> pwd' <* char '@') <&>
-       (host' <* char ':' <&> port'))) <&>
+      (scheme' <* char ':' <* str"//" <&>
+       (opt auth' <&>
+       (host' <&> opt (char ':' *> port')))) <&>
        (path' <&> query') <*
        stop)
 
   let full' = compile full
 end
 
-let parse str : t =
-  match Tyre.exec P.full' str with
-  | Error _ -> failwith "gibt's nicht."
-  | Ok n -> n
+let parse str =
+  Tyre.exec P.full' str
 

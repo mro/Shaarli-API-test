@@ -9,15 +9,17 @@ let print_version () =
 let print_help () =
   let exe = Filename.basename Sys.executable_name in
   Printf.printf "
-Access a shaarli as if it had the pinboard.in/api.
+If run as a CGI: expose the local shaarli via pinboard.in/api.
+
+If run from commandline: Access a shaarli as if it had the pinboard.in/api.
 
 SYNOPSIS
 
-$ %s -v
+  $ %s -v
 
-$ %s -h
+  $ %s -h
 
-$ %s 'https://uid:pwd@my.shaarli.host/posts/get?dt=2011-09-14'
+  $ %s 'https://uid:pwd@my.shaarli.host/posts/get?dt=2011-09-14'
 
 " exe exe exe;
   0
