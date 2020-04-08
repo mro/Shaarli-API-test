@@ -1,31 +1,35 @@
 ---
 openapi: 3.0.1
 info:
-  title: Subset of the Pinboard API
+  title: Subset of pinboard.in/api
   version: '1'
   description: |-
-    The Pinboard API is a way to interact programatically with your bookmarks,
+    The pinboard.in/api is a way to interact programatically with your bookmarks,
     notes and other Pinboard data.
 
-    Wherever possible the Pinboard API uses the same syntax and method names as
-    the Delicious V1 API. See differences from Delicious for a full list of
+    Wherever possible the pinboard.in/api uses the same syntax and method names as
+    the Delicious V1 API. See https://pinboard.in/api#differences from Delicious for a full list of
     areas where the APIs diverge.
 
     Future features may be
     - auto-fill on /posts/get for unknown urls
     - non UTC times
     - enclosures (images, thumbnails, audio, video)
+
+    See also https://mro.name/ShaarliO/api.
   contact:
     email: pinboard-api@mro.name
     name: mro.name
-    url: https://code.mro.name/mro/pinboard4shaarli
+    url: https://mro.name/pin4sha
 externalDocs:
-  url: "../about"
-  description: DOAP RDF
+  url: https://pinboard.in/api
+  description: Pinboad API
 servers:
-- url: https://demo.mro.name/shaarli-v0.41b/pinboard4shaarli.cgi/v1
-- url: https://demo.mro.name/shaarli-v0.10.2/pinboard4shaarli.cgi/v1
-- url: https://demo.mro.name/shaarligo/shaarligo.cgi/v1
+- url: https://demo.0x4c.de/shaarli-v0.10.4/pin4sha.cgi/v1
+- url: https://demo.0x4c.de/shaarli-v0.11.1/pin4sha.cgi/v1
+- url: https://demo.0x4c.de/shaarli-v0.41b/pin4sha.cgi/v1
+- url: https://demo.0x4c.de/shaarligo-v0.1/shaarligo.cgi/v1
+- url: https://demo.0x4c.de/shaarlihasfun-v0.1/shaarlihasfun.cgi/v1
 - url: https://api.pinboard.in/v1
 paths:
   "/openapi.yaml":
@@ -72,7 +76,7 @@ paths:
             text/plain:
               schema:
                 type: string
-                example: 501 token auth not supported, use HTTP Basic.
+                example: Token auth not supported, use HTTP Basic.
   "/posts/get":
     get:
       tags:
@@ -281,50 +285,61 @@ components:
   schemas:
     tag:
       type: string
+      maxLength: 255
+      pattern: "\\S*"
       description: up to 255 characters. May not contain commas or whitespace. Please
         be aware that tags beginning with a period are treated as private and trigger
         special private tag semantics.
     URL:
       type: string
+      format: uri
       description: as defined by RFC 3986. Allowed schemes are http, https, javascript,
         mailto, ftp and file. The Safari-specific feed scheme is allowed but will
         be treated as a synonym for http.
     title:
       type: string
+      maxLength: 255
       description: up to 255 characters long
     text:
       type: string
+      maxLength: 65536
       description: up to 65536 characters long. Any URLs will be auto-linkified when
         displayed.
     datetime:
       type: string
+      format: datetime
+      pattern: "Z$"
       description: 'UTC timestamp in this format: 2010-12-11T19:48:02Z. Valid date
         range is Jan 1, 1 AD to January 1, 2100 (but see note below about future timestamps).'
       example: '2010-12-11T19:48:02Z'
     date:
       type: string
+      format: date
       description: 'UTC date in this format: 2010-12-11. Same range as datetime above'
       example: '2010-12-11'
     yes_no:
       type: string
-      description: the literal string 'yes' or 'no'
-      example: 'no'
+      enum: [yes, no]
     md5:
       type: string
+      pattern: "[0-9a-f]{32}"
       description: 32 character hexadecimal MD5 hash
     integer:
       type: integer
+      format: int32
+      minimum: 0
       description: integer in the range 0..2^32
     format:
       type: string
-      description: the literal string 'json' or 'xml'
-      example: json
+      enum: [xml, json]
       default: xml
     posts:
       type: array
       properties:
         dt:
           type: string
+          format: datetime
+          pattern: "Z$"
           xml:
             attribute: true
           example: '2010-12-11T19:48:02Z'
@@ -345,6 +360,7 @@ components:
         properties:
           href:
             type: string
+            format: url
             xml:
               attribute: true
             example: http://www.howtocreate.co.uk/tutorials/texterise.php?dom=1
@@ -360,14 +376,16 @@ components:
             example: dom reference
           hash:
             type: string
+            pattern: "[0-9a-f]{32}"
             xml:
               attribute: true
             example: c0238dc0c44f07daedd9a1fd9bbdeebd
           meta:
             type: string
+            pattern: "[0-9a-f]{32}"
             xml:
               attribute: true
-            example: 92959a96fd69146c5fe7cbde6e5720f2
+            example: c0238dc0c44f07daedd9a1fd9bbdeebd
           others:
             type: string
             xml:
@@ -375,11 +393,13 @@ components:
             example: 55
           tag:
             type: string
+            pattern: "\\S+"
             xml:
               attribute: true
             example: dom javascript webdev
           time:
             type: string
+            format: datetime
             xml:
               attribute: true
             example: '2005-11-28T05:26:09.000Z'
