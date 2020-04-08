@@ -3,7 +3,7 @@
 
 let print_version () =
   let exe = Filename.basename Sys.executable_name in
-  Printf.printf "%s: https://mro.name/%s/v%s, built: %s\n" exe "pin4sha.cgi" Version.git_sha Version.date;
+  Printf.printf "%s: https://mro.name/%s/v%s, built: %s\n" exe "pin4sha" Version.git_sha Version.date;
   0
 
 let print_help () =

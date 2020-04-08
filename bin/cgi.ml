@@ -64,6 +64,12 @@ let error status reason =
   Printf.printf "%s %s.\n" camel reason ;
   0
 
+let dump_gzip_clob mime clob =
+  Printf.printf "Content-type: %s\n" mime ;
+  Printf.printf "Content-Encoding: %s\n" "gzip" ;
+  Printf.printf "\n%s" clob ;
+  0
+
 
 let print_request req' =
   let req : Cgi.req_raw = req' in
@@ -104,8 +110,9 @@ let handle req =
   else match req.path_info with
     | ""                    -> [req.request_uri; "about"] |> String.concat "/" |> redirect
     | "/"                   -> [req.request_uri; "about"] |> String.concat "/" |> redirect
-    | "/about"              -> print_request req (* doap *)
-    | "/v1/openapi.yaml"    -> print_request req
+    | "/about"              -> dump_gzip_clob "text/xml" Lib.Res.doap_rdf_gz
+    | "/doap2html.xslt"     -> dump_gzip_clob "text/xml" Lib.Res.doap2html_xslt_gz
+    | "/v1/openapi.yaml"    -> dump_gzip_clob "application/vnd.oai.openapi;version=3.0.1" Lib.Res.V1.openapi_yaml_gz
     | "/v1/user/api_token"  -> error 501 "Not Implemented"
     | "/v1/posts/get"       -> print_request req
     | "/v1/posts/add"       -> error 501 "Not Implemented"
