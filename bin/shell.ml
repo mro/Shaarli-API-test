@@ -3,7 +3,7 @@
 
 let print_version () =
   let exe = Filename.basename Sys.executable_name in
-  Printf.printf "%s: https://mro.name/%s/v%s, %s\n" exe "pin4sha.cgi" Version.git_sha Version.date;
+  Printf.printf "%s: https://mro.name/%s/v%s, built: %s\n" exe "pin4sha.cgi" Version.git_sha Version.date;
   0
 
 let print_help () =
@@ -19,7 +19,7 @@ SYNOPSIS
 
   $ %s -h
 
-  $ %s 'https://uid:pwd@my.shaarli.host/posts/get?dt=2011-09-14'
+  $ %s 'https://uid:pwd@my.shaarli.host/v1/posts/get?url=https://example.com/a/bookmarked/url'
 
 " exe exe exe;
   0
@@ -34,35 +34,33 @@ let err i msgs =
 
 open Lib.Url
 
-let exec_posts_get_url _ u =
+(* May be a candidate for Shaarli.ml *)
+let pin_posts_get_url _ u =
   Error ["not implemented yet"; u]
 
 let exec_posts_get ep q =
-  let p = Lib.Pinboard.get_params q (Ok Lib.Pinboard.empty_par) in
-  match p with
+  match Lib.Pinboard.get_params q (Ok Lib.Pinboard.empty_par) with
   | Error e -> Error e
   | Ok p'   -> match p'.url with
     | None   -> Error ["I need the url parameter"]
-    | Some u -> exec_posts_get_url ep u
-
-let exec_posts url verb' =
-  match verb' with
-  | Dir "/get" -> exec_posts_get url url.query
-  | Dir verb   -> Error ["unknown verb"; verb]
+    | Some u -> pin_posts_get_url ep u
 
 let exec_url url =
   let url' : Lib.Url.t = url in
   let htap = List.rev url'.path in
-  let verb'= List.hd htap
-  and noun'= List.hd (List.tl htap) in
-  match noun' with
-  | Dir "/posts" -> exec_posts url verb'
+  let tl   = List.tl htap in
+  match List.hd tl with
+  | Dir "/posts" -> 
+    begin match List.hd htap with
+    | Dir "/get" -> exec_posts_get {url with path = tl |> List.tl |> List.rev ; query = []} url.query
+    | Dir verb   -> Error ["unknown verb"; verb]
+    end
   | Dir noun     -> Error ["unknown noun"; noun]
 
 let exec_str str =
   match Lib.Url.parse str with
   | Ok url  -> exec_url url
-  | Error _ -> Error ["aua"]
+  | Error _ -> Error ["parse error"]
 
 let run () =
   let status = match Sys.argv |> Array.to_list |> List.tl with
@@ -78,5 +76,5 @@ let run () =
       | Error e   -> err 2 e
     end
   in
-  exit status;;
+  exit status
 

@@ -1,7 +1,7 @@
 (library
   (name Lib)
   (libraries
-    tyre lambdasoup
+    tyre lambdasoup cohttp
   )
 )
 
