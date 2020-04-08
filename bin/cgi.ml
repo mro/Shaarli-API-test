@@ -1,7 +1,7 @@
 
 open Lib
 
-let w s = 
+let w s =
   print_string s;
   print_string "\n"
 
@@ -16,6 +16,7 @@ let va n =
   print_string "\n"
 
 let dump_headers_all () =
+  w "HTTP/1.1 200 Ok";
   w "Content-type: text/html; charset=utf-8";
   w "";
   w "<html>
@@ -46,17 +47,28 @@ let dump_headers_all () =
 </html>";
   0
 
+let camel = "🐫"
+
 open Lib.Cgi
-open Lib.Url
 
-let url_from_req req' =
-  let req : Cgi.req_raw = req' in
-  from_parts req.scheme req.server_name req.server_port req.path_info req.query_string
+let redirect url =
+  Printf.printf "HTTP/1.1 %d %s\n" 302 "Found";
+  Printf.printf "Location: %s\n" url ;
+  Printf.printf "\n" ;
+  0
 
-let print_request req' = 
+let error status reason =
+  Printf.printf "HTTP/1.1 %d %s\n" status reason;
+  Printf.printf "Content-type: text/plain; charset=utf-8\n" ;
+  Printf.printf "\n" ;
+  Printf.printf "%s %s.\n" camel reason ;
+  0
+
+
+let print_request req' =
   let req : Cgi.req_raw = req' in
   let cwd = Sys.getcwd () in
-  Printf.printf "Status: %d\n" 202 ;
+  Printf.printf "HTTP/1.1 %d %s\n" 202 "Accepted";
   w "Content-type: text/html; charset=utf-8" ;
   w "" ;
   w "<html>
@@ -75,14 +87,28 @@ let print_request req' =
   Printf.printf "<li>%s: %s</li>\n" "REQUEST_METHOD"  req.request_method ;
   Printf.printf "<li>%s: %s</li>\n" "REQUEST_URI"     req.request_uri ;
   Printf.printf "<li>%s: %s</li>\n" "SERVER_NAME"     req.server_name ;
-  Printf.printf "<li>%s: %d</li>\n" "SERVER_PORT"     req.server_port ;
+  Printf.printf "<li>%s: %s</li>\n" "SERVER_PORT"     req.server_port ;
+  let parts = String.split_on_char '?' req.request_uri in
+  let endp = [ req.scheme; "://"; req.server_name; ":"; req.server_port; List.hd parts; "/../../../../"; "index.php" ] |> String.concat "" in
+  (* we need the authentication info either from the query string (auth_token) or preauthenticated basic auth. *)
+  Printf.printf "<li>shaarli: %s</li>\n" endp ;
   w "</ul>
 </body>
 </html>";
   0
 
-let handle req = 
-  if false
-  then dump_headers_all ()
-  else print_request req
+
+let handle req =
+  if "GET" <> req.request_method
+  then error 405 "Method Not Allowed"
+  else match req.path_info with
+    | ""                    -> [req.request_uri; "about"] |> String.concat "/" |> redirect
+    | "/"                   -> [req.request_uri; "about"] |> String.concat "/" |> redirect
+    | "/about"              -> print_request req (* doap *)
+    | "/v1/openapi.yaml"    -> print_request req
+    | "/v1/user/api_token"  -> error 501 "Not Implemented"
+    | "/v1/posts/get"       -> print_request req
+    | "/v1/posts/add"       -> error 501 "Not Implemented"
+    | "/dump"               -> dump_headers_all ()
+    | _                     -> error 404 "Not Found"
 

@@ -127,7 +127,7 @@ let from_parts scheme host port _ _ =
     scheme = Scheme scheme ;
     auth   = None ;
     host   = Host host ;
-    port   = Some (Port port) ;
+    port   = Some (Port (int_of_string port)) ;
     path   = [ Dir "/todo" ] ;
     query  = [ {name = Name "bar"; value = Value "baz"} ] ;
   }

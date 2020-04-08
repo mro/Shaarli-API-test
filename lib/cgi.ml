@@ -8,7 +8,7 @@ type req_raw = {
   request_uri    : string ;
   query_string   : string ;
   server_name    : string ;
-  server_port    : int ;
+  server_port    : string ;
 }
 
 (* https://tools.ietf.org/html/rfc7231#section-6 *)
@@ -25,15 +25,15 @@ let getenv_safe ?default s =
 let request_from_env () =
   try
     let ret = {
-      http_cookie    = Sys.getenv "HTTP_COOKIE" ;
-      http_host      = Sys.getenv "HTTP_HOST" ;
-      path_info      = Sys.getenv "PATH_INFO" ;
-      query_string   = Sys.getenv "QUERY_STRING" ;
+      http_cookie    = getenv_safe ~default:"" "HTTP_COOKIE" ;
+      http_host      = getenv_safe ~default:"" "HTTP_HOST" ;
+      path_info      = getenv_safe ~default:"" "PATH_INFO" ;
+      query_string   = getenv_safe ~default:"" "QUERY_STRING" ;
       request_method = Sys.getenv "REQUEST_METHOD" ;
       request_uri    = Sys.getenv "REQUEST_URI" ;
       scheme         = (match Sys.getenv "HTTPS" with "on" -> "https" | _ -> "http") ;
       server_name    = Sys.getenv "SERVER_NAME" ;
-      server_port    = Sys.getenv "SERVER_PORT" |> int_of_string ;
+      server_port    = Sys.getenv "SERVER_PORT" ;
     } in
     Ok ret
   with Not_found ->
