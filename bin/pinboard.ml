@@ -26,9 +26,8 @@
  *)
 
 let () =
- let status =
-    match Sys.getenv_opt Lib.Cgi.http_request_method with
-    | Some _ -> Cgi.run()
-    | None   -> Shell.run() in
-  exit status;;
+  let status = match Lib.Cgi.request_from_env () with
+  | Ok req  -> Cgi.handle req
+  | Error _ -> Sys.argv |> Array.to_list |> Shell.exec in
+  exit status
 

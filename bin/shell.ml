@@ -62,8 +62,8 @@ let exec_str str =
   | Ok url  -> exec_url url
   | Error _ -> Error ["parse error"]
 
-let run () =
-  let status = match Sys.argv |> Array.to_list |> List.tl with
+let exec args =
+  match args |> List.tl with
   | []  -> err 2 ["get help with -h"]
   | arg ->
     begin match List.hd arg with
@@ -75,6 +75,4 @@ let run () =
       | Ok ret    -> ret
       | Error e   -> err 2 e
     end
-  in
-  exit status
 

@@ -100,8 +100,10 @@ module P = struct
     (* TODO: allow also the empty string. *)
     char '?' *> separated_list ~sep:(char '&') par'
 
+  let query'' = compile query'
+
   (* https://gabriel.radanne.net/papers/tyre/tyre_paper.pdf#page=9 *)
-  let full =
+  let full' =
     let to_ ((scheme, (auth, (host, port))), (path, query)) =
       {scheme; auth; host; port; path; query}
     and of_ {scheme; auth; host; port; path; query} =
@@ -114,9 +116,19 @@ module P = struct
        (path' <&> query') <*
        stop)
 
-  let full' = compile full
+  let full'' = compile full'
 end
 
 let parse str =
-  Tyre.exec P.full' str
+  Tyre.exec P.full'' str
+
+let from_parts scheme host port _ _ =
+  {
+    scheme = Scheme scheme ;
+    auth   = None ;
+    host   = Host host ;
+    port   = Some (Port port) ;
+    path   = [ Dir "/todo" ] ;
+    query  = [ {name = Name "bar"; value = Value "baz"} ] ;
+  }
 
