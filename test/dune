@@ -1,8 +1,10 @@
 ; http://cumulus.github.io/Syndic/syndic/Syndic__/Syndic_atom/
 (tests
  (names
-   soup_test
    url_test
+   unix_test
+   cohttp_test
+   soup_test
    simple_test
  )
  (libraries Lib alcotest))

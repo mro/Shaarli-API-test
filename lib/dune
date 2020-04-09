@@ -1,7 +1,8 @@
 (library
   (name Lib)
   (libraries
-    tyre lambdasoup cohttp
+    tyre lambdasoup
+    ssl lwt_ssl cohttp-lwt-unix cohttp
   )
 )
 
