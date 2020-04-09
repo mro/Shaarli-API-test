@@ -3,6 +3,3 @@ _build/
 dune-project
 bin/version.ml
 lib/res.ml
-res/doap.rdf.gz
-res/doap2html.xslt.gz
-res/v1/openapi.yaml.gz

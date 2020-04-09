@@ -2,12 +2,11 @@
 type req_raw = {
   scheme         : string ;
   http_cookie    : string ;
-  http_host      : string ;
+  host           : string ;
   path_info      : string ;
   request_method : string ;
   request_uri    : string ;
   query_string   : string ;
-  server_name    : string ;
   server_port    : string ;
 }
 
@@ -22,17 +21,18 @@ let getenv_safe ?default s =
     | Some d -> d
     | None   -> failwith ("Cgi: the environment variable " ^ s ^ " is not set")
 
+(* very basic, minimal parsing only *)
 let request_from_env () =
   try
+    let name = Sys.getenv "SERVER_NAME" in
     let ret = {
       http_cookie    = getenv_safe ~default:"" "HTTP_COOKIE" ;
-      http_host      = getenv_safe ~default:"" "HTTP_HOST" ;
+      host           = getenv_safe ~default:name "HTTP_HOST" ;
       path_info      = getenv_safe ~default:"" "PATH_INFO" ;
       query_string   = getenv_safe ~default:"" "QUERY_STRING" ;
       request_method = Sys.getenv "REQUEST_METHOD" ;
       request_uri    = Sys.getenv "REQUEST_URI" ;
       scheme         = (match Sys.getenv "HTTPS" with "on" -> "https" | _ -> "http") ;
-      server_name    = Sys.getenv "SERVER_NAME" ;
       server_port    = Sys.getenv "SERVER_PORT" ;
     } in
     Ok ret

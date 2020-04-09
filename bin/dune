@@ -1,6 +1,6 @@
 ; https://stackoverflow.com/a/53325230/349514
 (executable
-  (name pinboard)
+  (name pin4sha)
   (libraries Lib)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Prepare for static linking

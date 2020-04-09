@@ -3,64 +3,22 @@
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
    xmlns="http://usefulinc.com/ns/doap#">
   <Project>
-    <bug-database rdf:resource="https://code.mro.name/mro/pin4sha.cgi/issues"/>
-    <description xml:lang="en"># pinboard.in.cgi
-
-The natural API for shaarli.
-
-## Why?
-
-The wish to have an API goes back to the [early
-days](https://sebsauvage.net/wiki/doku.php?id=php:shaarli:ideas).
-
-And because shaarli started as a personal, minimal, delicious clone, using a
-minimal subset of just that very API seems natural to me.
-[pinboard.in](https://pinboard.in/api/) prooves the API is not only seasoned and
-mature, but also still up the job today.
-
-Also another project of mine, [ShaarliOS](/mro/ShaarliOS/) needs a drop-in API
-compatibility layer for a wide range of shaarlis out in the wild.
-
-## How?
-
-You find a single, statically linked, zero-dependencies ([🐫
-Ocaml](https://ocaml.org/)) binary which is both a
-
-1. cgi to drop into your shaarli php webapplication next to index.php – as the API
-   endpoint,
-2. commandline client to any shaarli out there, mostly for debugging and
-   compatibility-testing purposes.
-
-![post flow](post.png)
-
-## Compatibility
-
-All shaarlis from the old ages until spring 2020
-([v0.11.1](https://github.com/shaarli/Shaarli/releases/tag/v0.11.1)).
-
-All systems [🐫 Ocaml](https://ocaml.org/) can produce binaries for.
-
-Just the delicious API calls in
-[v1/openapi.yaml](v1/openapi.yaml)
-
-## Design Goals
-
-| Quality         | very good | good | normal | irrelevant |
-|-----------------|:---------:|:----:|:------:|:----------:|
-| Functionality   |           |      |    ×   |            |
-| Reliability     |     ×     |      |        |            |
-| Usability       |           |   ×  |        |            |
-| Efficiency      |           |      |    ×   |            |
-| Changeability   |           |   ×  |        |            |
-| Portability     |     ×     |      |        |            |
-</description>
-    <homepage rdf:resource="https://code.mro.name/mro/pin4sha.cgi/"/>
-    <implements rdf:resource="v1/openapi.yaml"/>
-    <license rdf:resource="LICENSE"/>
-    <maintainer rdf:resource="https://code.mro.name/mro"/>
     <name>pin4sha.cgi</name>
-    <programming-language>golang</programming-language>
-    <programming-language>ocaml</programming-language>
+    <shortdesc xml:lang="en">🐫 API wrapper for Shaarli exposing pinboard.in/api. Zero-config, drop-in, single-file CGI deployment.</shortdesc>
+    <description xml:lang="en">Make the essential commands for posting to a shaarli available via a subset of the pinboard/delicious API.</description>
+    <description xml:lang="fr">Rendre le sous-ensemble essentiel pour l'affichage dans un shaarli disponible via un sous-ensemble de l'API pinboard/delicious mature et éprouvée.</description>
+    <homepage rdf:resource="https://mro.name/pin4sha"/>
+    <bug-database rdf:resource="https://code.mro.name/mro/pin4sha.cgi/issues"/>
+    <service-endpoint rdf:resource="v1"/>
+    <implements rdf:resource="v1/openapi.yaml"/>
+    <implements rdf:resource="https://pinboard.in/api"/>
+    <programming-language>OCaml</programming-language>
+    <category rdf:resource="https://projects.apache.org/category/http" />
+    <license rdf:resource="LICENSE"/>
+    <license rdf:resource="https://spdx.org/licenses/GPL-3.0-only"/>
+    <maintainer rdf:resource="https://code.mro.name/mro"/>
+    <wiki rdf:resource="https://code.mro.name/mro/pin4sha.cgi/wiki"/>
+    <readme xml:lang="en" rdf:resource="README.md" />
     <repository>
       <GitRepository>
         <browse rdf:resource="https://git.sr.ht/~mro/pin4sha.cgi"/>
@@ -92,8 +50,5 @@ Just the delicious API calls in
         <location rdf:resource="https://code.mro.name/mro/pin4sha.cgi.git"/>
       </GitRepository>
     </repository>
-    <short-description xml:lang="en">Make the essential subset for posting to a shaarli available via a subset of the pinboard/delicious API.</short-description>
-    <short-description xml:lang="fr">Rendre le sous-ensemble essentiel pour l'affichage dans un shaarli disponible via un sous-ensemble de l'API pinboard/delicious mature et éprouvée.</short-description>
-    <wiki rdf:resource="https://code.mro.name/mro/pin4sha.cgi/wiki"/>
-  </Project>
+ </Project>
 </rdf:RDF>

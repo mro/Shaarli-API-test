@@ -19,9 +19,11 @@ SYNOPSIS
 
   $ %s -h
 
+  $ %s --doap
+
   $ %s 'https://uid:pwd@my.shaarli.host/v1/posts/get?url=https://example.com/a/bookmarked/url'
 
-" exe exe exe;
+" exe exe exe exe;
   0
 
 let err i msgs =
@@ -71,6 +73,7 @@ let exec args =
     | "--help"    -> print_help ()
     | "-v"
     | "--version" -> print_version ()
+    | "--doap"    -> Printf.printf "%s" Lib.Res.doap_rdf; 0
     | url         -> match exec_str url with
       | Ok ret    -> ret
       | Error e   -> err 2 e

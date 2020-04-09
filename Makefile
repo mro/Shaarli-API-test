@@ -6,19 +6,16 @@ dst := _build/pin4sha-$(os)-$(cpu)-$(ver).cgi
 
 final: build $(dst)
 
-res/doap.rdf.gz:	doap.rdf
-	gzip --best < $< > $@
-
-res/doap2html.xslt.gz:	doap2html.xslt
-	gzip --best < $< > $@
-
-res/v1/openapi.yaml.gz: openapi.yaml
-	gzip --best < $< > $@
-
-lib/res.ml:	res res/doap.rdf.gz res/doap2html.xslt.gz res/v1/openapi.yaml.gz
-	# opam install ocp-ocamlres
+lib/res.ml:	res res/doap.rdf res/doap2html.xslt res/v1/openapi.yaml
 	find res -name .DS_Store -delete
+	# opam install ocp-ocamlres
 	ocp-ocamlres -format ocaml $< -o $@
+
+$(dst): _build/default/bin/pin4sha.exe
+	cp $< $@
+	chmod u+w $@
+	strip $@
+	ls -l $@
 
 #
 # https://github.com/ocaml/dune/tree/master/example/sample-projects/hello_world
@@ -29,7 +26,7 @@ lib/res.ml:	res res/doap.rdf.gz res/doap2html.xslt.gz res/v1/openapi.yaml.gz
 build: lib/res.ml
 	@echo "let git_sha = \""`git rev-parse --short HEAD`"\"" > bin/version.ml
 	@echo "let date = \""`date +'%FT%T%z'`"\""              >> bin/version.ml
-	dune build bin/pinboard.exe
+	dune build bin/pin4sha.exe
 
 all: build
 
@@ -50,11 +47,3 @@ doc:
 
 clean:
 	rm -rf lib/res.ml _build *.install
-
-
-$(dst): _build/default/bin/pinboard.exe
-	cp $< $@
-	chmod u+w $@
-	strip $@
-	ls -l $@
-
