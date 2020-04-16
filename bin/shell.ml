@@ -21,7 +21,7 @@ SYNOPSIS
 
   $ %s --doap
 
-  $ %s 'https://uid:pwd@my.shaarli.host/v1/posts/get?url=https://example.com/a/bookmarked/url'
+  $ %s 'https://demo:demodemodemo@demo.0x4c.de/shaarli-v0.41b/pin4sha.cgi/v1/posts/get?url=http://sebsauvage.net/wiki/doku.php?id=php:shaarli'
 
 " exe exe exe exe;
   0
@@ -59,23 +59,18 @@ let exec_url url =
     end
   | Dir noun     -> Error ["unknown noun"; noun]
 
-let exec_str str =
-  match Lib.Url.parse str with
-  | Ok url  -> exec_url url
-  | Error _ -> Error ["parse error"]
-
 let exec args =
   match args |> List.tl with
   | []  -> err 2 ["get help with -h"]
-  | arg ->
-    begin match List.hd arg with
+  | arg -> match List.hd arg with
     | "-h"
     | "--help"    -> print_help ()
     | "-v"
     | "--version" -> print_version ()
     | "--doap"    -> Printf.printf "%s" Lib.Res.doap_rdf; 0
-    | url         -> match exec_str url with
-      | Ok ret    -> ret
-      | Error e   -> err 2 e
-    end
+    | url         -> match url |> Lib.Url.parse with
+      | Error _   -> err 3 ["Couldn't parse url"]
+      | Ok url'   -> match url' |> exec_url with
+        | Error e -> err 4 e
+        | Ok c    -> c
 

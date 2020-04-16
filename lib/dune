@@ -2,7 +2,7 @@
   (name Lib)
   (libraries
     tyre lambdasoup
-    ssl lwt_ssl cohttp-lwt-unix cohttp
+    ssl lwt_ssl cohttp-lwt-unix
   )
 )
 
