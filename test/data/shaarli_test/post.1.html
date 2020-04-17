@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head><title>Shaarli v0.41 🚀</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="format-detection" content="telephone=no" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<link rel="alternate" type="application/rss+xml" href="https://demo.0x4c.de/shaarli-v0.41b/?do=rss" title="RSS Feed" />
+<link rel="alternate" type="application/atom+xml" href="https://demo.0x4c.de/shaarli-v0.41b/?do=atom" title="ATOM Feed" />
+<link href="images/favicon.ico" rel="shortcut icon" type="image/x-icon" />
+<link type="text/css" rel="stylesheet" href="inc/shaarli.css?version=0.0.41+beta" />
+
+
+<script src="inc/jquery.min.js"></script><script src="inc/jquery-ui.min.js"></script>
+</head>
+<body
+onload="document.linkform.lf_tags.focus();" >
+<div id="pageheader">
+	
+    <div id="logo" title="Share your links !" onclick="document.location='?';"></div>
+    <div style="float:right; font-style:italic; color:#bbb; text-align:right; padding:0 5 0 0;" class="nomobile">Shaare your links...<br>
+        3 links</div>
+    <span id="shaarli_title"><a href="?">Shaarli v0.41 🚀</a></span>
+  
+
+    <a href="?" class="nomobile">Home</a>
+    
+        <a href="?do=logout">Logout</a><a href="?do=tools">Tools</a><a href="?do=addlink"><b>Add link</b></a>
+    
+    <a href="https://demo.0x4c.de/shaarli-v0.41b/?do=rss" class="nomobile">RSS Feed</a>
+    <a href="https://demo.0x4c.de/shaarli-v0.41b/?do=atom" style="padding-left:10px;" class="nomobile">ATOM Feed</a>
+    <a href="?do=tagcloud">Tag cloud</a>
+    <a href="?do=picwall">Picture wall</a>
+    <a href="?do=daily">Daily</a>
+
+    <div class="clear"></div>
+
+
+
+	<div id="editlinkform">
+	    <form method="post" name="linkform">
+	        <input type="hidden" name="lf_linkdate" value="20110914_190000">
+	        <i>URL</i><br><input type="text" name="lf_url" value="http://sebsauvage.net/wiki/doku.php?id=php:shaarli" style="width:100%"><br>
+	        <i>Title</i><br><input type="text" name="lf_title" value="Shaarli - sebsauvage.net" style="width:100%"><br>
+	        <i>Description</i><br><textarea name="lf_description" rows="4" cols="25" style="width:100%">Welcome to Shaarli ! This is a bookmark. To edit or delete me, you must first login.</textarea><br>
+	        <i>Tags</i><br><input type="text" id="lf_tags" name="lf_tags" value="opensource software" style="width:100%"><br>
+	        
+            <input type="checkbox"  name="lf_private" id="lf_private">
+            &nbsp;<label for="lf_private"><i>Private</i></label><br>
+            
+	        <input type="submit" value="Save" name="save_edit" class="bigbutton" style="margin-left:40px;">
+	        <input type="submit" value="Cancel" name="cancel_edit" class="bigbutton" style="margin-left:40px;">
+	        <input type="submit" value="Delete" name="delete_link" class="bigbutton" style="margin-left:180px;" onClick="return confirmDeleteLink();">
+	        <input type="hidden" name="token" value="6bce07d8e940f7a937cee85354c3cccc00c6d852">
+	        <input type="hidden" name="returnurl" value="https://demo.0x4c.de/shaarli-v0.41b/?do=addlink">
+	    </form>
+	</div>
+</div>
+<div id="footer">
+    <b><a href="http://sebsauvage.net/wiki/doku.php?id=php:shaarli">Shaarli 0.0.41 beta</a></b> - The personal, minimalist, super-fast, no-database delicious clone. By <a href="http://sebsauvage.net" target="_blank">sebsauvage.net</a>. Theme by <a href="http://blog.idleman.fr" target="_blank">idleman.fr</a>.
+</div>
+
+
+<script language="JavaScript">function confirmDeleteLink() { var agree=confirm("Are you sure you want to delete this link ?"); if (agree) return true ; else return false ; }</script>
+
+
+
+<script language="JavaScript">
+$(document).ready(function()
+{
+    $('#lf_tags').autocomplete({source:'https://demo.0x4c.de/shaarli-v0.41b/?ws=tags',minLength:1});
+});
+</script>
+
+</body>
+</html>
