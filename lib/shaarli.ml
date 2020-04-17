@@ -11,28 +11,36 @@ let checkbox_checked   = "checked"
 
 let comb_linkform soup =
   soup
-    |> select "html > body form[name='linkform'] input"
-    |> fold (fun li no -> match attribute "type" no with
-      | Some "submit" -> li
-      | Some "checkbox" -> begin match attribute "name" no with
-        | None        -> li
-        | Some na     -> let va = match attribute "checked" no with
-          (* https://code.mro.name/mro/ShaarliOS/src/master/swift4/ShaarliOS/HtmlFormParser.swift#L111 *)
-          (* obscure: https://html.spec.whatwg.org/multipage/input.html#checkbox-state-(type=checkbox) *)
-          | Some "off"
-          | None      -> checkbox_unchecked
-          | _         -> checkbox_checked
-        in li |> List.cons (na, va)
+    |> select "html > body form[name='linkform'] *"
+    |> fold (fun li no -> match name no with
+      | "textarea" -> begin match attribute "name" no with
+          | None        -> li
+          | Some na     -> let va = no |> texts |> String.concat " " in
+            li |> List.cons (na, va)
+        end
+      | "input" -> begin match attribute "type" no with
+        | Some "checkbox" -> begin match attribute "name" no with
+          | None        -> li
+          | Some na     -> let va = match attribute "checked" no with
+            (* https://code.mro.name/mro/ShaarliOS/src/master/swift4/ShaarliOS/HtmlFormParser.swift#L111 *)
+            (* obscure: https://html.spec.whatwg.org/multipage/input.html#checkbox-state-(type=checkbox) *)
+            | Some "off"
+            | None      -> checkbox_unchecked
+            | _         -> checkbox_checked
+          in li |> List.cons (na, va)
+        end
+        | Some "hidden" 
+        | Some "text"   -> begin match attribute "name" no with
+          | None        -> li
+          | Some na     -> let va = match attribute "value" no with
+            | None      -> ""
+            | Some v    -> v
+          in li |> List.cons (na, va)
+        end
+        | Some "submit"
+        | _             -> li
       end
-      | Some "hidden" 
-      | Some "text"   -> begin match attribute "name" no with
-        | None        -> li
-        | Some na     -> let va = match attribute "value" no with
-          | None      -> ""
-          | Some v    -> v
-        in li |> List.cons (na, va)
-      end
-      | _             -> li
+      | _               -> li
     ) []
     |> List.rev
 
