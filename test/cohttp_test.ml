@@ -60,10 +60,34 @@ let test_get_timeout () =
     |> Lwt_main.run
   in assert("Timeout" = ret)
 
-let test_uri () =
-  let _ = Uri.of_string "https://demo:demodemodemo@demo.0x4c.de/shaarli-v0.41b/pin4sha.cgi/v1/posts/get?url=http://sebsauvage.net/wiki/doku.php?id=php:shaarli"
-  in
-  assert (1 = 1)
+let v1_posts_get_param_url_to_post uri =
+  (* https://mirage.github.io/ocaml-uri/uri/Uri/ *)
+  match Uri.get_query_param uri "url" with
+  | None     -> Error "get param 'url' required"
+  | Some url ->
+    let u1 = None |> Uri.with_userinfo uri in
+    (* be opaque and strip all parameters *)
+    let u2 = [("post", url)] |> Uri.with_query' u1 in
+    let ret = (u2 |> Uri.path) ^ "/../../../../"
+      |> Uri.with_path u2
+      |> Uri.canonicalize in
+    Ok ret
+
+let test_v1_posts_get_param_url_to_post () =
+  match "https://demo:demodemodemo@demo.0x4c.de/shaarli-v0.41b/pin4sha.cgi/v1/posts/get?url=http://sebsauvage.net/wiki/doku.php?id=php:shaarli"
+    |> Uri.of_string
+    |> v1_posts_get_param_url_to_post
+  with
+  | Error _ -> assert(false)
+  | Ok u    ->
+    assert (Some "https" = Uri.scheme u);
+    assert (None = Uri.user u);
+    assert (None = Uri.password u);
+    assert (Some "demo.0x4c.de" = Uri.host u);
+    assert (None = Uri.port u);
+    assert ("/shaarli-v0.41b/" = Uri.path u);
+    assert (Some "http://sebsauvage.net/wiki/doku.php?id=php:shaarli" = Uri.get_query_param u "post");
+    assert ("https://demo.0x4c.de/shaarli-v0.41b/?post=http://sebsauvage.net/wiki/doku.php?id=php:shaarli" = Uri.to_string u)
 
 (*
  * Take a complete command uri incl. endpoint and credentials like
@@ -104,7 +128,7 @@ let test_get_shaarli () =
 
 
 let () =
-  test_uri ();
+  test_v1_posts_get_param_url_to_post ();
   test_get ();
   test_get_timeout ();
   test_get_shaarli ()
