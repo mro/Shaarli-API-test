@@ -4,6 +4,7 @@
    shaarli_test
    cohttp_test
    soup_test
+   cgi_test
    url_test
    unix_test
    simple_test
